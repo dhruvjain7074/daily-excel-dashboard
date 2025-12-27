@@ -8,14 +8,62 @@ import os
 # =================================================
 st.set_page_config(page_title="Daily Excel Dashboard", layout="wide")
 
+# =================================================
+# GLOBAL CSS (UI POLISH)
+# =================================================
 st.markdown(
     """
     <style>
+
+    html, body, [class*="css"] {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: #f6f8fa;
+    }
+
     .block-container {
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding: 2rem 2.5rem;
         max-width: 100%;
     }
+
+    h1 {
+        font-size: 2.1rem;
+        font-weight: 700;
+        margin-bottom: 1.2rem;
+    }
+
+    h2, h3 {
+        font-weight: 600;
+        margin-top: 1.5rem;
+    }
+
+    div[data-baseweb="select"] > div {
+        background-color: white;
+        border-radius: 10px;
+        border: 1px solid #e1e4e8;
+    }
+
+    input {
+        border-radius: 8px !important;
+    }
+
+    .chart-card {
+        background-color: white;
+        border-radius: 14px;
+        padding: 1.2rem;
+        margin-bottom: 1.6rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+    }
+
+    img {
+        border-radius: 12px;
+    }
+
+    hr {
+        border: none;
+        border-top: 1px solid #e5e7eb;
+        margin: 2.5rem 0;
+    }
+
     </style>
     """,
     unsafe_allow_html=True
@@ -24,7 +72,7 @@ st.markdown(
 st.title("📊 Daily Excel Dashboard")
 
 # =================================================
-# LOAD DATA (MULTI-SHEET)
+# LOAD DATA
 # =================================================
 def load_data():
     df_main = pd.read_excel("Book1.xlsx", sheet_name="comparision charts")
@@ -55,7 +103,7 @@ view = st.selectbox(
 )
 
 # =================================================
-# DATASET MAPPING (DATASET 1 / 2 / 3)
+# DATASET MAPPING
 # =================================================
 mapping = {
     "Dataset 1": {
@@ -85,7 +133,7 @@ mapping = {
 }
 
 # =================================================
-# COMMON PLOT FUNCTION
+# COMMON PLOT HELPER
 # =================================================
 def plot_single_line(df, x, y, height=350, y_label=None):
     fig = px.line(df, x=x, y=y)
@@ -101,10 +149,12 @@ def plot_single_line(df, x, y, height=350, y_label=None):
         yaxis_title=y_label,
         template="plotly_white"
     )
+    st.markdown('<div class="chart-card">', unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # =================================================
-# DATASET 1 / 2 / 3 VIEW
+# DATASET 1 / 2 / 3
 # =================================================
 if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
 
@@ -131,7 +181,7 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
         (data[m["date"]] <= pd.to_datetime(end_date))
     ]
 
-    # -------- Chart 1: HIGH vs LOW --------
+    # Chart 1: HIGH vs LOW
     plot_df1 = filtered[[m["date"], m["high"], m["low"]]].rename(
         columns={m["date"]: "Date", m["high"]: "HIGH", m["low"]: "LOW"}
     )
@@ -148,16 +198,17 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
         height=600,
         template="plotly_white"
     )
+    st.markdown('<div class="chart-card">', unsafe_allow_html=True)
     st.plotly_chart(fig1, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    # -------- Chart 2: H/L Ratio --------
+    # Chart 2 & 3
     plot_single_line(
         filtered.rename(columns={m["date"]: "Date", m["hl"]: "H/L Ratio"}),
         "Date",
         "H/L Ratio"
     )
 
-    # -------- Chart 3: H RATIO vs L RATIO --------
     plot_df3 = filtered[[m["date"], m["hr"], m["lr"]]].rename(
         columns={m["date"]: "Date", m["hr"]: "H RATIO", m["lr"]: "L RATIO"}
     )
@@ -174,32 +225,18 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
         height=350,
         template="plotly_white"
     )
+    st.markdown('<div class="chart-card">', unsafe_allow_html=True)
     st.plotly_chart(fig3, use_container_width=True)
-
-    # -------- Dataset-specific charts --------
-    st.subheader("📌 Dataset-specific Charts")
-
-    if view == "Dataset 1":
-        plot_single_line(filtered, "DATE 1", "HIGH 1")
-        plot_single_line(filtered, "DATE 1", "LOW 1")
-
-    if view == "Dataset 2":
-        plot_single_line(filtered, "DATE 2", "HIGH 2")
-        plot_single_line(filtered, "DATE 2", "LOW 2")
-
-    if view == "Dataset 3":
-        plot_single_line(filtered, "DATE 3", "HIGH 3")
-        plot_single_line(filtered, "DATE 3", "LOW 3")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # =================================================
-# RBI NET LIQUIDITY INJECTED (LAKHS)
+# RBI NET LIQUIDITY INJECTED
 # =================================================
 if view == "RBI Net Liquidity Injected":
 
     st.subheader("🏦 RBI Net Liquidity Injected (₹ in Lakhs)")
 
     rbi = df_rbi.copy()
-
     rbi["DATE-1"] = pd.to_datetime(rbi["DATE-1"])
     rbi["DATE_2"] = pd.to_datetime(rbi["DATE_2"])
 
@@ -207,23 +244,15 @@ if view == "RBI Net Liquidity Injected":
     rbi["AMOUNT_LAKHS"] = rbi["AMOUNT"] / 100000
 
     plot_single_line(
-        rbi,
-        "DATE-1",
-        "NET_LIQ_LAKHS",
-        height=400,
-        y_label="Net Liquidity (Lakhs)"
+        rbi, "DATE-1", "NET_LIQ_LAKHS", 400, "Net Liquidity (Lakhs)"
     )
 
     plot_single_line(
-        rbi,
-        "DATE_2",
-        "AMOUNT_LAKHS",
-        height=400,
-        y_label="Amount (Lakhs)"
+        rbi, "DATE_2", "AMOUNT_LAKHS", 400, "Amount (Lakhs)"
     )
 
 # =================================================
-# ASSET CLASS CHARTS (TRADINGVIEW IMAGES)
+# ASSET CLASS CHARTS
 # =================================================
 if view == "Asset Class Charts":
 
@@ -232,7 +261,7 @@ if view == "Asset Class Charts":
     charts_folder = "asset_class_charts"
 
     if not os.path.exists(charts_folder):
-        st.warning("Folder 'asset_class_charts' not found in repository.")
+        st.warning("Folder 'asset_class_charts' not found.")
     else:
         images = [
             f for f in os.listdir(charts_folder)
@@ -240,12 +269,14 @@ if view == "Asset Class Charts":
         ]
 
         if not images:
-            st.info("No images found in asset_class_charts folder.")
+            st.info("No images found.")
         else:
             for img in sorted(images):
                 title = img.replace("_", " ").split(".")[0].title()
                 st.markdown(f"### {title}")
+                st.markdown('<div class="chart-card">', unsafe_allow_html=True)
                 st.image(
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+                st.markdown('</div>', unsafe_allow_html=True)
