@@ -4,7 +4,7 @@ import plotly.express as px
 import os
 
 # =================================================
-# SIMPLE PASSWORD PROTECTION (OPTION A)
+# SIMPLE PASSWORD PROTECTION
 # =================================================
 def check_password():
     def password_entered():
@@ -35,10 +35,16 @@ def check_password():
 
     else:
         return True
+
+
 # =================================================
 # PAGE CONFIG
 # =================================================
 st.set_page_config(page_title="Daily Excel Dashboard", layout="wide")
+
+# 🔒 BLOCK APP UNTIL PASSWORD IS CORRECT
+if not check_password():
+    st.stop()
 
 st.markdown(
     """
@@ -281,4 +287,3 @@ if view == "Asset Class Charts":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
-
