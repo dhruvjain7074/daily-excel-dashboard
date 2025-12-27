@@ -8,78 +8,14 @@ import os
 # =================================================
 st.set_page_config(page_title="Daily Excel Dashboard", layout="wide")
 
-# =================================================
-# GLOBAL CSS (CLEAN + PROFESSIONAL)
-# =================================================
 st.markdown(
     """
     <style>
-
-    /* ---------- Page ---------- */
-    body {
-        background-color: #f4f6f9;
-        color: #1f2937;
-        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont;
-    }
-
     .block-container {
-        max-width: 1400px;
-        padding: 2rem 2.5rem;
-        margin: auto;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        max-width: 100%;
     }
-
-    /* ---------- Headings ---------- */
-    h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
-
-    h2, h3 {
-        font-weight: 600;
-        margin-top: 1.8rem;
-    }
-
-    /* ---------- Dropdown ---------- */
-    div[data-baseweb="select"] {
-        max-width: 380px;
-    }
-
-    /* ---------- Section Cards ---------- */
-    .section-card {
-        background: white;
-        border-radius: 10px;
-        padding: 1.4rem;
-        margin-bottom: 1.6rem;
-        border: 1px solid #e5e7eb;
-    }
-
-    /* ---------- Asset Chart Grid ---------- */
-    .image-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 24px;
-        margin-top: 1.2rem;
-    }
-
-    .image-item {
-        background: white;
-        border-radius: 10px;
-        padding: 12px;
-        border: 1px solid #e5e7eb;
-    }
-
-    .image-title {
-        font-size: 0.95rem;
-        font-weight: 600;
-        margin-bottom: 8px;
-    }
-
-    img {
-        width: 100%;
-        border-radius: 8px;
-    }
-
     </style>
     """,
     unsafe_allow_html=True
@@ -119,7 +55,7 @@ view = st.selectbox(
 )
 
 # =================================================
-# DATASET MAPPING
+# DATASET MAPPING (DATASET 1 / 2 / 3)
 # =================================================
 mapping = {
     "Dataset 1": {
@@ -165,9 +101,7 @@ def plot_single_line(df, x, y, height=350, y_label=None):
         yaxis_title=y_label,
         template="plotly_white"
     )
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # =================================================
 # DATASET 1 / 2 / 3 VIEW
@@ -184,9 +118,12 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
 
     st.subheader("📅 Date Filter")
 
+    min_date = data[m["date"]].min().date()
+    max_date = data[m["date"]].max().date()
+
     start_date, end_date = st.date_input(
         "Select date range",
-        [data[m["date"]].min().date(), data[m["date"]].max().date()]
+        [min_date, max_date]
     )
 
     filtered = data[
@@ -194,7 +131,7 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
         (data[m["date"]] <= pd.to_datetime(end_date))
     ]
 
-    # Chart 1: HIGH vs LOW
+    # -------- Chart 1: HIGH vs LOW --------
     plot_df1 = filtered[[m["date"], m["high"], m["low"]]].rename(
         columns={m["date"]: "Date", m["high"]: "HIGH", m["low"]: "LOW"}
     )
@@ -208,20 +145,19 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
     )
     fig1.update_layout(
         hovermode="x unified",
-        height=550,
+        height=600,
         template="plotly_white"
     )
-
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.plotly_chart(fig1, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
+    # -------- Chart 2: H/L Ratio --------
     plot_single_line(
         filtered.rename(columns={m["date"]: "Date", m["hl"]: "H/L Ratio"}),
         "Date",
         "H/L Ratio"
     )
 
+    # -------- Chart 3: H RATIO vs L RATIO --------
     plot_df3 = filtered[[m["date"], m["hr"], m["lr"]]].rename(
         columns={m["date"]: "Date", m["hr"]: "H RATIO", m["lr"]: "L RATIO"}
     )
@@ -238,19 +174,32 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
         height=350,
         template="plotly_white"
     )
-
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.plotly_chart(fig3, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+
+    # -------- Dataset-specific charts --------
+    st.subheader("📌 Dataset-specific Charts")
+
+    if view == "Dataset 1":
+        plot_single_line(filtered, "DATE 1", "HIGH 1")
+        plot_single_line(filtered, "DATE 1", "LOW 1")
+
+    if view == "Dataset 2":
+        plot_single_line(filtered, "DATE 2", "HIGH 2")
+        plot_single_line(filtered, "DATE 2", "LOW 2")
+
+    if view == "Dataset 3":
+        plot_single_line(filtered, "DATE 3", "HIGH 3")
+        plot_single_line(filtered, "DATE 3", "LOW 3")
 
 # =================================================
-# RBI NET LIQUIDITY INJECTED
+# RBI NET LIQUIDITY INJECTED (LAKHS)
 # =================================================
 if view == "RBI Net Liquidity Injected":
 
     st.subheader("🏦 RBI Net Liquidity Injected (₹ in Lakhs)")
 
     rbi = df_rbi.copy()
+
     rbi["DATE-1"] = pd.to_datetime(rbi["DATE-1"])
     rbi["DATE_2"] = pd.to_datetime(rbi["DATE_2"])
 
@@ -261,7 +210,7 @@ if view == "RBI Net Liquidity Injected":
         rbi,
         "DATE-1",
         "NET_LIQ_LAKHS",
-        height=420,
+        height=400,
         y_label="Net Liquidity (Lakhs)"
     )
 
@@ -269,12 +218,12 @@ if view == "RBI Net Liquidity Injected":
         rbi,
         "DATE_2",
         "AMOUNT_LAKHS",
-        height=420,
+        height=400,
         y_label="Amount (Lakhs)"
     )
 
 # =================================================
-# ASSET CLASS CHARTS
+# ASSET CLASS CHARTS (TRADINGVIEW IMAGES)
 # =================================================
 if view == "Asset Class Charts":
 
@@ -283,28 +232,21 @@ if view == "Asset Class Charts":
     charts_folder = "asset_class_charts"
 
     if not os.path.exists(charts_folder):
-        st.warning("Folder 'asset_class_charts' not found.")
+        st.warning("Folder 'asset_class_charts' not found in repository.")
     else:
-        images = sorted(
+        images = [
             f for f in os.listdir(charts_folder)
             if f.lower().endswith((".png", ".jpg", ".jpeg"))
-        )
+        ]
 
         if not images:
-            st.info("No images found.")
+            st.info("No images found in asset_class_charts folder.")
         else:
-            st.markdown('<div class="image-grid">', unsafe_allow_html=True)
-
-            for img in images:
+            for img in sorted(images):
                 title = img.replace("_", " ").split(".")[0].title()
-                st.markdown(
-                    f"""
-                    <div class="image-item">
-                        <div class="image-title">{title}</div>
-                        <img src="{charts_folder}/{img}">
-                    </div>
-                    """,
-                    unsafe_allow_html=True
+                st.markdown(f"### {title}")
+                st.image(
+                    os.path.join(charts_folder, img),
+                    use_container_width=True
                 )
 
-            st.markdown("</div>", unsafe_allow_html=True)
