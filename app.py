@@ -47,69 +47,17 @@ if not check_password():
     st.stop()
 
 # =================================================
-# GLOBAL CSS (CLEAN & PROFESSIONAL)
+# PAGE CONFIG
 # =================================================
+st.set_page_config(page_title="Daily Excel Dashboard", layout="wide")
+
 st.markdown(
     """
     <style>
-    body {
-        background-color: #f4f6f9;
-        color: #1f2937;
-        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont;
-    }
-
     .block-container {
-        max-width: 1400px;
-        padding: 2rem 2.5rem;
-        margin: auto;
-    }
-
-    h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
-
-    h2, h3 {
-        font-weight: 600;
-        margin-top: 1.8rem;
-    }
-
-    div[data-baseweb="select"] {
-        max-width: 380px;
-    }
-
-    .section-card {
-        background: white;
-        border-radius: 10px;
-        padding: 1.4rem;
-        margin-bottom: 1.6rem;
-        border: 1px solid #e5e7eb;
-    }
-
-    .image-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 24px;
-        margin-top: 1.2rem;
-    }
-
-    .image-item {
-        background: white;
-        border-radius: 10px;
-        padding: 12px;
-        border: 1px solid #e5e7eb;
-    }
-
-    .image-title {
-        font-size: 0.95rem;
-        font-weight: 600;
-        margin-bottom: 8px;
-    }
-
-    img {
-        width: 100%;
-        border-radius: 8px;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        max-width: 100%;
     }
     </style>
     """,
@@ -301,3 +249,4 @@ if view == "Asset Class Charts":
                 )
 
             st.markdown("</div>", unsafe_allow_html=True)
+
