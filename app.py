@@ -110,7 +110,7 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
 
     m = mapping[view]
 
-    data = df[
+    data = df_main[
         [m["date"], m["high"], m["low"], m["hl"], m["hr"], m["lr"]]
     ].dropna()
 
@@ -118,12 +118,9 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
 
     st.subheader("📅 Date Filter")
 
-    min_date = data[m["date"]].min().date()
-    max_date = data[m["date"]].max().date()
-
     start_date, end_date = st.date_input(
         "Select date range",
-        [min_date, max_date]
+        [data[m["date"]].min().date(), data[m["date"]].max().date()]
     )
 
     filtered = data[
@@ -131,39 +128,38 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
         (data[m["date"]] <= pd.to_datetime(end_date))
     ]
 
-    # -------- Chart 1: HIGH vs LOW --------
+    # -------- Chart 1: HIGH vs LOW (GREEN / RED) --------
     plot_df1 = filtered[[m["date"], m["high"], m["low"]]].rename(
         columns={m["date"]: "Date", m["high"]: "HIGH", m["low"]: "LOW"}
     )
 
     fig1 = px.line(
-    plot_df1,
-    x="Date",
-    y=["HIGH", "LOW"],
-    color_discrete_map={
-        "HIGH": "green",
-        "LOW": "red"
-    }
-)
+        plot_df1,
+        x="Date",
+        y=["HIGH", "LOW"],
+        color_discrete_map={
+            "HIGH": "green",
+            "LOW": "red"
+        }
+    )
 
-fig1.update_traces(
-    hovertemplate=
-        "<b>%{fullData.name}</b><br>"
-        "Date: %{x|%d-%m-%y}<br>"
-        "Value: %{y}<extra></extra>"
-)
+    fig1.update_traces(
+        hovertemplate=
+            "<b>%{fullData.name}</b><br>"
+            "Date: %{x|%d-%m-%y}<br>"
+            "Value: %{y}<extra></extra>"
+    )
 
-fig1.update_layout(
-    hovermode="x unified",
-    height=600,
-    template="plotly_white"
-)
+    fig1.update_layout(
+        hovermode="x unified",
+        height=600,
+        template="plotly_white"
+    )
 
-st.plotly_chart(fig1, use_container_width=True)
-
+    st.plotly_chart(fig1, use_container_width=True)
 
     # -------- Chart 2: H/L Ratio --------
-plot_single_line(
+    plot_single_line(
         filtered.rename(columns={m["date"]: "Date", m["hl"]: "H/L Ratio"}),
         "Date",
         "H/L Ratio"
@@ -175,18 +171,14 @@ plot_single_line(
     )
 
     fig3 = px.line(plot_df3, x="Date", y=["H RATIO", "L RATIO"])
-    fig3.update_traces(
-        hovertemplate=
-            "<b>%{fullData.name}</b><br>"
-            "Date: %{x|%d-%m-%y}<br>"
-            "Value: %{y}<extra></extra>"
-    )
     fig3.update_layout(
         hovermode="x unified",
         height=350,
         template="plotly_white"
     )
+
     st.plotly_chart(fig3, use_container_width=True)
+
 
     # -------- Dataset-specific charts --------
     st.subheader("📌 Dataset-specific Charts")
@@ -274,6 +266,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
