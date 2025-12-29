@@ -164,20 +164,20 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
         "H/L Ratio"
     )
 
-    # -------- Chart 3: H RATIO vs L RATIO --------
-    plot_df3 = filtered[[m["date"], m["hr"], m["lr"]]].rename(
-        columns={m["date"]: "Date", m["hr"]: "H RATIO", m["lr"]: "L RATIO"}
-    )
+    # -------- Chart 3: H RATIO --------
+plot_single_line(
+    filtered.rename(columns={m["date"]: "Date", m["hr"]: "H RATIO"}),
+    "Date",
+    "H RATIO"
+)
 
-    fig3 = px.line(plot_df3, x="Date", y=["H RATIO", "L RATIO"])
+# -------- Chart 4: L RATIO --------
+plot_single_line(
+    filtered.rename(columns={m["date"]: "Date", m["lr"]: "L RATIO"}),
+    "Date",
+    "L RATIO"
+)
 
-    fig3.update_layout(
-        hovermode="x unified",
-        height=350,
-        template="plotly_white"
-    )
-
-    st.plotly_chart(fig3, use_container_width=True)
 
 # =================================================
 # RBI NET LIQUIDITY INJECTED (LAKHS)
@@ -250,6 +250,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
