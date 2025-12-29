@@ -165,7 +165,7 @@ plot_single_line(
     )
 
     # -------- Chart 3: H RATIO vs L RATIO --------
-    plot_df3 = filtered[[m["date"], m["hr"], m["lr"]]].rename(
+plot_df3 = filtered[[m["date"], m["hr"], m["lr"]]].rename(
         columns={m["date"]: "Date", m["hr"]: "H RATIO", m["lr"]: "L RATIO"}
     )
 
@@ -251,6 +251,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
