@@ -136,19 +136,31 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
         columns={m["date"]: "Date", m["high"]: "HIGH", m["low"]: "LOW"}
     )
 
-    fig1 = px.line(plot_df1, x="Date", y=["HIGH", "LOW"])
-    fig1.update_traces(
-        hovertemplate=
-            "<b>%{fullData.name}</b><br>"
-            "Date: %{x|%d-%m-%y}<br>"
-            "Value: %{y}<extra></extra>"
-    )
-    fig1.update_layout(
-        hovermode="x unified",
-        height=600,
-        template="plotly_white"
-    )
-    st.plotly_chart(fig1, use_container_width=True)
+    fig1 = px.line(
+    plot_df1,
+    x="Date",
+    y=["HIGH", "LOW"],
+    color_discrete_map={
+        "HIGH": "green",
+        "LOW": "red"
+    }
+)
+
+fig1.update_traces(
+    hovertemplate=
+        "<b>%{fullData.name}</b><br>"
+        "Date: %{x|%d-%m-%y}<br>"
+        "Value: %{y}<extra></extra>"
+)
+
+fig1.update_layout(
+    hovermode="x unified",
+    height=600,
+    template="plotly_white"
+)
+
+st.plotly_chart(fig1, use_container_width=True)
+
 
     # -------- Chart 2: H/L Ratio --------
     plot_single_line(
@@ -262,6 +274,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
