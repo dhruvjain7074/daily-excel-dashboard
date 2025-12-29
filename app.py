@@ -235,18 +235,23 @@ if view == "Asset Class Charts":
         st.warning("Folder 'asset_class_charts' not found in repository.")
     else:
         images = [
-            f for f in os.listdir(charts_folder)
-            if f.lower().endswith((".png", ".jpg", ".jpeg"))
-        ]
+    f for f in os.listdir(charts_folder)
+    if f.lower().endswith((".png", ".jpg", ".jpeg"))
+]
 
-        if not images:
-            st.info("No images found in asset_class_charts folder.")
-        else:
-            for img in sorted(images):
-                title = img.replace("_", " ").split(".")[0].title()
-                st.markdown(f"### {title}")
-                st.image(
-                    os.path.join(charts_folder, img),
-                    use_container_width=True
-                )
+# Sort images by file modified time (oldest → newest)
+images_sorted = sorted(
+    images,
+    key=lambda x: os.path.getmtime(os.path.join(charts_folder, x))
+)
+
+for img in images_sorted:
+    title = img.replace("_", " ").split(".")[0].title()
+    st.markdown(f"### {title}")
+    st.image(
+        os.path.join(charts_folder, img),
+        use_container_width=True
+    )
+
+
 
