@@ -225,6 +225,8 @@ if view == "RBI Net Liquidity Injected":
 # =================================================
 # ASSET CLASS CHARTS (TRADINGVIEW IMAGES)
 # =================================================
+from datetime import datetime
+
 if view == "Asset Class Charts":
 
     st.subheader("📷 Asset Class Charts")
@@ -232,26 +234,35 @@ if view == "Asset Class Charts":
     charts_folder = "asset_class_charts"
 
     if not os.path.exists(charts_folder):
-        st.warning("Folder 'asset_class_charts' not found in repository.")
+        st.warning("Folder 'asset_class_charts' not found.")
     else:
         images = [
-    f for f in os.listdir(charts_folder)
-    if f.lower().endswith((".png", ".jpg", ".jpeg"))
-]
+            f for f in os.listdir(charts_folder)
+            if f.lower().endswith((".png", ".jpg", ".jpeg"))
+        ]
 
-# Sort images by file modified time (oldest → newest)
-images_sorted = sorted(
-    images,
-    key=lambda x: os.path.getmtime(os.path.join(charts_folder, x))
-)
+        def extract_datetime(filename):
+            """
+            Expected filename format:
+            ANYTHING_YYYY-MM-DD_HH-MM-SS.ext
+            """
+            try:
+                parts = filename.rsplit("_", 2)
+                dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
+                return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
+            except Exception:
+                return datetime.min  # fallback if format mismatch
 
-for img in images_sorted:
-    title = img.replace("_", " ").split(".")[0].title()
-    st.markdown(f"### {title}")
-    st.image(
-        os.path.join(charts_folder, img),
-        use_container_width=True
-    )
+        images_sorted = sorted(images, key=extract_datetime)
+
+        for img in images_sorted:
+            title = img.replace("_", " ").split(".")[0]
+            st.markdown(f"### {title}")
+            st.image(
+                os.path.join(charts_folder, img),
+                use_container_width=True
+            )
+
 
 
 
