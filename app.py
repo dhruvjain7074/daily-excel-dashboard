@@ -144,10 +144,9 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
     )
 
     fig1.update_traces(
-        hovertemplate=
-            "<b>%{fullData.name}</b><br>"
-            "Date: %{x|%d-%m-%y}<br>"
-            "Value: %{y}<extra></extra>"
+        hovertemplate="<b>%{fullData.name}</b><br>"
+                      "Date: %{x|%d-%m-%y}<br>"
+                      "Value: %{y}<extra></extra>"
     )
 
     fig1.update_layout(
@@ -171,6 +170,7 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
     )
 
     fig3 = px.line(plot_df3, x="Date", y=["H RATIO", "L RATIO"])
+
     fig3.update_layout(
         hovermode="x unified",
         height=350,
@@ -179,21 +179,6 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
 
     st.plotly_chart(fig3, use_container_width=True)
 
-
-    # -------- Dataset-specific charts --------
-    st.subheader("📌 Dataset-specific Charts")
-
-    if view == "Dataset 1":
-        plot_single_line(filtered, "DATE 1", "HIGH 1")
-        plot_single_line(filtered, "DATE 1", "LOW 1")
-
-    if view == "Dataset 2":
-        plot_single_line(filtered, "DATE 2", "HIGH 2")
-        plot_single_line(filtered, "DATE 2", "LOW 2")
-
-    if view == "Dataset 3":
-        plot_single_line(filtered, "DATE 3", "HIGH 3")
-        plot_single_line(filtered, "DATE 3", "LOW 3")
 
 # =================================================
 # RBI NET LIQUIDITY INJECTED (LAKHS)
@@ -266,6 +251,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
