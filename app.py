@@ -38,7 +38,7 @@ def load_data():
 if st.button("🔄 Refresh Data"):
     st.cache_data.clear()
 
-df, df_rbi = load_data()
+df_main, df_rbi = load_data()
 
 # =================================================
 # MAIN DROPDOWN
@@ -250,6 +250,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
