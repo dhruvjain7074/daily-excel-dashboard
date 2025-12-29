@@ -158,7 +158,7 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
     st.plotly_chart(fig1, use_container_width=True)
 
     # -------- Chart 2: H/L Ratio --------
-    plot_single_line(
+plot_single_line(
         filtered.rename(columns={m["date"]: "Date", m["hl"]: "H/L Ratio"}),
         "Date",
         "H/L Ratio"
@@ -251,6 +251,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
