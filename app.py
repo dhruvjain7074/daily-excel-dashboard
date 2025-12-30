@@ -137,64 +137,59 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
         (data[m["date"]] <= pd.to_datetime(end_date))
     ]
 
-    # -------- Chart 1: HIGH vs LOW (GREEN / RED) --------
+    # -------- Chart 1: HIGH & LOW COUNT --------
     plot_df1 = filtered[[m["date"], m["high"], m["low"]]].rename(
         columns={m["date"]: "Date", m["high"]: "HIGH", m["low"]: "LOW"}
     )
 
-fig1 = px.line(
-    plot_df1,
-    x="Date",
-    y=["HIGH", "LOW"],
-    color_discrete_map={
-        "HIGH": "green",
-        "LOW": "red"
-    },
-    title="HIGH & LOW COUNT"
-)
+    fig1 = px.line(
+        plot_df1,
+        x="Date",
+        y=["HIGH", "LOW"],
+        color_discrete_map={"HIGH": "green", "LOW": "red"},
+        title="HIGH & LOW COUNT"
+    )
 
-fig1.update_traces(
-    hovertemplate="<b>%{fullData.name}</b><br>"
-                  "Date: %{x|%d-%m-%y}<br>"
-                  "Value: %{y}<extra></extra>"
-)
+    fig1.update_traces(
+        hovertemplate="<b>%{fullData.name}</b><br>"
+                      "Date: %{x|%d-%m-%y}<br>"
+                      "Value: %{y}<extra></extra>"
+    )
 
-fig1.update_layout(
-    hovermode="x unified",
-    height=600,
-    title_x=0.5,
-    template="plotly_white"
-)
+    fig1.update_layout(
+        hovermode="x unified",
+        height=600,
+        title_x=0.5,
+        template="plotly_white"
+    )
 
-st.plotly_chart(fig1, use_container_width=True)
+    st.plotly_chart(fig1, use_container_width=True)
 
+    # -------- Chart 2: HIGH/LOW RATIO --------
+    plot_single_line(
+        filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
+        "Date",
+        "HIGH/LOW RATIO",
+        title="HIGH/LOW RATIO"
+    )
 
-    # -------- Chart 2: H/L Ratio --------
-plot_single_line(
-    filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
-    "Date",
-    "HIGH/LOW RATIO"
-)
+    # -------- Chart 3: HIGH / EMA 200 --------
+    plot_single_line(
+        filtered.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
+        "Date",
+        "HIGH / EMA 200",
+        title="HIGH / EMA 200",
+        color="green"
+    )
 
-    # -------- Chart 3: H RATIO --------
-plot_single_line(
-    filtered.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
-    "Date",
-    "HIGH / EMA 200",
-    title="HIGH / EMA 200",
-    color="green"
-)
-
-
-# -------- Chart 4: L RATIO --------
-plot_single_line(
-    filtered.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
-    "Date",
-    "LOW / EMA 200",
-    title="LOW / EMA 200",
-    color="red"
-)
-
+    # -------- Chart 4: LOW / EMA 200 --------
+    plot_single_line(
+        filtered.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
+        "Date",
+        "LOW / EMA 200",
+        title="LOW / EMA 200",
+        color="red"
+    )
 
 
 # =================================================
@@ -266,6 +261,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
