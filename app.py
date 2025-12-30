@@ -248,7 +248,7 @@ if view == "Asset Class Charts":
 
     charts_folder = "asset_class_charts"
 
-    three_per_row = st.checkbox("Show 3 images per row", value=False)
+    three_per_page = st.checkbox("Show 3 images per page", value=False)
 
     if not os.path.exists(charts_folder):
         st.warning("Folder 'asset_class_charts' not found.")
@@ -264,27 +264,26 @@ if view == "Asset Class Charts":
             # ---- SORT BY DATE & TIME FROM FILENAME ----
             def extract_datetime(filename):
                 try:
-                    # Expected: ANYTHING_YYYY-MM-DD_HH-MM-SS.ext
                     parts = filename.rsplit("_", 2)
                     dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
                     return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
                 except Exception:
-                    return datetime.min  # fallback for unexpected filenames
+                    return datetime.min
 
             images = sorted(images, key=extract_datetime)
 
-            # ---- DISPLAY ----
-            if three_per_row:
-                cols = st.columns(3)
-                for idx, img in enumerate(images):
-                    with cols[idx % 3]:
-                        st.image(
-                            os.path.join(charts_folder, img),
-                            use_container_width=True
-                        )
-            else:
+            # ---- DISPLAY LOGIC ----
+            if three_per_page:
+                # simulate 3 images per page by reducing size
                 for img in images:
                     st.image(
                         os.path.join(charts_folder, img),
-                        use_container_width=True
+                        width=700  # smaller width → smaller height (~200)
+                    )
+            else:
+                # 1 image per page (large)
+                for img in images:
+                    st.image(
+                        os.path.join(charts_folder, img),
+                        width=1100  # larger width → larger height (~600)
                     )
