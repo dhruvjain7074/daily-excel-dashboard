@@ -209,48 +209,18 @@ if view == "RBI Net Liquidity Injected":
     rbi["AMOUNT_LAKHS"] = rbi["AMOUNT"]
 
     # -------- Chart 1: RBI Net Liquidity Injected (RAW, Color by Sign) --------
-rbi_net = rbi.rename(
-    columns={
-        "DATE-1": "Date",
-        "NET LIQ INC TODAY": "Net Liquidity"
-    }
-)[["Date", "Net Liquidity"]].copy()
-
-# Split positive and negative values
-rbi_net["Positive"] = rbi_net["Net Liquidity"].where(rbi_net["Net Liquidity"] >= 0)
-rbi_net["Negative"] = rbi_net["Net Liquidity"].where(rbi_net["Net Liquidity"] < 0)
-
-fig = px.line(
-    rbi_net,
-    x="Date",
-    y=["Positive", "Negative"],
-    color_discrete_map={
-        "Positive": "blue",
-        "Negative": "red"
-    },
-    title="RBI Net Liquidity Injected (Raw)"
+plot_single_line(
+    rbi.rename(
+        columns={
+            "DATE-1": "Date",
+            "NET LIQ INC TODAY": "Net Liquidity"
+        }
+    ),
+    "Date",
+    "Net Liquidity",
+    title="RBI Net Liquidity Injected (Raw)",
+    height=600
 )
-
-fig.update_traces(
-    hovertemplate="Date: %{x|%d-%m-%y}<br>Value: %{y:,}<extra></extra>"
-)
-
-fig.update_layout(
-    hovermode="x unified",
-    height=600,
-    title_x=0.5,
-    template="plotly_white"
-)
-
-fig.update_yaxes(
-    tickformat=",",
-    showexponent="none",
-    zeroline=True,
-    zerolinecolor="black"
-)
-
-st.plotly_chart(fig, use_container_width=True)
-
 
     # -------- Chart 2: Amount --------
 plot_single_line(
@@ -306,6 +276,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
