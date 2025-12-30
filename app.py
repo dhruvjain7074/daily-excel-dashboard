@@ -253,7 +253,7 @@ st.plotly_chart(fig, use_container_width=True)
 
 
     # -------- Chart 2: Amount --------
-    plot_single_line(
+plot_single_line(
         rbi.rename(
             columns={
                 "DATE_2": "Date",
@@ -306,6 +306,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
