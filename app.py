@@ -46,19 +46,20 @@ df_main, df_rbi = load_data()
 view = st.selectbox(
     "Select View",
     [
-        "Dataset 1",
-        "Dataset 2",
-        "Dataset 3",
+        "52 Week Data",
+        "EMA 20 Data",
+        "EMA 200 Data",
         "RBI Net Liquidity Injected",
         "Asset Class Charts"
     ]
 )
 
+
 # =================================================
 # DATASET MAPPING (DATASET 1 / 2 / 3)
 # =================================================
 mapping = {
-    "Dataset 1": {
+    "52 Week Data": {
         "date": "DATE 1",
         "high": "HIGH 1",
         "low": "LOW 1",
@@ -66,7 +67,7 @@ mapping = {
         "hr": "H RATIO 1",
         "lr": "L RATIO 1"
     },
-    "Dataset 2": {
+    "EMA 20 Data": {
         "date": "DATE 2",
         "high": "HIGH 2",
         "low": "LOW 2",
@@ -74,7 +75,7 @@ mapping = {
         "hr": "H RATIO 2",
         "lr": "L RATIO 2"
     },
-    "Dataset 3": {
+    "EMA 200 Data": {
         "date": "DATE 3",
         "high": "HIGH 3",
         "low": "LOW 3",
@@ -115,7 +116,7 @@ def plot_single_line(df, x, y, height=350, y_label=None, title=None, color=None)
 # =================================================
 # DATASET 1 / 2 / 3 VIEW
 # =================================================
-if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
+if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data"]:
 
     m = mapping[view]
 
@@ -166,31 +167,34 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
     st.plotly_chart(fig1, use_container_width=True)
 
     # -------- Chart 2: HIGH/LOW RATIO --------
-    plot_single_line(
-        filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
-        "Date",
-        "HIGH/LOW RATIO",
-        title="HIGH/LOW RATIO"
-    )
+plot_single_line(
+    filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
+    "Date",
+    "HIGH/LOW RATIO",
+    title="HIGH/LOW RATIO",
+    height=600
+)
+
 
     # -------- Chart 3: HIGH / EMA 200 --------
-    plot_single_line(
-        filtered.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
-        "Date",
-        "HIGH / EMA 200",
-        title="HIGH / EMA 200",
-        color="green"
-    )
+plot_single_line(
+    filtered.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
+    "Date",
+    "HIGH / EMA 200",
+    title="HIGH / EMA 200",
+    color="green",
+    height=600
+)
 
     # -------- Chart 4: LOW / EMA 200 --------
-    plot_single_line(
-        filtered.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
-        "Date",
-        "LOW / EMA 200",
-        title="LOW / EMA 200",
-        color="red"
-    )
-
+plot_single_line(
+    filtered.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
+    "Date",
+    "LOW / EMA 200",
+    title="LOW / EMA 200",
+    color="red",
+    height=600
+)
 
 # =================================================
 # RBI NET LIQUIDITY INJECTED (LAKHS)
@@ -207,19 +211,21 @@ if view == "RBI Net Liquidity Injected":
     rbi["NET_LIQ_LAKHS"] = rbi["NET LIQ INC TODAY"] / 100000
     rbi["AMOUNT_LAKHS"] = rbi["AMOUNT"] / 100000
 
-    plot_single_line(
-        rbi.rename(columns={"DATE-1": "Date", "NET_LIQ_LAKHS": "Net Liquidity (Lakhs)"}),
-        "Date",
-        "Net Liquidity (Lakhs)",
-        title="RBI Net Liquidity Injected (Lakhs)"
-    )
+plot_single_line(
+    rbi.rename(columns={"DATE-1": "Date", "NET_LIQ_LAKHS": "Net Liquidity (Lakhs)"}),
+    "Date",
+    "Net Liquidity (Lakhs)",
+    title="RBI Net Liquidity Injected (Lakhs)",
+    height=600
+)
 
-    plot_single_line(
-        rbi.rename(columns={"DATE_2": "Date", "AMOUNT_LAKHS": "Amount (Lakhs)"}),
-        "Date",
-        "Amount (Lakhs)",
-        title="RBI Amount (Lakhs)"
-    )
+plot_single_line(
+    rbi.rename(columns={"DATE_2": "Date", "AMOUNT_LAKHS": "Amount (Lakhs)"}),
+    "Date",
+    "Amount (Lakhs)",
+    title="RBI Amount (Lakhs)",
+    height=600
+)
 
 # =================================================
 # ASSET CLASS CHARTS (TRADINGVIEW IMAGES)
@@ -261,6 +267,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
