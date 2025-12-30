@@ -204,21 +204,33 @@ if view == "RBI Net Liquidity Injected":
     rbi["NET_LIQ_LAKHS"] = rbi["NET LIQ INC TODAY"] / 100000
     rbi["AMOUNT_LAKHS"] = rbi["AMOUNT"] / 100000
 
-plot_single_line(
-    rbi.rename(columns={"DATE-1": "Date", "NET_LIQ_LAKHS": "Net Liquidity (Lakhs)"}),
-    "Date",
-    "Net Liquidity (Lakhs)",
-    title="RBI Net Liquidity Injected (Lakhs)",
-    height=600
-)
+    # -------- Chart 1: Net Liquidity --------
+    plot_single_line(
+        rbi.rename(
+            columns={
+                "DATE-1": "Date",
+                "NET_LIQ_LAKHS": "Net Liquidity (Lakhs)"
+            }
+        ),
+        "Date",
+        "Net Liquidity (Lakhs)",
+        title="RBI Net Liquidity Injected (Lakhs)",
+        height=600
+    )
 
-plot_single_line(
-    rbi.rename(columns={"DATE_2": "Date", "AMOUNT_LAKHS": "Amount (Lakhs)"}),
-    "Date",
-    "Amount (Lakhs)",
-    title="RBI Amount (Lakhs)",
-    height=600
-)
+    # -------- Chart 2: Amount --------
+    plot_single_line(
+        rbi.rename(
+            columns={
+                "DATE_2": "Date",
+                "AMOUNT_LAKHS": "Amount (Lakhs)"
+            }
+        ),
+        "Date",
+        "Amount (Lakhs)",
+        title="Net Durable Liquidity",
+        height=600
+    )
 
 # =================================================
 # ASSET CLASS CHARTS (TRADINGVIEW IMAGES)
@@ -260,6 +272,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
