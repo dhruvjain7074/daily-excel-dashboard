@@ -273,10 +273,44 @@ if view == "Asset Class Charts":
         for img in images_sorted:
             title = img.replace("_", " ").split(".")[0]
             st.markdown(f"### {title}")
+            from datetime import datetime
+
+if view == "Asset Class Charts":
+
+    st.subheader("📷 Asset Class Charts")
+
+    charts_folder = "asset_class_charts"
+
+    if not os.path.exists(charts_folder):
+        st.warning("Folder 'asset_class_charts' not found.")
+    else:
+        images = [
+            f for f in os.listdir(charts_folder)
+            if f.lower().endswith((".png", ".jpg", ".jpeg"))
+        ]
+
+        def extract_datetime(filename):
+            """
+            Expected filename format:
+            ANYTHING_YYYY-MM-DD_HH-MM-SS.ext
+            """
+            try:
+                parts = filename.rsplit("_", 2)
+                dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
+                return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
+            except Exception:
+                return datetime.min  # fallback if format mismatch
+
+        images_sorted = sorted(images, key=extract_datetime)
+
+        for img in images_sorted:
+            title = img.replace("_", " ").split(".")[0]
+            st.markdown(f"### {title}")
             st.image(
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
