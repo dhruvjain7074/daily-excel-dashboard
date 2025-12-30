@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import os
+from datetime import datetime
+
 
 # =================================================
 # PAGE CONFIG
@@ -259,17 +261,19 @@ if view == "Asset Class Charts":
         if not images:
             st.info("No images found.")
         else:
-            # sort images by date/time in filename
+            # ---- SORT BY DATE & TIME FROM FILENAME ----
             def extract_datetime(filename):
                 try:
+                    # Expected: ANYTHING_YYYY-MM-DD_HH-MM-SS.ext
                     parts = filename.rsplit("_", 2)
                     dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
                     return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
                 except Exception:
-                    return datetime.min
+                    return datetime.min  # fallback for unexpected filenames
 
             images = sorted(images, key=extract_datetime)
 
+            # ---- DISPLAY ----
             if three_per_row:
                 cols = st.columns(3)
                 for idx, img in enumerate(images):
@@ -284,21 +288,3 @@ if view == "Asset Class Charts":
                         os.path.join(charts_folder, img),
                         use_container_width=True
                     )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
