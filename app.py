@@ -151,12 +151,6 @@ if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data"]:
         title="HIGH & LOW COUNT"
     )
 
-    fig1.update_traces(
-        hovertemplate="<b>%{fullData.name}</b><br>"
-                      "Date: %{x|%d-%m-%y}<br>"
-                      "Value: %{y}<extra></extra>"
-    )
-
     fig1.update_layout(
         hovermode="x unified",
         height=600,
@@ -167,34 +161,33 @@ if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data"]:
     st.plotly_chart(fig1, use_container_width=True)
 
     # -------- Chart 2: HIGH/LOW RATIO --------
-plot_single_line(
-    filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
-    "Date",
-    "HIGH/LOW RATIO",
-    title="HIGH/LOW RATIO",
-    height=600
-)
-
+    plot_single_line(
+        filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
+        "Date",
+        "HIGH/LOW RATIO",
+        title="HIGH/LOW RATIO",
+        height=600
+    )
 
     # -------- Chart 3: HIGH / EMA 200 --------
-plot_single_line(
-    filtered.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
-    "Date",
-    "HIGH / EMA 200",
-    title="HIGH / EMA 200",
-    color="green",
-    height=600
-)
+    plot_single_line(
+        filtered.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
+        "Date",
+        "HIGH / EMA 200",
+        title="HIGH / EMA 200",
+        color="green",
+        height=600
+    )
 
     # -------- Chart 4: LOW / EMA 200 --------
-plot_single_line(
-    filtered.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
-    "Date",
-    "LOW / EMA 200",
-    title="LOW / EMA 200",
-    color="red",
-    height=600
-)
+    plot_single_line(
+        filtered.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
+        "Date",
+        "LOW / EMA 200",
+        title="LOW / EMA 200",
+        color="red",
+        height=600
+    )
 
 # =================================================
 # RBI NET LIQUIDITY INJECTED (LAKHS)
@@ -267,6 +260,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
