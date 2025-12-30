@@ -238,15 +238,15 @@ if view == "RBI Net Liquidity Injected":
     )
 
 # =================================================
-# ASSET CLASS CHARTS (TRADINGVIEW IMAGES)
+# ASSET CLASS CHARTS
 # =================================================
-from datetime import datetime
-
 if view == "Asset Class Charts":
 
     st.subheader("📷 Asset Class Charts")
 
     charts_folder = "asset_class_charts"
+
+    three_per_row = st.checkbox("Show 3 images per row", value=False)
 
     if not os.path.exists(charts_folder):
         st.warning("Folder 'asset_class_charts' not found.")
@@ -256,60 +256,35 @@ if view == "Asset Class Charts":
             if f.lower().endswith((".png", ".jpg", ".jpeg"))
         ]
 
-        def extract_datetime(filename):
-            """
-            Expected filename format:
-            ANYTHING_YYYY-MM-DD_HH-MM-SS.ext
-            """
-            try:
-                parts = filename.rsplit("_", 2)
-                dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
-                return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
-            except Exception:
-                return datetime.min  # fallback if format mismatch
+        if not images:
+            st.info("No images found.")
+        else:
+            # sort images by date/time in filename
+            def extract_datetime(filename):
+                try:
+                    parts = filename.rsplit("_", 2)
+                    dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
+                    return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
+                except Exception:
+                    return datetime.min
 
-        images_sorted = sorted(images, key=extract_datetime)
+            images = sorted(images, key=extract_datetime)
 
-        for img in images_sorted:
-            title = img.replace("_", " ").split(".")[0]
-            st.markdown(f"### {title}")
-            from datetime import datetime
+            if three_per_row:
+                cols = st.columns(3)
+                for idx, img in enumerate(images):
+                    with cols[idx % 3]:
+                        st.image(
+                            os.path.join(charts_folder, img),
+                            use_container_width=True
+                        )
+            else:
+                for img in images:
+                    st.image(
+                        os.path.join(charts_folder, img),
+                        use_container_width=True
+                    )
 
-if view == "Asset Class Charts":
-
-    st.subheader("📷 Asset Class Charts")
-
-    charts_folder = "asset_class_charts"
-
-    if not os.path.exists(charts_folder):
-        st.warning("Folder 'asset_class_charts' not found.")
-    else:
-        images = [
-            f for f in os.listdir(charts_folder)
-            if f.lower().endswith((".png", ".jpg", ".jpeg"))
-        ]
-
-        def extract_datetime(filename):
-            """
-            Expected filename format:
-            ANYTHING_YYYY-MM-DD_HH-MM-SS.ext
-            """
-            try:
-                parts = filename.rsplit("_", 2)
-                dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
-                return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
-            except Exception:
-                return datetime.min  # fallback if format mismatch
-
-        images_sorted = sorted(images, key=extract_datetime)
-
-        for img in images_sorted:
-            title = img.replace("_", " ").split(".")[0]
-            st.markdown(f"### {title}")
-            st.image(
-                os.path.join(charts_folder, img),
-                use_container_width=True
-            )
 
 
 
