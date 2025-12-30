@@ -240,15 +240,13 @@ if view == "RBI Net Liquidity Injected":
     )
 
 # =================================================
-# ASSET CLASS CHARTS
+# ASSET CLASS CHARTS (ORIGINAL)
 # =================================================
 if view == "Asset Class Charts":
 
     st.subheader("📷 Asset Class Charts")
 
     charts_folder = "asset_class_charts"
-
-    three_per_page = st.checkbox("Show 3 images per page", value=False)
 
     if not os.path.exists(charts_folder):
         st.warning("Folder 'asset_class_charts' not found.")
@@ -261,9 +259,7 @@ if view == "Asset Class Charts":
         if not images:
             st.info("No images found.")
         else:
-            # ---- SORT BY DATE & TIME ----
-            from datetime import datetime
-
+            # ---- SORT BY DATE & TIME FROM FILENAME ----
             def extract_datetime(filename):
                 try:
                     parts = filename.rsplit("_", 2)
@@ -274,21 +270,8 @@ if view == "Asset Class Charts":
 
             images = sorted(images, key=extract_datetime)
 
-            # ---- PAGINATION LOGIC ----
-            page_size = 3 if three_per_page else 1
-            total_pages = (len(images) - 1) // page_size + 1
-
-            page = st.number_input(
-                "Page",
-                min_value=1,
-                max_value=total_pages,
-                step=1
-            )
-
-            start = (page - 1) * page_size
-            end = start + page_size
-
-            for img in images[start:end]:
+            # ---- DISPLAY (ORIGINAL BEHAVIOR) ----
+            for img in images:
                 st.image(
                     os.path.join(charts_folder, img),
                     use_container_width=True
