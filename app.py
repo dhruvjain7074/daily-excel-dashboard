@@ -87,21 +87,30 @@ mapping = {
 # =================================================
 # COMMON PLOT FUNCTION
 # =================================================
-def plot_single_line(df, x, y, height=350, y_label=None):
+def plot_single_line(df, x, y, height=350, y_label=None, title=None, color=None):
     fig = px.line(df, x=x, y=y)
+
+    if color:
+        fig.update_traces(line=dict(color=color, width=2.6))
+    else:
+        fig.update_traces(line=dict(width=2.6))
+
     fig.update_traces(
-        line=dict(width=2.6),
-        hovertemplate=
-            "Date: %{x|%d-%m-%y}<br>"
-            "Value: %{y}<extra></extra>"
+        hovertemplate="Date: %{x|%d-%m-%y}<br>"
+                      "Value: %{y}<extra></extra>"
     )
+
     fig.update_layout(
         hovermode="x unified",
         height=height,
         yaxis_title=y_label,
+        title=title,
+        title_x=0.5,
         template="plotly_white"
     )
+
     st.plotly_chart(fig, use_container_width=True)
+
 
 # =================================================
 # DATASET 1 / 2 / 3 VIEW
@@ -133,50 +142,59 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
         columns={m["date"]: "Date", m["high"]: "HIGH", m["low"]: "LOW"}
     )
 
-    fig1 = px.line(
-        plot_df1,
-        x="Date",
-        y=["HIGH", "LOW"],
-        color_discrete_map={
-            "HIGH": "green",
-            "LOW": "red"
-        }
-    )
+fig1 = px.line(
+    plot_df1,
+    x="Date",
+    y=["HIGH", "LOW"],
+    color_discrete_map={
+        "HIGH": "green",
+        "LOW": "red"
+    },
+    title="HIGH & LOW COUNT"
+)
 
-    fig1.update_traces(
-        hovertemplate="<b>%{fullData.name}</b><br>"
-                      "Date: %{x|%d-%m-%y}<br>"
-                      "Value: %{y}<extra></extra>"
-    )
+fig1.update_traces(
+    hovertemplate="<b>%{fullData.name}</b><br>"
+                  "Date: %{x|%d-%m-%y}<br>"
+                  "Value: %{y}<extra></extra>"
+)
 
-    fig1.update_layout(
-        hovermode="x unified",
-        height=600,
-        template="plotly_white"
-    )
+fig1.update_layout(
+    hovermode="x unified",
+    height=600,
+    title_x=0.5,
+    template="plotly_white"
+)
 
-    st.plotly_chart(fig1, use_container_width=True)
+st.plotly_chart(fig1, use_container_width=True)
+
 
     # -------- Chart 2: H/L Ratio --------
-    plot_single_line(
-        filtered.rename(columns={m["date"]: "Date", m["hl"]: "H/L Ratio"}),
-        "Date",
-        "H/L Ratio"
-    )
+   plot_single_line(
+    filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
+    "Date",
+    "HIGH/LOW RATIO"
+)
 
     # -------- Chart 3: H RATIO --------
 plot_single_line(
-    filtered.rename(columns={m["date"]: "Date", m["hr"]: "H RATIO"}),
+    filtered.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
     "Date",
-    "H RATIO"
+    "HIGH / EMA 200",
+    title="HIGH / EMA 200",
+    color="green"
 )
+
 
 # -------- Chart 4: L RATIO --------
 plot_single_line(
-    filtered.rename(columns={m["date"]: "Date", m["lr"]: "L RATIO"}),
+    filtered.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
     "Date",
-    "L RATIO"
+    "LOW / EMA 200",
+    title="LOW / EMA 200",
+    color="red"
 )
+
 
 
 # =================================================
@@ -250,17 +268,3 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
