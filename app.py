@@ -261,7 +261,9 @@ if view == "Asset Class Charts":
         if not images:
             st.info("No images found.")
         else:
-            # ---- SORT BY DATE & TIME FROM FILENAME ----
+            # ---- SORT BY DATE & TIME ----
+            from datetime import datetime
+
             def extract_datetime(filename):
                 try:
                     parts = filename.rsplit("_", 2)
@@ -272,18 +274,23 @@ if view == "Asset Class Charts":
 
             images = sorted(images, key=extract_datetime)
 
-            # ---- DISPLAY LOGIC ----
-            if three_per_page:
-                # simulate 3 images per page by reducing size
-                for img in images:
-                    st.image(
-                        os.path.join(charts_folder, img),
-                        width=700  # smaller width → smaller height (~200)
-                    )
-            else:
-                # 1 image per page (large)
-                for img in images:
-                    st.image(
-                        os.path.join(charts_folder, img),
-                        width=1100  # larger width → larger height (~600)
-                    )
+            # ---- PAGINATION LOGIC ----
+            page_size = 3 if three_per_page else 1
+            total_pages = (len(images) - 1) // page_size + 1
+
+            page = st.number_input(
+                "Page",
+                min_value=1,
+                max_value=total_pages,
+                step=1
+            )
+
+            start = (page - 1) * page_size
+            end = start + page_size
+
+            for img in images[start:end]:
+                st.image(
+                    os.path.join(charts_folder, img),
+                    use_container_width=True
+                )
+
