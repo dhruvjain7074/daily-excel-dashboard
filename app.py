@@ -143,7 +143,6 @@ if view in ["Dataset 1", "Dataset 2", "Dataset 3"]:
     )
 
 fig1 = px.line(
-    plot_df1,
     x="Date",
     y=["HIGH", "LOW"],
     color_discrete_map={
@@ -266,6 +265,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
