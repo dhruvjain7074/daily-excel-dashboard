@@ -170,7 +170,7 @@ st.plotly_chart(fig1, use_container_width=True)
 
 
     # -------- Chart 2: H/L Ratio --------
-   plot_single_line(
+plot_single_line(
     filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
     "Date",
     "HIGH/LOW RATIO"
@@ -268,3 +268,4 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
