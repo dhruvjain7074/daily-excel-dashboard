@@ -201,8 +201,8 @@ if view == "RBI Net Liquidity Injected":
     rbi["DATE-1"] = pd.to_datetime(rbi["DATE-1"])
     rbi["DATE_2"] = pd.to_datetime(rbi["DATE_2"])
 
-    rbi["NET_LIQ_LAKHS"] = rbi["NET LIQ INC TODAY"] / 100000
-    rbi["AMOUNT_LAKHS"] = rbi["AMOUNT"] / 100000
+    rbi["NET_LIQ_LAKHS"] = rbi["NET LIQ INC TODAY"]
+    rbi["AMOUNT_LAKHS"] = rbi["AMOUNT"]
 
     # -------- Chart 1: Net Liquidity --------
     plot_single_line(
@@ -214,7 +214,7 @@ if view == "RBI Net Liquidity Injected":
         ),
         "Date",
         "Net Liquidity (Lakhs)",
-        title="RBI Net Liquidity Injected (Lakhs)",
+        title="RBI Net Liquidity Injected",
         height=600
     )
 
@@ -272,6 +272,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
