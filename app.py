@@ -194,44 +194,45 @@ if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data"]:
     )
 
 # =================================================
-# RBI NET LIQUIDITY INJECTED (LAKHS)
+# RBI NET LIQUIDITY INJECTED
 # =================================================
 if view == "RBI Net Liquidity Injected":
 
-    st.subheader("🏦 RBI Net Liquidity Injected (₹ in Lakhs)")
+    st.subheader("🏦 RBI Net Liquidity Injected")
 
     rbi = df_rbi.copy()
 
     rbi["DATE-1"] = pd.to_datetime(rbi["DATE-1"])
     rbi["DATE_2"] = pd.to_datetime(rbi["DATE_2"])
 
+    # keep RAW values (no conversion)
     rbi["NET_LIQ_LAKHS"] = rbi["NET LIQ INC TODAY"]
     rbi["AMOUNT_LAKHS"] = rbi["AMOUNT"]
 
-    # -------- Chart 1: RBI Net Liquidity Injected (RAW, Color by Sign) --------
-plot_single_line(
-    rbi.rename(
-        columns={
-            "DATE-1": "Date",
-            "NET LIQ INC TODAY": "Net Liquidity"
-        }
-    ),
-    "Date",
-    "Net Liquidity",
-    title="RBI Net Liquidity Injected (Raw)",
-    height=600
-)
-
-    # -------- Chart 2: Amount --------
-plot_single_line(
+    # -------- Chart 1: RBI Net Liquidity Injected (RAW) --------
+    plot_single_line(
         rbi.rename(
             columns={
-                "DATE_2": "Date",
-                "AMOUNT_LAKHS": "Amount (Lakhs)"
+                "DATE-1": "Date",
+                "NET LIQ INC TODAY": "Net Liquidity"
             }
         ),
         "Date",
-        "Amount (Lakhs)",
+        "Net Liquidity",
+        title="RBI Net Liquidity Injected (Raw)",
+        height=600
+    )
+
+    # -------- Chart 2: Amount --------
+    plot_single_line(
+        rbi.rename(
+            columns={
+                "DATE_2": "Date",
+                "AMOUNT_LAKHS": "Amount"
+            }
+        ),
+        "Date",
+        "Amount",
         title="Net Durable Liquidity",
         height=600
     )
@@ -276,6 +277,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
