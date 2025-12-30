@@ -109,6 +109,10 @@ def plot_single_line(df, x, y, height=350, y_label=None, title=None, color=None)
         title_x=0.5,
         template="plotly_white"
     )
+    fig.update_yaxes(
+    tickformat=",",
+    showexponent="none"
+)
 
     st.plotly_chart(fig, use_container_width=True)
 
@@ -272,6 +276,7 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
 
 
