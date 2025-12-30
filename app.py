@@ -212,7 +212,7 @@ if view == "RBI Net Liquidity Injected":
     rbi["NET_LIQ_LAKHS"] = rbi["NET LIQ INC TODAY"] / 100000
     rbi["AMOUNT_LAKHS"] = rbi["AMOUNT"] / 100000
 
-    plot_single_line(
+plot_single_line(
         rbi,
         "DATE-1",
         "NET_LIQ_LAKHS",
@@ -220,7 +220,7 @@ if view == "RBI Net Liquidity Injected":
         y_label="Net Liquidity (Lakhs)"
     )
 
-    plot_single_line(
+plot_single_line(
         rbi,
         "DATE_2",
         "AMOUNT_LAKHS",
@@ -268,4 +268,5 @@ if view == "Asset Class Charts":
                 os.path.join(charts_folder, img),
                 use_container_width=True
             )
+
 
