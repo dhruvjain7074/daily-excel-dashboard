@@ -286,6 +286,9 @@ if view == "Asset Class Charts (Weekly)":
 
     charts_folder = "asset_class_charts_weekly"
 
+    st.write("Weekly folder exists:", os.path.exists(charts_folder))
+    st.write("Files:", os.listdir(charts_folder) if os.path.exists(charts_folder) else "N/A")
+
     if not os.path.exists(charts_folder):
         st.warning("Folder 'asset_class_charts_weekly' not found.")
     else:
@@ -297,7 +300,6 @@ if view == "Asset Class Charts (Weekly)":
         if not images:
             st.info("No images found.")
         else:
-            # ---- SORT BY DATE & TIME FROM FILENAME ----
             def extract_datetime(filename):
                 try:
                     parts = filename.rsplit("_", 2)
@@ -308,10 +310,5 @@ if view == "Asset Class Charts (Weekly)":
 
             images = sorted(images, key=extract_datetime)
 
-            # ---- DISPLAY (SAME AS ORIGINAL) ----
             for img in images:
-                st.image(
-                    os.path.join(charts_folder, img),
-                    use_container_width=True
-                )
-
+                st.image(os.path.join(charts_folder, img), use_container_width=True)
