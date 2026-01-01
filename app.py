@@ -52,7 +52,8 @@ view = st.selectbox(
         "EMA 20 Data",
         "EMA 200 Data",
         "RBI Net Liquidity Injected",
-        "Asset Class Charts"
+        "Asset Class Charts",
+        "Asset class charts (weekly)"
     ]
 )
 
@@ -271,6 +272,43 @@ if view == "Asset Class Charts":
             images = sorted(images, key=extract_datetime)
 
             # ---- DISPLAY (ORIGINAL BEHAVIOR) ----
+            for img in images:
+                st.image(
+                    os.path.join(charts_folder, img),
+                    use_container_width=True
+                )
+# =================================================
+# ASSET CLASS CHARTS (WEEKLY)
+# =================================================
+if view == "Asset Class Charts (Weekly)":
+
+    st.subheader("📷 Asset Class Charts (Weekly)")
+
+    charts_folder = "asset_class_charts_weekly"
+
+    if not os.path.exists(charts_folder):
+        st.warning("Folder 'asset_class_charts_weekly' not found.")
+    else:
+        images = [
+            f for f in os.listdir(charts_folder)
+            if f.lower().endswith((".png", ".jpg", ".jpeg"))
+        ]
+
+        if not images:
+            st.info("No images found.")
+        else:
+            # ---- SORT BY DATE & TIME FROM FILENAME ----
+            def extract_datetime(filename):
+                try:
+                    parts = filename.rsplit("_", 2)
+                    dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
+                    return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
+                except Exception:
+                    return datetime.min
+
+            images = sorted(images, key=extract_datetime)
+
+            # ---- DISPLAY (SAME AS ORIGINAL) ----
             for img in images:
                 st.image(
                     os.path.join(charts_folder, img),
