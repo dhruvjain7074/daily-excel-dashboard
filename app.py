@@ -29,18 +29,21 @@ st.title("📊 Daily Excel Dashboard")
 # LOAD DATA (MULTI-SHEET)
 # =================================================
 def load_data():
+    def load_data():
     df_main = pd.read_excel("Book1.xlsx", sheet_name="comparision charts")
     df_rbi = pd.read_excel("Book1.xlsx", sheet_name="Rbi net liquidity")
+    df_index_oi = pd.read_excel("Book1.xlsx", sheet_name="Index oi charts")
 
     df_main.columns = df_main.columns.str.strip()
     df_rbi.columns = df_rbi.columns.str.strip()
+    df_index_oi.columns = df_index_oi.columns.str.strip()
 
-    return df_main, df_rbi
+    return df_main, df_rbi, df_index_oi
 
 if st.button("🔄 Refresh Data"):
     st.cache_data.clear()
 
-df_main, df_rbi = load_data()
+df_main, df_rbi, df_index_oi = load_data()
 
 # =================================================
 # MAIN DROPDOWN
@@ -52,6 +55,7 @@ view = st.selectbox(
         "EMA 20 Data",
         "EMA 200 Data",
         "RBI Net Liquidity Injected",
+        "Index Futures OI",
         "Asset Class Charts",
         "Asset Class Charts (Weekly)"
     ]
@@ -237,6 +241,136 @@ if view == "RBI Net Liquidity Injected":
         title="Net Durable Liquidity",
         height=600
     )
+# =================================================
+# INDEX FUTURES OI
+# =================================================
+if view == "Index Futures OI":
+
+    st.subheader("📊 Index Futures OI")
+
+    oi = df_index_oi.copy()
+
+    # ---- Convert dates ----
+    oi["Date_1"] = pd.to_datetime(oi["Date_1"])
+    oi["Date_2"] = pd.to_datetime(oi["Date_2"])
+    oi["Date_3"] = pd.to_datetime(oi["Date_3"])
+    oi["DATE_4"] = pd.to_datetime(oi["DATE_4"])
+
+    # ---- Date Filter (based on earliest & latest available) ----
+    min_date = min(
+        oi["Date_1"].min(),
+        oi["Date_2"].min(),
+        oi["Date_3"].min(),
+        oi["DATE_4"].min()
+    ).date()
+
+    max_date = max(
+        oi["Date_1"].max(),
+        oi["Date_2"].max(),
+        oi["Date_3"].max(),
+        oi["DATE_4"].max()
+    ).date()
+
+    start_date, end_date = st.date_input(
+        "Select date range",
+        [min_date, max_date]
+    )
+
+    # =================================================
+    # Chart 1: Index Futures OI
+    # =================================================
+    plot_single_line(
+        oi[
+            (oi["Date_1"] >= pd.to_datetime(start_date)) &
+            (oi["Date_1"] <= pd.to_datetime(end_date))
+        ].rename(columns={"Date_1": "Date"}),
+        "Date",
+        "Index Futures OI",
+        title="Index Futures OI"
+    )
+
+    # =================================================
+    # Chart 2: Nifty Futures OI
+    # =================================================
+    plot_single_line(
+        oi[
+            (oi["Date_2"] >= pd.to_datetime(start_date)) &
+            (oi["Date_2"] <= pd.to_datetime(end_date))
+        ].rename(columns={"Date_2": "Date"}),
+        "Date",
+        "Nifty Futures oi",
+        title="Nifty Futures OI"
+    )
+
+    # =================================================
+    # Chart 3: Future Index Long vs Short
+    # =================================================
+    long_short = oi[
+        (oi["Date_3"] >= pd.to_datetime(start_date)) &
+        (oi["Date_3"] <= pd.to_datetime(end_date))
+    ][["Date_3", "Future Index Long", "Future Index Short"]].rename(
+        columns={"Date_3": "Date"}
+    )
+
+    fig_ls = px.line(
+        long_short,
+        x="Date",
+        y=["Future Index Long", "Future Index Short"],
+        color_discrete_map={
+            "Future Index Long": "green",
+            "Future Index Short": "red"
+        },
+        title="Future Index Long vs Short"
+    )
+
+    fig_ls.update_layout(
+        hovermode="x unified",
+        height=600,
+        title_x=0.5,
+        template="plotly_white"
+    )
+
+    fig_ls.update_yaxes(
+        tickformat=",",
+        showexponent="none",
+        zeroline=True,
+        zerolinecolor="black"
+    )
+
+    st.plotly_chart(fig_ls, use_container_width=True)
+
+    # =================================================
+    # Chart 4: Client OI vs FII OI
+    # =================================================
+    client_fii = oi[
+        (oi["DATE_4"] >= pd.to_datetime(start_date)) &
+        (oi["DATE_4"] <= pd.to_datetime(end_date))
+    ][["DATE_4", "Client OI", "FII OI"]].rename(
+        columns={"DATE_4": "Date"}
+    )
+
+    fig_cf = px.line(
+        client_fii,
+        x="Date",
+        y=["Client OI", "FII OI"],
+        title="Client OI vs FII OI"
+    )
+
+    fig_cf.update_layout(
+        hovermode="x unified",
+        height=600,
+        title_x=0.5,
+        template="plotly_white"
+    )
+
+    fig_cf.update_yaxes(
+        tickformat=",",
+        showexponent="none",
+        zeroline=True,
+        zerolinecolor="black"
+    )
+
+    st.plotly_chart(fig_cf, use_container_width=True)
 
 # =================================================
 # ASSET CLASS CHARTS (ORIGINAL)
@@ -312,5 +446,6 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
