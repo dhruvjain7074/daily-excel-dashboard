@@ -250,13 +250,13 @@ if view == "Index Futures OI":
 
     oi = df_index_oi.copy()
 
-    # ---- Convert dates ----
+    # ---- Date conversion ----
     oi["Date_1"] = pd.to_datetime(oi["Date_1"])
     oi["Date_2"] = pd.to_datetime(oi["Date_2"])
     oi["Date_3"] = pd.to_datetime(oi["Date_3"])
     oi["DATE_4"] = pd.to_datetime(oi["DATE_4"])
 
-    # ---- Date Filter (based on earliest & latest available) ----
+    # ---- Date Filter ----
     min_date = min(
         oi["Date_1"].min(),
         oi["Date_2"].min(),
@@ -303,69 +303,74 @@ if view == "Index Futures OI":
     )
 
     # =================================================
-# Chart 3: Total Client OI
-# =================================================
-client_oi = oi[
-    (oi["Date_3"] >= pd.to_datetime(start_date)) &
-    (oi["Date_3"] <= pd.to_datetime(end_date))
-][["Date_3", "total client oi"]].rename(
-    columns={"Date_3": "Date"}
-)
+    # Chart 3: Total Client OI
+    # =================================================
+    client_oi = oi[
+        (oi["Date_3"] >= pd.to_datetime(start_date)) &
+        (oi["Date_3"] <= pd.to_datetime(end_date))
+    ][["Date_3", "total client oi"]].rename(
+        columns={"Date_3": "Date"}
+    )
 
-# force numeric (safe)
-client_oi["total client oi"] = pd.to_numeric(
-    client_oi["total client oi"], errors="coerce"
-)
+    client_oi["total client oi"] = pd.to_numeric(
+        client_oi["total client oi"], errors="coerce"
+    )
 
-client_oi = client_oi.dropna(subset=["total client oi"])
+    client_oi = client_oi.dropna(subset=["total client oi"])
 
-plot_single_line(
-    client_oi,
-    "Date",
-    "total client oi",
-    title="Total Client OI",
-    height=600
-)
+    plot_single_line(
+        client_oi,
+        "Date",
+        "total client oi",
+        title="Total Client OI"
+    )
 
     # =================================================
-# Chart 4: Client OI vs FII OI (FIXED)
-# =================================================
-client_fii = oi[
-    (oi["DATE_4"] >= pd.to_datetime(start_date)) &
-    (oi["DATE_4"] <= pd.to_datetime(end_date))
-][["DATE_4", "Client OI", "FII OI"]].rename(
-    columns={"DATE_4": "Date"}
-)
+    # Chart 4: Client OI vs FII OI
+    # =================================================
+    client_fii = oi[
+        (oi["DATE_4"] >= pd.to_datetime(start_date)) &
+        (oi["DATE_4"] <= pd.to_datetime(end_date))
+    ][["DATE_4", "Client OI", "FII OI"]].rename(
+        columns={"DATE_4": "Date"}
+    )
 
-# ---- FORCE NUMERIC (IMPORTANT) ----
-client_fii["Client OI"] = pd.to_numeric(client_fii["Client OI"], errors="coerce")
-client_fii["FII OI"] = pd.to_numeric(client_fii["FII OI"], errors="coerce")
+    client_fii["Client OI"] = pd.to_numeric(client_fii["Client OI"], errors="coerce")
+    client_fii["FII OI"] = pd.to_numeric(client_fii["FII OI"], errors="coerce")
 
-# Drop rows where both are NaN
-client_fii = client_fii.dropna(subset=["Client OI", "FII OI"], how="all")
+    client_fii = client_fii.dropna(subset=["Client OI", "FII OI"], how="all")
 
-fig_cf = px.line(
-    client_fii,
-    x="Date",
-    y=["Client OI", "FII OI"],
-    title="Client OI vs FII OI"
-)
+    fig_cf = px.line(
+        client_fii,
+        x="Date",
+        y=["Client OI", "FII OI"],
+        title="Client OI vs FII OI"
+    )
 
-fig_cf.update_layout(
-    hovermode="x unified",
-    height=600,
-    title_x=0.5,
-    template="plotly_white"
-)
+    # ---- LEGEND INSIDE THE CHART (FOR REAL) ----
+    fig_cf.update_layout(
+        hovermode="x unified",
+        height=600,
+        title_x=0.5,
+        template="plotly_white",
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=0.98,
+            xanchor="right",
+            x=0.98,
+            bgcolor="rgba(255,255,255,0.6)"
+        ),
+        margin=dict(l=40, r=40, t=60, b=40)
+    )
 
-fig_cf.update_yaxes(
-    tickformat=",",
-    showexponent="none",
-    zeroline=True,
-    zerolinecolor="black"
-)
+    fig_cf.update_yaxes(
+        tickformat=",",
+        showexponent="none"
+    )
 
-st.plotly_chart(fig_cf, use_container_width=True)
+    st.plotly_chart(fig_cf, use_container_width=True)
+
 
 # =================================================
 # ASSET CLASS CHARTS (ORIGINAL)
@@ -441,6 +446,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
