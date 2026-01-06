@@ -40,7 +40,7 @@ def load_data():
 
     client = gspread.authorize(creds)
 
-    SPREADSHEET_ID = "PASTE_YOUR_SPREADSHEET_ID_HERE"
+    SPREADSHEET_ID = "13UqMshnNj01OTGpsEjw7t1TEYZt6rBNpPWcTxLV2ZzM"
     sheet = client.open_by_key(SPREADSHEET_ID)
 
     df_main = pd.DataFrame(
@@ -463,6 +463,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
