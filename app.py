@@ -92,7 +92,7 @@ mapping = {
 # =================================================
 # COMMON PLOT FUNCTION
 # =================================================
-def plot_single_line(df, x, y, height=350, y_label=None, title=None, color=None):
+def plot_single_line(df, x, y, height=600, y_label=None, title=None, color=None):
     fig = px.line(df, x=x, y=y)
 
     if color:
@@ -111,15 +111,16 @@ def plot_single_line(df, x, y, height=350, y_label=None, title=None, color=None)
         yaxis_title=y_label,
         title=title,
         title_x=0.5,
-        template="plotly_white"
+        template="plotly_white",
+        margin=dict(l=40, r=40, t=60, b=40)  # 🔴 IMPORTANT
     )
+
     fig.update_yaxes(
-    tickformat=",",
-    showexponent="none"
-)
+        tickformat=",",
+        showexponent="none"
+    )
 
     st.plotly_chart(fig, use_container_width=True)
-
 
 # =================================================
 # DATASET 1 / 2 / 3 VIEW
@@ -440,6 +441,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
