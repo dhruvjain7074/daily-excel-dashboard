@@ -31,10 +31,7 @@ st.title("📊 Daily Excel Dashboard")
 # LOAD DATA (MULTI-SHEET)
 # =================================================
 def load_data():
-    # ---- Google Sheets authentication ----
-    scopes = [
-        "https://www.googleapis.com/auth/spreadsheets.readonly"
-    ]
+    scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
     creds = Credentials.from_service_account_info(
         st.secrets["gcp_service_account"],
@@ -43,13 +40,9 @@ def load_data():
 
     client = gspread.authorize(creds)
 
-    # ---- Open the Google Sheet ----
-    SPREADSHEET_ID = "13UqMshnNj01OTGpsEjw7t1TEYZt6rBNpPWcTxLV2ZzM"
+    SPREADSHEET_ID = "PASTE_YOUR_SPREADSHEET_ID_HERE"
+    sheet = client.open_by_key(SPREADSHEET_ID)
 
-sheet = client.open_by_key(SPREADSHEET_ID)
-
-
-    # ---- Read individual tabs ----
     df_main = pd.DataFrame(
         sheet.worksheet("comparision charts").get_all_records()
     )
@@ -62,13 +55,11 @@ sheet = client.open_by_key(SPREADSHEET_ID)
         sheet.worksheet("Index oi charts").get_all_records()
     )
 
-    # ---- Clean column names ----
     df_main.columns = df_main.columns.str.strip()
     df_rbi.columns = df_rbi.columns.str.strip()
     df_index_oi.columns = df_index_oi.columns.str.strip()
 
     return df_main, df_rbi, df_index_oi
-df_main, df_rbi, df_index_oi = load_data()
 
 # =================================================
 # MAIN DROPDOWN
@@ -472,6 +463,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
