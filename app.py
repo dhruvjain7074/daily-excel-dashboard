@@ -302,41 +302,29 @@ if view == "Index Futures OI":
     )
 
     # =================================================
-    # Chart 3: Future Index Long vs Short
-    # =================================================
-    long_short = oi[
-        (oi["Date_3"] >= pd.to_datetime(start_date)) &
-        (oi["Date_3"] <= pd.to_datetime(end_date))
-    ][["Date_3", "Future Index Long", "Future Index Short"]].rename(
-        columns={"Date_3": "Date"}
-    )
+# Chart 3: Total Client OI
+# =================================================
+client_oi = oi[
+    (oi["Date_3"] >= pd.to_datetime(start_date)) &
+    (oi["Date_3"] <= pd.to_datetime(end_date))
+][["Date_3", "total client oi"]].rename(
+    columns={"Date_3": "Date"}
+)
 
-    fig_ls = px.line(
-        long_short,
-        x="Date",
-        y=["Future Index Long", "Future Index Short"],
-        color_discrete_map={
-            "Future Index Long": "green",
-            "Future Index Short": "red"
-        },
-        title="Future Index Long vs Short"
-    )
+# force numeric (safe)
+client_oi["total client oi"] = pd.to_numeric(
+    client_oi["total client oi"], errors="coerce"
+)
 
-    fig_ls.update_layout(
-        hovermode="x unified",
-        height=600,
-        title_x=0.5,
-        template="plotly_white"
-    )
+client_oi = client_oi.dropna(subset=["total client oi"])
 
-    fig_ls.update_yaxes(
-        tickformat=",",
-        showexponent="none",
-        zeroline=True,
-        zerolinecolor="black"
-    )
-
-    st.plotly_chart(fig_ls, use_container_width=True)
+plot_single_line(
+    client_oi,
+    "Date",
+    "total client oi",
+    title="Total Client OI",
+    height=600
+)
 
     # =================================================
 # Chart 4: Client OI vs FII OI (FIXED)
@@ -452,6 +440,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
