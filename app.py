@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.express as px
 import os
 from datetime import datetime
+import gspread
+from google.oauth2.service_account import Credentials
 
 
 # =================================================
@@ -29,20 +31,41 @@ st.title("📊 Daily Excel Dashboard")
 # LOAD DATA (MULTI-SHEET)
 # =================================================
 def load_data():
-    df_main = pd.read_excel("Book1.xlsx", sheet_name="comparision charts")
-    df_rbi = pd.read_excel("Book1.xlsx", sheet_name="Rbi net liquidity")
-    df_index_oi = pd.read_excel("Book1.xlsx", sheet_name="Index oi charts")
+    # ---- Google Sheets authentication ----
+    scopes = [
+        "https://www.googleapis.com/auth/spreadsheets.readonly"
+    ]
 
+    creds = Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=scopes
+    )
+
+    client = gspread.authorize(creds)
+
+    # ---- Open the Google Sheet ----
+    sheet = client.open("Daily Dashboard Data")
+
+    # ---- Read individual tabs ----
+    df_main = pd.DataFrame(
+        sheet.worksheet("comparision charts").get_all_records()
+    )
+
+    df_rbi = pd.DataFrame(
+        sheet.worksheet("Rbi net liquidity").get_all_records()
+    )
+
+    df_index_oi = pd.DataFrame(
+        sheet.worksheet("Index oi charts").get_all_records()
+    )
+
+    # ---- Clean column names ----
     df_main.columns = df_main.columns.str.strip()
     df_rbi.columns = df_rbi.columns.str.strip()
     df_index_oi.columns = df_index_oi.columns.str.strip()
 
     return df_main, df_rbi, df_index_oi
 
-if st.button("🔄 Refresh Data"):
-    st.cache_data.clear()
-
-df_main, df_rbi, df_index_oi = load_data()
 
 # =================================================
 # MAIN DROPDOWN
@@ -446,6 +469,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
