@@ -29,7 +29,6 @@ st.title("📊 Daily Excel Dashboard")
 # LOAD DATA (MULTI-SHEET)
 # =================================================
 def load_data():
-    def load_data():
     df_main = pd.read_excel("Book1.xlsx", sheet_name="comparision charts")
     df_rbi = pd.read_excel("Book1.xlsx", sheet_name="Rbi net liquidity")
     df_index_oi = pd.read_excel("Book1.xlsx", sheet_name="Index oi charts")
@@ -446,6 +445,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
