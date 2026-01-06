@@ -339,37 +339,44 @@ if view == "Index Futures OI":
     st.plotly_chart(fig_ls, use_container_width=True)
 
     # =================================================
-    # Chart 4: Client OI vs FII OI
-    # =================================================
-    client_fii = oi[
-        (oi["DATE_4"] >= pd.to_datetime(start_date)) &
-        (oi["DATE_4"] <= pd.to_datetime(end_date))
-    ][["DATE_4", "Client OI", "FII OI"]].rename(
-        columns={"DATE_4": "Date"}
-    )
+# Chart 4: Client OI vs FII OI (FIXED)
+# =================================================
+client_fii = oi[
+    (oi["DATE_4"] >= pd.to_datetime(start_date)) &
+    (oi["DATE_4"] <= pd.to_datetime(end_date))
+][["DATE_4", "Client OI", "FII OI"]].rename(
+    columns={"DATE_4": "Date"}
+)
 
-    fig_cf = px.line(
-        client_fii,
-        x="Date",
-        y=["Client OI", "FII OI"],
-        title="Client OI vs FII OI"
-    )
+# ---- FORCE NUMERIC (IMPORTANT) ----
+client_fii["Client OI"] = pd.to_numeric(client_fii["Client OI"], errors="coerce")
+client_fii["FII OI"] = pd.to_numeric(client_fii["FII OI"], errors="coerce")
 
-    fig_cf.update_layout(
-        hovermode="x unified",
-        height=600,
-        title_x=0.5,
-        template="plotly_white"
-    )
+# Drop rows where both are NaN
+client_fii = client_fii.dropna(subset=["Client OI", "FII OI"], how="all")
 
-    fig_cf.update_yaxes(
-        tickformat=",",
-        showexponent="none",
-        zeroline=True,
-        zerolinecolor="black"
-    )
+fig_cf = px.line(
+    client_fii,
+    x="Date",
+    y=["Client OI", "FII OI"],
+    title="Client OI vs FII OI"
+)
 
-    st.plotly_chart(fig_cf, use_container_width=True)
+fig_cf.update_layout(
+    hovermode="x unified",
+    height=600,
+    title_x=0.5,
+    template="plotly_white"
+)
+
+fig_cf.update_yaxes(
+    tickformat=",",
+    showexponent="none",
+    zeroline=True,
+    zerolinecolor="black"
+)
+
+st.plotly_chart(fig_cf, use_container_width=True)
 
 # =================================================
 # ASSET CLASS CHARTS (ORIGINAL)
@@ -445,6 +452,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
