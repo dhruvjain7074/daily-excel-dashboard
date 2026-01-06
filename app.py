@@ -44,7 +44,10 @@ def load_data():
     client = gspread.authorize(creds)
 
     # ---- Open the Google Sheet ----
-    sheet = client.open("Daily Dashboard Data")
+    SPREADSHEET_ID = "13UqMshnNj01OTGpsEjw7t1TEYZt6rBNpPWcTxLV2ZzM"
+
+sheet = client.open_by_key(SPREADSHEET_ID)
+
 
     # ---- Read individual tabs ----
     df_main = pd.DataFrame(
@@ -469,6 +472,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
