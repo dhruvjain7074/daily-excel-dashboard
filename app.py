@@ -55,16 +55,15 @@ def load_data():
         sheet.worksheet("Index oi charts").get_all_records()
     )
 
+    # Clean column names
     df_main.columns = df_main.columns.str.strip()
     df_rbi.columns = df_rbi.columns.str.strip()
     df_index_oi.columns = df_index_oi.columns.str.strip()
-    
- df_main, df_rbi, df_index_oi = load_data()
-st.write("df_main columns:", list(df_main.columns))
 
     return df_main, df_rbi, df_index_oi
-   
+df_main, df_rbi, df_index_oi = load_data()
 
+st.write("df_main columns:", list(df_main.columns))
 
 # =================================================
 # MAIN DROPDOWN
@@ -468,6 +467,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
