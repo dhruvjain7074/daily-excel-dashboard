@@ -165,7 +165,7 @@ start_date, end_date = st.date_input(
         [data[m["date"]].min().date(), data[m["date"]].max().date()]
     )
 
-    filtered = data[
+filtered = data[
         (data[m["date"]] >= pd.to_datetime(start_date)) &
         (data[m["date"]] <= pd.to_datetime(end_date))
     ]
@@ -469,6 +469,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
