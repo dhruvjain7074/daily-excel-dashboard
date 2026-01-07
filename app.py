@@ -156,16 +156,16 @@ if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data"]:
     dayfirst=True
 )
 
-data = data.dropna(subset=[m["date"]])
+    data = data.dropna(subset=[m["date"]])
 
-st.subheader("📅 Date Filter")
+    st.subheader("📅 Date Filter")
 
-start_date, end_date = st.date_input(
+    start_date, end_date = st.date_input(
         "Select date range",
         [data[m["date"]].min().date(), data[m["date"]].max().date()]
     )
 
-filtered = data[
+    filtered = data[
         (data[m["date"]] >= pd.to_datetime(start_date)) &
         (data[m["date"]] <= pd.to_datetime(end_date))
     ]
@@ -469,6 +469,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
