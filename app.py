@@ -268,55 +268,78 @@ if view == "RBI Net Liquidity Injected":
     st.subheader("🏦 RBI Net Liquidity Injected")
 st.write("RBI date range:", df_rbi["DATE-1"].min(), "→", df_rbi["DATE-1"].max())
     # ===============================
-# CHART 1: RBI NET LIQUIDITY
+# RBI NET LIQUIDITY – CHART 1
 # ===============================
-rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
+if view == "RBI Net Liquidity Injected":
 
-# --- Correct date parsing (NO dayfirst) ---
-rbi_1["DATE-1"] = (
-    pd.to_datetime(rbi_1["DATE-1"], errors="coerce")
-    .dt.floor("D")
-)
+    st.subheader("🏦 RBI Net Liquidity Injected")
 
+    # --- Work on a clean copy ---
+    rbi_raw = df_rbi.copy()
 
-# --- Numeric cleaning ---
-rbi_1["NET LIQ INC TODAY"] = (
-    rbi_1["NET LIQ INC TODAY"]
-    .astype(str)
-    .str.replace(",", "", regex=False)
-    .str.replace("₹", "", regex=False)
-    .str.replace("+", "", regex=False)
-    .str.strip()
-)
+    # --- Select required columns ---
+    rbi_1 = rbi_raw[["DATE-1", "NET LIQ INC TODAY"]].copy()
 
-rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
-    rbi_1["NET LIQ INC TODAY"],
-    errors="coerce"
-)
+    # --- Parse date (NO dayfirst) ---
+    rbi_1["DATE-1"] = pd.to_datetime(
+        rbi_1["DATE-1"],
+        errors="coerce"
+    )
 
-# --- Keep valid rows only ---
-rbi_1 = rbi_1.dropna(subset=["DATE-1", "NET LIQ INC TODAY"])
+    # --- Clean numeric values (Excel-equivalent) ---
+    rbi_1["NET LIQ INC TODAY"] = (
+        rbi_1["NET LIQ INC TODAY"]
+        .astype(str)
+        .str.replace(",", "", regex=False)
+        .str.replace("₹", "", regex=False)
+        .str.replace("+", "", regex=False)
+        .str.strip()
+    )
 
-# --- Aggregate by date & sort ---
-rbi_1 = (
-    rbi_1
-    .groupby("DATE-1", as_index=False)
-    .sum()
-    .sort_values("DATE-1")
-)
+    rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
+        rbi_1["NET LIQ INC TODAY"],
+        errors="coerce"
+    )
 
-plot_single_line(
-    rbi_1.rename(
-        columns={
-            "DATE-1": "Date",
-            "NET LIQ INC TODAY": "Net Liquidity"
-        }
-    ),
-    x="Date",
-    y="Net Liquidity",
-    title="RBI Net Liquidity Injected",
-    height=600
-)
+    # --- Drop invalid rows ---
+    rbi_1 = rbi_1.dropna(subset=["DATE-1", "NET LIQ INC TODAY"])
+
+    # --- Aggregate per date & sort ---
+    rbi_1 = (
+        rbi_1
+        .groupby("DATE-1", as_index=False)
+        .sum()
+        .sort_values("DATE-1")
+    )
+
+    # --- Explicit X-axis range (CRITICAL FIX) ---
+    x_min = rbi_1["DATE-1"].min()
+    x_max = rbi_1["DATE-1"].max()
+
+    # --- Plot ---
+    fig = px.line(
+        rbi_1.rename(
+            columns={
+                "DATE-1": "Date",
+                "NET LIQ INC TODAY": "Net Liquidity"
+            }
+        ),
+        x="Date",
+        y="Net Liquidity",
+        title="RBI Net Liquidity Injected"
+    )
+
+    fig.update_xaxes(range=[x_min, x_max])
+
+    fig.update_layout(
+        height=600,
+        hovermode="x unified",
+        title_x=0.5,
+        template="plotly_white"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
 
     # ===============================
     # CHART 2: RBI AMOUNT
@@ -570,6 +593,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
