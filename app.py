@@ -272,51 +272,50 @@ if view == "RBI Net Liquidity Injected":
     # ===============================
     rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
 
-    # --- Date parsing (robust for Sheets) ---
-    rbi_1["DATE-1"] = pd.to_datetime(
-        rbi_1["DATE-1"],
-        errors="coerce",
-        dayfirst=True
-    )
+# --- Correct date parsing (NO dayfirst) ---
+rbi_1["DATE-1"] = pd.to_datetime(
+    rbi_1["DATE-1"],
+    errors="coerce"
+)
 
-    # --- Numeric sanitization (CRITICAL) ---
-    rbi_1["NET LIQ INC TODAY"] = (
-        rbi_1["NET LIQ INC TODAY"]
-        .astype(str)
-        .str.replace(",", "", regex=False)
-        .str.replace("₹", "", regex=False)
-        .str.replace("+", "", regex=False)
-        .str.strip()
-    )
+# --- Numeric cleaning ---
+rbi_1["NET LIQ INC TODAY"] = (
+    rbi_1["NET LIQ INC TODAY"]
+    .astype(str)
+    .str.replace(",", "", regex=False)
+    .str.replace("₹", "", regex=False)
+    .str.replace("+", "", regex=False)
+    .str.strip()
+)
 
-    rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
-        rbi_1["NET LIQ INC TODAY"],
-        errors="coerce"
-    )
+rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
+    rbi_1["NET LIQ INC TODAY"],
+    errors="coerce"
+)
 
-    # --- Keep only valid rows ---
-    rbi_1 = rbi_1.dropna(subset=["DATE-1", "NET LIQ INC TODAY"])
+# --- Keep valid rows only ---
+rbi_1 = rbi_1.dropna(subset=["DATE-1", "NET LIQ INC TODAY"])
 
-    # --- Aggregate & sort (Excel-equivalent) ---
-    rbi_1 = (
-        rbi_1
-        .groupby("DATE-1", as_index=False)
-        .sum()
-        .sort_values("DATE-1")
-    )
+# --- Aggregate by date & sort ---
+rbi_1 = (
+    rbi_1
+    .groupby("DATE-1", as_index=False)
+    .sum()
+    .sort_values("DATE-1")
+)
 
-    plot_single_line(
-        rbi_1.rename(
-            columns={
-                "DATE-1": "Date",
-                "NET LIQ INC TODAY": "Net Liquidity"
-            }
-        ),
-        x="Date",
-        y="Net Liquidity",
-        title="RBI Net Liquidity Injected",
-        height=600
-    )
+plot_single_line(
+    rbi_1.rename(
+        columns={
+            "DATE-1": "Date",
+            "NET LIQ INC TODAY": "Net Liquidity"
+        }
+    ),
+    x="Date",
+    y="Net Liquidity",
+    title="RBI Net Liquidity Injected",
+    height=600
+)
 
     # ===============================
     # CHART 2: RBI AMOUNT
@@ -570,6 +569,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
