@@ -289,7 +289,7 @@ rbi["NET_LIQ_LAKHS"] = rbi["NET LIQ INC TODAY"]
 rbi["AMOUNT_LAKHS"] = rbi["AMOUNT"]
 
     # -------- Chart 1: RBI Net Liquidity Injected (RAW) --------
-    plot_single_line(
+plot_single_line(
         rbi.rename(
             columns={
                 "DATE-1": "Date",
@@ -303,7 +303,7 @@ rbi["AMOUNT_LAKHS"] = rbi["AMOUNT"]
     )
 
     # -------- Chart 2: Amount --------
-    plot_single_line(
+plot_single_line(
         rbi.rename(
             columns={
                 "DATE_2": "Date",
@@ -520,6 +520,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
