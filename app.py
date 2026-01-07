@@ -320,15 +320,15 @@ plot_single_line(
     # ===============================
     # CHART 2: RBI AMOUNT
     # ===============================
-    rbi_2 = df_rbi[["DATE_2", "AMOUNT"]].copy()
+rbi_2 = df_rbi[["DATE_2", "AMOUNT"]].copy()
 
-    rbi_2["DATE_2"] = pd.to_datetime(
+rbi_2["DATE_2"] = pd.to_datetime(
         rbi_2["DATE_2"],
         errors="coerce",
         dayfirst=True
     )
 
-    rbi_2["AMOUNT"] = (
+rbi_2["AMOUNT"] = (
         rbi_2["AMOUNT"]
         .astype(str)
         .str.replace(",", "", regex=False)
@@ -337,12 +337,12 @@ plot_single_line(
         .str.strip()
     )
 
-    rbi_2["AMOUNT"] = pd.to_numeric(
+rbi_2["AMOUNT"] = pd.to_numeric(
         rbi_2["AMOUNT"],
         errors="coerce"
     )
 
-    rbi_2 = rbi_2.dropna(subset=["DATE_2", "AMOUNT"])
+rbi_2 = rbi_2.dropna(subset=["DATE_2", "AMOUNT"])
 
     rbi_2 = (
         rbi_2
@@ -351,7 +351,7 @@ plot_single_line(
         .sort_values("DATE_2")
     )
 
-    plot_single_line(
+plot_single_line(
         rbi_2.rename(
             columns={
                 "DATE_2": "Date",
@@ -569,6 +569,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
