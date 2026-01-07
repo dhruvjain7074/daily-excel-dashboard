@@ -268,17 +268,12 @@ if view == "RBI Net Liquidity Injected":
     st.subheader("🏦 RBI Net Liquidity Injected")
 st.write("RBI date range:", df_rbi["DATE-1"].min(), "→", df_rbi["DATE-1"].max())
 # ===============================
-# CHART 1: NET LIQUIDITY
+# CHART 1: NET LIQUIDITY (FINAL)
 # ===============================
 rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
 
-# ✅ Correct date parsing (NO dayfirst)
-rbi_1["DATE-1"] = pd.to_datetime(
-    rbi_1["DATE-1"],
-    errors="coerce"
-)
+rbi_1["DATE-1"] = pd.to_datetime(rbi_1["DATE-1"], errors="coerce")
 
-# ✅ Clean numeric formatting BEFORE conversion
 rbi_1["NET LIQ INC TODAY"] = (
     rbi_1["NET LIQ INC TODAY"]
     .astype(str)
@@ -287,27 +282,43 @@ rbi_1["NET LIQ INC TODAY"] = (
     .str.replace("+", "", regex=False)
     .str.strip()
 )
-
 rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
-    rbi_1["NET LIQ INC TODAY"],
-    errors="coerce"
+    rbi_1["NET LIQ INC TODAY"], errors="coerce"
 )
 
-# ✅ Drop only truly invalid rows
 rbi_1 = rbi_1.dropna(subset=["DATE-1", "NET LIQ INC TODAY"])
 
-plot_single_line(
-    rbi_1.rename(
-        columns={
-            "DATE-1": "Date",
-            "NET LIQ INC TODAY": "Net Liquidity"
-        }
-    ),
+rbi_1 = rbi_1.rename(
+    columns={
+        "DATE-1": "Date",
+        "NET LIQ INC TODAY": "Net Liquidity"
+    }
+)
+
+x_min = rbi_1["Date"].min()
+x_max = rbi_1["Date"].max()
+
+fig = px.line(
+    rbi_1,
     x="Date",
     y="Net Liquidity",
-    title="RBI Net Liquidity Injected",
-    height=600
+    title="RBI Net Liquidity Injected"
 )
+
+# 🔴 THIS IS THE MISSING PIECE
+fig.update_xaxes(
+    range=[x_min, x_max],
+    autorange=False
+)
+
+fig.update_layout(
+    height=600,
+    hovermode="x unified",
+    title_x=0.5,
+    template="plotly_white"
+)
+
+st.plotly_chart(fig, use_container_width=True)
 
     # ===============================
     # CHART 2: RBI AMOUNT
@@ -561,6 +572,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
