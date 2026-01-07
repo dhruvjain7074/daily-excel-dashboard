@@ -268,24 +268,6 @@ if view == "RBI Net Liquidity Injected":
     st.subheader("🏦 RBI Net Liquidity Injected")
 st.write("RBI date range:", df_rbi["DATE-1"].min(), "→", df_rbi["DATE-1"].max())
 # ===============================
-# CHART 1: NET LIQUIDITY (FINAL)
-# ===============================
-rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
-
-rbi_1["DATE-1"] = pd.to_datetime(rbi_1["DATE-1"], errors="coerce")
-
-rbi_1["NET LIQ INC TODAY"] = (
-    rbi_1["NET LIQ INC TODAY"]
-    .astype(str)
-    .str.replace(",", "", regex=False)
-    .str.replace("₹", "", regex=False)
-    .str.replace("+", "", regex=False)
-    .str.strip()
-)
-rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
-    rbi_1["NET LIQ INC TODAY"],
-)
-# ===============================
 # CHART 1: RBI NET LIQUIDITY (FINAL – NO TIME AXIS)
 # ===============================
 rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
@@ -333,6 +315,7 @@ fig.update_layout(
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
 
 
     # ===============================
@@ -587,6 +570,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
