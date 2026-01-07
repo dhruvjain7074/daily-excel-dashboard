@@ -283,33 +283,45 @@ rbi_1["NET LIQ INC TODAY"] = (
     .str.strip()
 )
 rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
+    rbi_1["NET LIQ INC TODAY"], # ===============================
+# CHART 1: RBI NET LIQUIDITY (FINAL – NO TIME AXIS)
+# ===============================
+rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
+
+# Parse date normally
+rbi_1["DATE-1"] = pd.to_datetime(rbi_1["DATE-1"], errors="coerce")
+
+# Clean numbers
+rbi_1["NET LIQ INC TODAY"] = (
+    rbi_1["NET LIQ INC TODAY"]
+    .astype(str)
+    .str.replace(",", "", regex=False)
+    .str.replace("₹", "", regex=False)
+    .str.replace("+", "", regex=False)
+    .str.strip()
+)
+rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
     rbi_1["NET LIQ INC TODAY"], errors="coerce"
 )
 
+# Drop invalid rows
 rbi_1 = rbi_1.dropna(subset=["DATE-1", "NET LIQ INC TODAY"])
 
-rbi_1 = rbi_1.rename(
-    columns={
-        "DATE-1": "Date",
-        "NET LIQ INC TODAY": "Net Liquidity"
-    }
-)
+# Sort by date
+rbi_1 = rbi_1.sort_values("DATE-1")
 
-x_min = rbi_1["Date"].min()
-x_max = rbi_1["Date"].max()
+# 🔴 KEY FIX: convert date to STRING
+rbi_1["Date"] = rbi_1["DATE-1"].dt.strftime("%Y-%m-%d")
 
 fig = px.line(
     rbi_1,
     x="Date",
-    y="Net Liquidity",
+    y="NET LIQ INC TODAY",
     title="RBI Net Liquidity Injected"
 )
 
-# 🔴 THIS IS THE MISSING PIECE
-fig.update_xaxes(
-    range=[x_min, x_max],
-    autorange=False
-)
+# Force categorical axis
+fig.update_xaxes(type="category")
 
 fig.update_layout(
     height=600,
@@ -319,6 +331,7 @@ fig.update_layout(
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
 
     # ===============================
     # CHART 2: RBI AMOUNT
@@ -572,6 +585,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
