@@ -43,27 +43,20 @@ def load_data():
     SPREADSHEET_ID = "13UqMshnNj01OTGpsEjw7t1TEYZt6rBNpPWcTxLV2ZzM"
     sheet = client.open_by_key(SPREADSHEET_ID)
 
-    df_main = pd.DataFrame(
-        sheet.worksheet("comparision charts").get_all_records()
-    )
+    def read_worksheet(name):
+        ws = sheet.worksheet(name)
+        values = ws.get_all_values()
+        headers = values[0]
+        rows = values[1:]
+        df = pd.DataFrame(rows, columns=headers)
+        df.columns = df.columns.str.strip()
+        return df
 
-    df_rbi = pd.DataFrame(
-        sheet.worksheet("Rbi net liquidity").get_all_records()
-    )
-
-    df_index_oi = pd.DataFrame(
-        sheet.worksheet("Index oi charts").get_all_records()
-    )
-
-    # Clean column names
-    df_main.columns = df_main.columns.str.strip()
-    df_rbi.columns = df_rbi.columns.str.strip()
-    df_index_oi.columns = df_index_oi.columns.str.strip()
+    df_main = read_worksheet("comparision charts")
+    df_rbi = read_worksheet("Rbi net liquidity")
+    df_index_oi = read_worksheet("Index oi charts")
 
     return df_main, df_rbi, df_index_oi
-df_main, df_rbi, df_index_oi = load_data()
-
-st.write("df_main columns:", list(df_main.columns))
 
 # =================================================
 # MAIN DROPDOWN
@@ -467,6 +460,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
