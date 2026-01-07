@@ -266,7 +266,7 @@ if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data"]:
 if view == "RBI Net Liquidity Injected":
 
     st.subheader("🏦 RBI Net Liquidity Injected")
-
+st.write("RBI date range:", df_rbi["DATE-1"].min(), "→", df_rbi["DATE-1"].max())
     # ===============================
 # CHART 1: RBI NET LIQUIDITY
 # ===============================
@@ -570,6 +570,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
