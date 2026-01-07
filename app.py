@@ -272,67 +272,79 @@ if view == "RBI Net Liquidity Injected":
     # ===============================
     rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
 
-    rbi_1["DATE-1"] = pd.to_datetime(
-        rbi_1["DATE-1"],
-        errors="coerce",
-        dayfirst=True
-    )
-
-    rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
-        rbi_1["NET LIQ INC TODAY"],
-        errors="coerce"
-    )
-
-    rbi_1 = rbi_1.dropna(
-    subset=["DATE-1", "NET LIQ INC TODAY"],
-    how="all"  
+rbi_1["DATE-1"] = pd.to_datetime(
+    rbi_1["DATE-1"],
+    errors="coerce",
+    dayfirst=True
 )
-    
-    rbi_1 = rbi_1.sort_values("DATE-1")
 
-    plot_single_line(
-        rbi_1.rename(
-            columns={
-                "DATE-1": "Date",
-                "NET LIQ INC TODAY": "Net Liquidity"
-            }
-        ),
-        x="Date",
-        y="Net Liquidity",
-        title="RBI Net Liquidity Injected",
-        height=600
-    )
+rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
+    rbi_1["NET LIQ INC TODAY"],
+    errors="coerce"
+)
+
+# Drop rows where date is missing
+rbi_1 = rbi_1.dropna(subset=["DATE-1"])
+
+# 🔴 CRITICAL FIX: AGGREGATE BY DATE
+rbi_1 = (
+    rbi_1
+    .groupby("DATE-1", as_index=False)
+    .sum()
+    .sort_values("DATE-1")
+)
+
+plot_single_line(
+    rbi_1.rename(
+        columns={
+            "DATE-1": "Date",
+            "NET LIQ INC TODAY": "Net Liquidity"
+        }
+    ),
+    x="Date",
+    y="Net Liquidity",
+    title="RBI Net Liquidity Injected",
+    height=600
+)
 
     # ===============================
     # CHART 2: AMOUNT
     # ===============================
     rbi_2 = df_rbi[["DATE_2", "AMOUNT"]].copy()
 
-    rbi_2["DATE_2"] = pd.to_datetime(
-        rbi_2["DATE_2"],
-        errors="coerce",
-        dayfirst=True
-    )
+rbi_2["DATE_2"] = pd.to_datetime(
+    rbi_2["DATE_2"],
+    errors="coerce",
+    dayfirst=True
+)
 
-    rbi_2["AMOUNT"] = pd.to_numeric(
-        rbi_2["AMOUNT"],
-        errors="coerce"
-    )
+rbi_2["AMOUNT"] = pd.to_numeric(
+    rbi_2["AMOUNT"],
+    errors="coerce"
+)
 
-    rbi_2 = rbi_2.dropna()
+rbi_2 = rbi_2.dropna(subset=["DATE_2"])
 
-    plot_single_line(
-        rbi_2.rename(
-            columns={
-                "DATE_2": "Date",
-                "AMOUNT": "Amount"
-            }
-        ),
-        x="Date",
-        y="Amount",
-        title="RBI Amount",
-        height=600
-    )
+# 🔴 CRITICAL FIX: AGGREGATE BY DATE
+rbi_2 = (
+    rbi_2
+    .groupby("DATE_2", as_index=False)
+    .sum()
+    .sort_values("DATE_2")
+)
+
+plot_single_line(
+    rbi_2.rename(
+        columns={
+            "DATE_2": "Date",
+            "AMOUNT": "Amount"
+        }
+    ),
+    x="Date",
+    y="Amount",
+    title="RBI Amount",
+    height=600
+)
 
 
 # =================================================
@@ -540,6 +552,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
