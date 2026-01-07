@@ -267,72 +267,47 @@ if view == "RBI Net Liquidity Injected":
 
     st.subheader("🏦 RBI Net Liquidity Injected")
 st.write("RBI date range:", df_rbi["DATE-1"].min(), "→", df_rbi["DATE-1"].max())
-   # ===============================
-# RBI NET LIQUIDITY – CHART 1
 # ===============================
-if view == "RBI Net Liquidity Injected":
+# CHART 1: NET LIQUIDITY
+# ===============================
+rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
 
-    st.subheader("🏦 RBI Net Liquidity Injected")
+# ✅ Correct date parsing (NO dayfirst)
+rbi_1["DATE-1"] = pd.to_datetime(
+    rbi_1["DATE-1"],
+    errors="coerce"
+)
 
-    rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
+# ✅ Clean numeric formatting BEFORE conversion
+rbi_1["NET LIQ INC TODAY"] = (
+    rbi_1["NET LIQ INC TODAY"]
+    .astype(str)
+    .str.replace(",", "", regex=False)
+    .str.replace("₹", "", regex=False)
+    .str.replace("+", "", regex=False)
+    .str.strip()
+)
 
-    # Date parsing
-    rbi_1["DATE-1"] = pd.to_datetime(rbi_1["DATE-1"], errors="coerce")
+rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
+    rbi_1["NET LIQ INC TODAY"],
+    errors="coerce"
+)
 
-    # Numeric cleaning
-    rbi_1["NET LIQ INC TODAY"] = (
-        rbi_1["NET LIQ INC TODAY"]
-        .astype(str)
-        .str.replace(",", "", regex=False)
-        .str.replace("₹", "", regex=False)
-        .str.replace("+", "", regex=False)
-        .str.strip()
-    )
-    rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
-        rbi_1["NET LIQ INC TODAY"], errors="coerce"
-    )
+# ✅ Drop only truly invalid rows
+rbi_1 = rbi_1.dropna(subset=["DATE-1", "NET LIQ INC TODAY"])
 
-    # Drop invalid rows
-    rbi_1 = rbi_1.dropna(subset=["DATE-1", "NET LIQ INC TODAY"])
-
-    # Aggregate & sort
-    rbi_1 = (
-        rbi_1
-        .groupby("DATE-1", as_index=False)
-        .sum()
-        .sort_values("DATE-1")
-    )
-
-    # 🔴 CRITICAL FIX: rename FIRST
-    rbi_1 = rbi_1.rename(
+plot_single_line(
+    rbi_1.rename(
         columns={
             "DATE-1": "Date",
             "NET LIQ INC TODAY": "Net Liquidity"
         }
-    )
-
-    # Now compute range on the SAME column Plotly uses
-    x_min = rbi_1["Date"].min()
-    x_max = rbi_1["Date"].max()
-
-    fig = px.line(
-        rbi_1,
-        x="Date",
-        y="Net Liquidity",
-        title="RBI Net Liquidity Injected"
-    )
-
-    # Apply range correctly
-    fig.update_xaxes(range=[x_min, x_max])
-
-    fig.update_layout(
-        height=600,
-        hovermode="x unified",
-        title_x=0.5,
-        template="plotly_white"
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
+    ),
+    x="Date",
+    y="Net Liquidity",
+    title="RBI Net Liquidity Injected",
+    height=600
+)
 
     # ===============================
     # CHART 2: RBI AMOUNT
@@ -586,6 +561,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
