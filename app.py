@@ -270,7 +270,7 @@ if view == "RBI Net Liquidity Injected":
     # ===============================
     # CHART 1: NET LIQUIDITY
     # ===============================
-    rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
+rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
 
 rbi_1["DATE-1"] = pd.to_datetime(
     rbi_1["DATE-1"],
@@ -561,6 +561,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
