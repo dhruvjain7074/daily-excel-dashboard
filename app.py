@@ -150,7 +150,14 @@ if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data"]:
         [m["date"], m["high"], m["low"], m["hl"], m["hr"], m["lr"]]
     ].dropna()
 
-    data[m["date"]] = pd.to_datetime(data[m["date"]])
+    data[m["date"]] = pd.to_datetime(
+    data[m["date"]],
+    errors="coerce",
+    dayfirst=True
+)
+
+data = data.dropna(subset=[m["date"]])
+
 
     st.subheader("📅 Date Filter")
 
@@ -463,6 +470,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
