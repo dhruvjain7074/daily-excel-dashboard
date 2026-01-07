@@ -268,18 +268,18 @@ if view == "RBI Net Liquidity Injected":
     st.subheader("🏦 RBI Net Liquidity Injected")
 
     # ===============================
-    # CHART 1: RBI NET LIQUIDITY
-    # ===============================
-    rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
+# CHART 1: RBI NET LIQUIDITY
+# ===============================
+rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
 
 # --- Correct date parsing (NO dayfirst) ---
-    rbi_1["DATE-1"] = pd.to_datetime(
+rbi_1["DATE-1"] = pd.to_datetime(
     rbi_1["DATE-1"],
     errors="coerce"
 )
 
 # --- Numeric cleaning ---
-    rbi_1["NET LIQ INC TODAY"] = (
+rbi_1["NET LIQ INC TODAY"] = (
     rbi_1["NET LIQ INC TODAY"]
     .astype(str)
     .str.replace(",", "", regex=False)
@@ -288,23 +288,23 @@ if view == "RBI Net Liquidity Injected":
     .str.strip()
 )
 
-    rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
+rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
     rbi_1["NET LIQ INC TODAY"],
     errors="coerce"
 )
 
 # --- Keep valid rows only ---
-    rbi_1 = rbi_1.dropna(subset=["DATE-1", "NET LIQ INC TODAY"])
+rbi_1 = rbi_1.dropna(subset=["DATE-1", "NET LIQ INC TODAY"])
 
 # --- Aggregate by date & sort ---
-    rbi_1 = (
+rbi_1 = (
     rbi_1
     .groupby("DATE-1", as_index=False)
     .sum()
     .sort_values("DATE-1")
 )
 
-    plot_single_line(
+plot_single_line(
     rbi_1.rename(
         columns={
             "DATE-1": "Date",
@@ -569,6 +569,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
