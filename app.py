@@ -267,6 +267,13 @@ if view == "RBI Net Liquidity Injected":
 
     st.subheader("🏦 RBI Net Liquidity Injected")
 st.write("RBI date range:", df_rbi["DATE-1"].min(), "→", df_rbi["DATE-1"].max())
+st.write("df_rbi rows:", len(df_rbi))
+st.write("df_rbi head:")
+st.dataframe(df_rbi.head())
+
+st.write("df_rbi tail:")
+st.dataframe(df_rbi.tail())
+
 
 # ===============================
 # CHART 1: RBI NET LIQUIDITY (FINAL, ROBUST)
@@ -576,6 +583,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
