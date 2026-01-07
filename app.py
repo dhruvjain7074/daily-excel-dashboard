@@ -278,9 +278,19 @@ rbi_1["DATE-1"] = pd.to_datetime(
     dayfirst=True
 )
 
+rbi_1["NET LIQ INC TODAY"] = (
+    rbi_1["NET LIQ INC TODAY"]
+    .astype(str)
+    .str.replace(",", "", regex=False)
+    .str.replace("₹", "", regex=False)
+    .str.replace("+", "", regex=False)
+    .str.strip()
+)
+
 rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
     rbi_1["NET LIQ INC TODAY"],
     errors="coerce"
+)
 )
 
 # Drop rows where date is missing
@@ -552,6 +562,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
