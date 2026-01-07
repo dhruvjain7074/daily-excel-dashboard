@@ -344,7 +344,7 @@ rbi_2["AMOUNT"] = pd.to_numeric(
 
 rbi_2 = rbi_2.dropna(subset=["DATE_2", "AMOUNT"])
 
-    rbi_2 = (
+rbi_2 = (
         rbi_2
         .groupby("DATE_2", as_index=False)
         .sum()
@@ -569,6 +569,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
