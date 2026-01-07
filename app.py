@@ -273,10 +273,11 @@ if view == "RBI Net Liquidity Injected":
 rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
 
 # --- Correct date parsing (NO dayfirst) ---
-rbi_1["DATE-1"] = pd.to_datetime(
-    rbi_1["DATE-1"],
-    errors="coerce"
+rbi_1["DATE-1"] = (
+    pd.to_datetime(rbi_1["DATE-1"], errors="coerce")
+    .dt.floor("D")
 )
+
 
 # --- Numeric cleaning ---
 rbi_1["NET LIQ INC TODAY"] = (
@@ -569,6 +570,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
