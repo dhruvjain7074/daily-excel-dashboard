@@ -286,6 +286,8 @@ if view == "RBI Net Liquidity Injected":
     rbi_1 = rbi_1.dropna(
     subset=["DATE-1", "NET LIQ INC TODAY"],
     how="all"
+        
+    rbi_1 = rbi_1.sort_values("DATE-1")
 )
 
     plot_single_line(
@@ -538,6 +540,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
