@@ -269,8 +269,20 @@ if view == "RBI Net Liquidity Injected":
 
     rbi = df_rbi.copy()
 
-    rbi["DATE-1"] = pd.to_datetime(rbi["DATE-1"])
-    rbi["DATE_2"] = pd.to_datetime(rbi["DATE_2"])
+    rbi["DATE-1"] = pd.to_datetime(
+    rbi["DATE-1"],
+    errors="coerce",
+    dayfirst=True
+)
+
+    rbi["DATE_2"] = pd.to_datetime(
+    rbi["DATE_2"],
+    errors="coerce",
+    dayfirst=True
+)
+
+rbi = rbi.dropna(subset=["DATE-1", "DATE_2"], how="all")
+
 
     # keep RAW values (no conversion)
     rbi["NET_LIQ_LAKHS"] = rbi["NET LIQ INC TODAY"]
@@ -508,6 +520,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
