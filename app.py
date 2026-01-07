@@ -283,7 +283,9 @@ rbi_1["NET LIQ INC TODAY"] = (
     .str.strip()
 )
 rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
-    rbi_1["NET LIQ INC TODAY"], # ===============================
+    rbi_1["NET LIQ INC TODAY"],
+)
+# ===============================
 # CHART 1: RBI NET LIQUIDITY (FINAL – NO TIME AXIS)
 # ===============================
 rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
@@ -585,6 +587,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
