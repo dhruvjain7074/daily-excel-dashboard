@@ -58,6 +58,9 @@ def load_data():
 
     return df_main, df_rbi, df_index_oi
 
+df_main, df_rbi, df_index_oi = load_data()
+
+
 # =================================================
 # MAIN DROPDOWN
 # =================================================
@@ -460,6 +463,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
