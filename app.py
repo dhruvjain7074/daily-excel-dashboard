@@ -267,35 +267,26 @@ if view == "RBI Net Liquidity Injected":
 
     st.subheader("🏦 RBI Net Liquidity Injected")
 
-    rbi = df_rbi.copy()
+    # ===============================
+    # CHART 1: NET LIQUIDITY
+    # ===============================
+    rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
 
-    # ---- Date cleaning (SAFE) ----
-    rbi["DATE-1"] = pd.to_datetime(
-        rbi["DATE-1"],
+    rbi_1["DATE-1"] = pd.to_datetime(
+        rbi_1["DATE-1"],
         errors="coerce",
         dayfirst=True
     )
 
-    rbi["DATE_2"] = pd.to_datetime(
-        rbi["DATE_2"],
-        errors="coerce",
-        dayfirst=True
+    rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
+        rbi_1["NET LIQ INC TODAY"],
+        errors="coerce"
     )
 
-    # ---- Numeric cleaning (CRITICAL) ----
-    for col in ["NET LIQ INC TODAY", "AMOUNT"]:
-        if col in rbi.columns:
-            rbi[col] = pd.to_numeric(rbi[col], errors="coerce")
+    rbi_1 = rbi_1.dropna()
 
-    # ---- Remove fully invalid rows ----
-    rbi = rbi.dropna(
-        subset=["DATE-1", "NET LIQ INC TODAY"],
-        how="any"
-    )
-
-    # ---- Chart 1: Net Liquidity ----
     plot_single_line(
-        rbi.rename(
+        rbi_1.rename(
             columns={
                 "DATE-1": "Date",
                 "NET LIQ INC TODAY": "Net Liquidity"
@@ -307,22 +298,37 @@ if view == "RBI Net Liquidity Injected":
         height=600
     )
 
-    # ---- Chart 2: Amount (optional) ----
-    if "DATE_2" in rbi.columns and "AMOUNT" in rbi.columns:
-        rbi_amt = rbi.dropna(subset=["DATE_2", "AMOUNT"])
+    # ===============================
+    # CHART 2: AMOUNT
+    # ===============================
+    rbi_2 = df_rbi[["DATE_2", "AMOUNT"]].copy()
 
-        plot_single_line(
-            rbi_amt.rename(
-                columns={
-                    "DATE_2": "Date",
-                    "AMOUNT": "Amount"
-                }
-            ),
-            x="Date",
-            y="Amount",
-            title="RBI Amount",
-            height=600
-        )
+    rbi_2["DATE_2"] = pd.to_datetime(
+        rbi_2["DATE_2"],
+        errors="coerce",
+        dayfirst=True
+    )
+
+    rbi_2["AMOUNT"] = pd.to_numeric(
+        rbi_2["AMOUNT"],
+        errors="coerce"
+    )
+
+    rbi_2 = rbi_2.dropna()
+
+    plot_single_line(
+        rbi_2.rename(
+            columns={
+                "DATE_2": "Date",
+                "AMOUNT": "Amount"
+            }
+        ),
+        x="Date",
+        y="Amount",
+        title="RBI Amount",
+        height=600
+    )
+
 
 # =================================================
 # INDEX FUTURES OI
@@ -529,6 +535,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
