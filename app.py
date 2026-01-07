@@ -158,8 +158,7 @@ if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data"]:
 
 data = data.dropna(subset=[m["date"]])
 
-
-    st.subheader("📅 Date Filter")
+st.subheader("📅 Date Filter")
 
     start_date, end_date = st.date_input(
         "Select date range",
@@ -470,6 +469,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
