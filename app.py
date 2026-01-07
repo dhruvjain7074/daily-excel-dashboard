@@ -60,6 +60,45 @@ def load_data():
 
 df_main, df_rbi, df_index_oi = load_data()
 
+# ===============================
+# CLEAN df_main (CRITICAL)
+# ===============================
+numeric_cols_main = [
+    "HIGH 1", "LOW 1", "H/L 1", "H RATIO 1", "L RATIO 1",
+    "HIGH 2", "LOW 2", "H/L 2", "H RATIO 2", "L RATIO 2",
+    "HIGH 3", "LOW 3", "H/L 3", "H RATIO 3", "L RATIO 3"
+]
+
+for col in numeric_cols_main:
+    if col in df_main.columns:
+        df_main[col] = pd.to_numeric(df_main[col], errors="coerce")
+
+# Drop rows where ALL numeric values are NaN
+df_main = df_main.dropna(how="all", subset=numeric_cols_main)
+
+# ===============================
+# CLEAN df_index_oi
+# ===============================
+numeric_cols_oi = [
+    "Index Futures OI",
+    "Nifty Futures oi",
+    "Future Index Long",
+    "Future Index Short",
+    "total client oi",
+    "Client OI",
+    "FII OI"
+]
+
+for col in numeric_cols_oi:
+    if col in df_index_oi.columns:
+        df_index_oi[col] = pd.to_numeric(df_index_oi[col], errors="coerce")
+        
+# ===============================
+# CLEAN df_rbi
+# ===============================
+for col in ["NET LIQ INC TODAY", "AMOUNT"]:
+    if col in df_rbi.columns:
+        df_rbi[col] = pd.to_numeric(df_rbi[col], errors="coerce")
 
 # =================================================
 # MAIN DROPDOWN
@@ -469,6 +508,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
