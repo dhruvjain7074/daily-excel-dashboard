@@ -310,7 +310,7 @@ plot_single_line(
     # ===============================
     # CHART 2: AMOUNT
     # ===============================
-    rbi_2 = df_rbi[["DATE_2", "AMOUNT"]].copy()
+rbi_2 = df_rbi[["DATE_2", "AMOUNT"]].copy()
 
 rbi_2["DATE_2"] = pd.to_datetime(
     rbi_2["DATE_2"],
@@ -552,6 +552,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
