@@ -160,7 +160,7 @@ data = data.dropna(subset=[m["date"]])
 
 st.subheader("📅 Date Filter")
 
-    start_date, end_date = st.date_input(
+start_date, end_date = st.date_input(
         "Select date range",
         [data[m["date"]].min().date(), data[m["date"]].max().date()]
     )
@@ -469,6 +469,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
