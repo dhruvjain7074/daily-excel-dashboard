@@ -285,8 +285,8 @@ rbi = rbi.dropna(subset=["DATE-1", "DATE_2"], how="all")
 
 
     # keep RAW values (no conversion)
-    rbi["NET_LIQ_LAKHS"] = rbi["NET LIQ INC TODAY"]
-    rbi["AMOUNT_LAKHS"] = rbi["AMOUNT"]
+rbi["NET_LIQ_LAKHS"] = rbi["NET LIQ INC TODAY"]
+rbi["AMOUNT_LAKHS"] = rbi["AMOUNT"]
 
     # -------- Chart 1: RBI Net Liquidity Injected (RAW) --------
     plot_single_line(
@@ -520,6 +520,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
