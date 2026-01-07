@@ -267,45 +267,53 @@ if view == "RBI Net Liquidity Injected":
 
     st.subheader("🏦 RBI Net Liquidity Injected")
 st.write("RBI date range:", df_rbi["DATE-1"].min(), "→", df_rbi["DATE-1"].max())
+
 # ===============================
-# CHART 1: RBI NET LIQUIDITY (FINAL – NO TIME AXIS)
+# CHART 1: RBI NET LIQUIDITY (FINAL, ROBUST)
 # ===============================
 rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
 
-# Parse date normally
+# --- Date parsing ---
 rbi_1["DATE-1"] = pd.to_datetime(rbi_1["DATE-1"], errors="coerce")
 
-# Clean numbers
+# --- FULL numeric normalisation ---
 rbi_1["NET LIQ INC TODAY"] = (
     rbi_1["NET LIQ INC TODAY"]
     .astype(str)
-    .str.replace(",", "", regex=False)
-    .str.replace("₹", "", regex=False)
-    .str.replace("+", "", regex=False)
+    .str.replace(r"[^\d\-\.\+]", "", regex=True)  # 🔴 THIS IS KEY
     .str.strip()
 )
+
 rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
-    rbi_1["NET LIQ INC TODAY"], errors="coerce"
+    rbi_1["NET LIQ INC TODAY"],
+    errors="coerce"
 )
 
-# Drop invalid rows
+# --- Drop invalid rows ---
 rbi_1 = rbi_1.dropna(subset=["DATE-1", "NET LIQ INC TODAY"])
 
-# Sort by date
+# --- Sort ---
 rbi_1 = rbi_1.sort_values("DATE-1")
 
-# 🔴 KEY FIX: convert date to STRING
-rbi_1["Date"] = rbi_1["DATE-1"].dt.strftime("%Y-%m-%d")
+# --- Rename for plotting ---
+rbi_1 = rbi_1.rename(
+    columns={
+        "DATE-1": "Date",
+        "NET LIQ INC TODAY": "Net Liquidity"
+    }
+)
 
+# --- DEBUG (IMPORTANT – TEMPORARY) ---
+st.write("RBI rows after cleaning:", len(rbi_1))
+st.write("Date range:", rbi_1["Date"].min(), "→", rbi_1["Date"].max())
+
+# --- Plot ---
 fig = px.line(
     rbi_1,
     x="Date",
-    y="NET LIQ INC TODAY",
+    y="Net Liquidity",
     title="RBI Net Liquidity Injected"
 )
-
-# Force categorical axis
-fig.update_xaxes(type="category")
 
 fig.update_layout(
     height=600,
@@ -315,8 +323,6 @@ fig.update_layout(
 )
 
 st.plotly_chart(fig, use_container_width=True)
-
-
 
     # ===============================
     # CHART 2: RBI AMOUNT
@@ -570,6 +576,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
