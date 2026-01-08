@@ -351,7 +351,7 @@ if view == "Index Futures OI":
     oi = df_index_oi.copy()
 
     # =================================================
-    # DATE CONVERSION (ROBUST FOR GOOGLE SHEETS)
+    # DATE CONVERSION (ROBUST)
     # =================================================
     oi["Date_1"] = pd.to_datetime(oi["Date_1"], errors="coerce", dayfirst=True)
     oi["Date_2"] = pd.to_datetime(oi["Date_2"], errors="coerce", dayfirst=True)
@@ -359,7 +359,7 @@ if view == "Index Futures OI":
     oi["DATE_4"] = pd.to_datetime(oi["DATE_4"], errors="coerce", dayfirst=True)
 
     # =================================================
-    # DATE FILTER (SAFE)
+    # DATE FILTER
     # =================================================
     min_date = min(
         oi["Date_1"].dropna().min(),
@@ -386,11 +386,13 @@ if view == "Index Futures OI":
     # =================================================
     # CHART 1: INDEX FUTURES OI
     # =================================================
+    plot_df_1 = oi.loc[
+        (oi["Date_1"] >= start_dt) & (oi["Date_1"] <= end_dt),
+        ["Date_1", "Index Futures OI"]
+    ].rename(columns={"Date_1": "Date"})
+
     plot_single_line(
-        oi[
-            (oi["Date_1"] >= start_dt) &
-            (oi["Date_1"] <= end_dt)
-        ].rename(columns={"Date_1": "Date_1"}),
+        plot_df_1,
         "Date",
         "Index Futures OI",
         title="Index Futures OI",
@@ -400,11 +402,13 @@ if view == "Index Futures OI":
     # =================================================
     # CHART 2: NIFTY FUTURES OI
     # =================================================
+    plot_df_2 = oi.loc[
+        (oi["Date_2"] >= start_dt) & (oi["Date_2"] <= end_dt),
+        ["Date_2", "Nifty Futures oi"]
+    ].rename(columns={"Date_2": "Date"})
+
     plot_single_line(
-        oi[
-            (oi["Date_2"] >= start_dt) &
-            (oi["Date_2"] <= end_dt)
-        ].rename(columns={"Date_2": "Date_2"}),
+        plot_df_2,
         "Date",
         "Nifty Futures oi",
         title="Nifty Futures OI",
@@ -414,27 +418,25 @@ if view == "Index Futures OI":
     # =================================================
     # CHART 3: TOTAL CLIENT OI
     # =================================================
-    client_oi = oi[
-        (oi["Date_3"] >= start_dt) &
-        (oi["Date_3"] <= end_dt)
-    ][["Date_3", "total client oi"]].rename(
-        columns={"Date_3": "Date_3"}
-    )
+    plot_df_3 = oi.loc[
+        (oi["Date_3"] >= start_dt) & (oi["Date_3"] <= end_dt),
+        ["Date_3", "total client oi"]
+    ].rename(columns={"Date_3": "Date"})
 
-    client_oi["total client oi"] = (
-        client_oi["total client oi"]
+    plot_df_3["total client oi"] = (
+        plot_df_3["total client oi"]
         .astype(str)
         .str.replace(",", "", regex=False)
     )
 
-    client_oi["total client oi"] = pd.to_numeric(
-        client_oi["total client oi"], errors="coerce"
+    plot_df_3["total client oi"] = pd.to_numeric(
+        plot_df_3["total client oi"], errors="coerce"
     )
 
-    client_oi = client_oi.dropna()
+    plot_df_3 = plot_df_3.dropna()
 
     plot_single_line(
-        client_oi,
+        plot_df_3,
         "Date",
         "total client oi",
         title="Total Client OI",
@@ -444,12 +446,10 @@ if view == "Index Futures OI":
     # =================================================
     # CHART 4: CLIENT OI vs FII OI
     # =================================================
-    client_fii = oi[
-        (oi["DATE_4"] >= start_dt) &
-        (oi["DATE_4"] <= end_dt)
-    ][["DATE_4", "Client OI", "FII OI"]].rename(
-        columns={"DATE_4": "Date_4"}
-    )
+    client_fii = oi.loc[
+        (oi["DATE_4"] >= start_dt) & (oi["DATE_4"] <= end_dt),
+        ["DATE_4", "Client OI", "FII OI"]
+    ].rename(columns={"DATE_4": "Date"})
 
     client_fii["Client OI"] = (
         client_fii["Client OI"]
@@ -470,12 +470,11 @@ if view == "Index Futures OI":
 
     fig_cf = px.line(
         client_fii,
-        x="Date_4",
+        x="Date",
         y=["Client OI", "FII OI"],
         title="Client OI vs FII OI"
     )
 
-    # ---- LEGEND INSIDE THE CHART ----
     fig_cf.update_layout(
         hovermode="x unified",
         height=600,
@@ -574,6 +573,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
