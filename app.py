@@ -266,13 +266,43 @@ if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data"]:
 if view == "RBI Net Liquidity Injected":
 
     st.subheader("🏦 RBI Net Liquidity Injected")
-st.write("RBI date range:", df_rbi["DATE-1"].min(), "→", df_rbi["DATE-1"].max())
-st.write("df_rbi rows:", len(df_rbi))
-st.write("df_rbi head:")
-st.dataframe(df_rbi.head())
 
-st.write("df_rbi tail:")
-st.dataframe(df_rbi.tail())
+    rbi = df_rbi.copy()   # ← local copy ONLY
+
+    # --- Chart 1 ---
+    rbi_1 = rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
+
+    rbi_1["DATE-1"] = pd.to_datetime(
+        rbi_1["DATE-1"],
+        errors="coerce",
+        dayfirst=True
+    )
+
+    rbi_1["NET LIQ INC TODAY"] = (
+        rbi_1["NET LIQ INC TODAY"]
+        .astype(str)
+        .str.replace(",", "", regex=False)
+    )
+
+    rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
+        rbi_1["NET LIQ INC TODAY"],
+        errors="coerce"
+    )
+
+    rbi_1 = rbi_1.dropna().sort_values("DATE-1")
+
+    plot_single_line(
+        rbi_1.rename(
+            columns={
+                "DATE-1": "Date",
+                "NET LIQ INC TODAY": "Net Liquidity"
+            }
+        ),
+        x="Date",
+        y="Net Liquidity",
+        title="RBI Net Liquidity Injected",
+        height=600
+    )
 
 
 # ===============================
@@ -573,6 +603,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
