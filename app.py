@@ -350,25 +350,29 @@ if view == "Index Futures OI":
 
     oi = df_index_oi.copy()
 
-    # ---- Date conversion ----
-    oi["Date_1"] = pd.to_datetime(oi["Date_1"])
-    oi["Date_2"] = pd.to_datetime(oi["Date_2"])
-    oi["Date_3"] = pd.to_datetime(oi["Date_3"])
-    oi["DATE_4"] = pd.to_datetime(oi["DATE_4"])
+    # =================================================
+    # DATE CONVERSION (ROBUST FOR GOOGLE SHEETS)
+    # =================================================
+    oi["Date_1"] = pd.to_datetime(oi["Date_1"], errors="coerce", dayfirst=True)
+    oi["Date_2"] = pd.to_datetime(oi["Date_2"], errors="coerce", dayfirst=True)
+    oi["Date_3"] = pd.to_datetime(oi["Date_3"], errors="coerce", dayfirst=True)
+    oi["DATE_4"] = pd.to_datetime(oi["DATE_4"], errors="coerce", dayfirst=True)
 
-    # ---- Date Filter ----
+    # =================================================
+    # DATE FILTER (SAFE)
+    # =================================================
     min_date = min(
-        oi["Date_1"].min(),
-        oi["Date_2"].min(),
-        oi["Date_3"].min(),
-        oi["DATE_4"].min()
+        oi["Date_1"].dropna().min(),
+        oi["Date_2"].dropna().min(),
+        oi["Date_3"].dropna().min(),
+        oi["DATE_4"].dropna().min()
     ).date()
 
     max_date = max(
-        oi["Date_1"].max(),
-        oi["Date_2"].max(),
-        oi["Date_3"].max(),
-        oi["DATE_4"].max()
+        oi["Date_1"].dropna().max(),
+        oi["Date_2"].dropna().max(),
+        oi["Date_3"].dropna().max(),
+        oi["DATE_4"].dropna().max()
     ).date()
 
     start_date, end_date = st.date_input(
@@ -376,69 +380,93 @@ if view == "Index Futures OI":
         [min_date, max_date]
     )
 
+    start_dt = pd.to_datetime(start_date)
+    end_dt = pd.to_datetime(end_date)
+
     # =================================================
-    # Chart 1: Index Futures OI
+    # CHART 1: INDEX FUTURES OI
     # =================================================
     plot_single_line(
         oi[
-            (oi["Date_1"] >= pd.to_datetime(start_date)) &
-            (oi["Date_1"] <= pd.to_datetime(end_date))
+            (oi["Date_1"] >= start_dt) &
+            (oi["Date_1"] <= end_dt)
         ].rename(columns={"Date_1": "Date"}),
         "Date",
         "Index Futures OI",
-        title="Index Futures OI"
+        title="Index Futures OI",
+        height=600
     )
 
     # =================================================
-    # Chart 2: Nifty Futures OI
+    # CHART 2: NIFTY FUTURES OI
     # =================================================
     plot_single_line(
         oi[
-            (oi["Date_2"] >= pd.to_datetime(start_date)) &
-            (oi["Date_2"] <= pd.to_datetime(end_date))
+            (oi["Date_2"] >= start_dt) &
+            (oi["Date_2"] <= end_dt)
         ].rename(columns={"Date_2": "Date"}),
         "Date",
         "Nifty Futures oi",
-        title="Nifty Futures OI"
+        title="Nifty Futures OI",
+        height=600
     )
 
     # =================================================
-    # Chart 3: Total Client OI
+    # CHART 3: TOTAL CLIENT OI
     # =================================================
     client_oi = oi[
-        (oi["Date_3"] >= pd.to_datetime(start_date)) &
-        (oi["Date_3"] <= pd.to_datetime(end_date))
+        (oi["Date_3"] >= start_dt) &
+        (oi["Date_3"] <= end_dt)
     ][["Date_3", "total client oi"]].rename(
         columns={"Date_3": "Date"}
+    )
+
+    client_oi["total client oi"] = (
+        client_oi["total client oi"]
+        .astype(str)
+        .str.replace(",", "", regex=False)
     )
 
     client_oi["total client oi"] = pd.to_numeric(
         client_oi["total client oi"], errors="coerce"
     )
 
-    client_oi = client_oi.dropna(subset=["total client oi"])
+    client_oi = client_oi.dropna()
 
     plot_single_line(
         client_oi,
         "Date",
         "total client oi",
-        title="Total Client OI"
+        title="Total Client OI",
+        height=600
     )
 
     # =================================================
-    # Chart 4: Client OI vs FII OI
+    # CHART 4: CLIENT OI vs FII OI
     # =================================================
     client_fii = oi[
-        (oi["DATE_4"] >= pd.to_datetime(start_date)) &
-        (oi["DATE_4"] <= pd.to_datetime(end_date))
+        (oi["DATE_4"] >= start_dt) &
+        (oi["DATE_4"] <= end_dt)
     ][["DATE_4", "Client OI", "FII OI"]].rename(
         columns={"DATE_4": "Date"}
+    )
+
+    client_fii["Client OI"] = (
+        client_fii["Client OI"]
+        .astype(str)
+        .str.replace(",", "", regex=False)
+    )
+
+    client_fii["FII OI"] = (
+        client_fii["FII OI"]
+        .astype(str)
+        .str.replace(",", "", regex=False)
     )
 
     client_fii["Client OI"] = pd.to_numeric(client_fii["Client OI"], errors="coerce")
     client_fii["FII OI"] = pd.to_numeric(client_fii["FII OI"], errors="coerce")
 
-    client_fii = client_fii.dropna(subset=["Client OI", "FII OI"], how="all")
+    client_fii = client_fii.dropna(how="all", subset=["Client OI", "FII OI"])
 
     fig_cf = px.line(
         client_fii,
@@ -447,7 +475,7 @@ if view == "Index Futures OI":
         title="Client OI vs FII OI"
     )
 
-    # ---- LEGEND INSIDE THE CHART (FOR REAL) ----
+    # ---- LEGEND INSIDE THE CHART ----
     fig_cf.update_layout(
         hovermode="x unified",
         height=600,
@@ -546,6 +574,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
