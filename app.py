@@ -390,7 +390,7 @@ if view == "Index Futures OI":
         oi[
             (oi["Date_1"] >= start_dt) &
             (oi["Date_1"] <= end_dt)
-        ].rename(columns={"Date_1": "Date"}),
+        ].rename(columns={"Date_1": "Date_1"}),
         "Date",
         "Index Futures OI",
         title="Index Futures OI",
@@ -404,7 +404,7 @@ if view == "Index Futures OI":
         oi[
             (oi["Date_2"] >= start_dt) &
             (oi["Date_2"] <= end_dt)
-        ].rename(columns={"Date_2": "Date"}),
+        ].rename(columns={"Date_2": "Date_2"}),
         "Date",
         "Nifty Futures oi",
         title="Nifty Futures OI",
@@ -418,7 +418,7 @@ if view == "Index Futures OI":
         (oi["Date_3"] >= start_dt) &
         (oi["Date_3"] <= end_dt)
     ][["Date_3", "total client oi"]].rename(
-        columns={"Date_3": "Date"}
+        columns={"Date_3": "Date_3"}
     )
 
     client_oi["total client oi"] = (
@@ -448,7 +448,7 @@ if view == "Index Futures OI":
         (oi["DATE_4"] >= start_dt) &
         (oi["DATE_4"] <= end_dt)
     ][["DATE_4", "Client OI", "FII OI"]].rename(
-        columns={"DATE_4": "Date"}
+        columns={"DATE_4": "Date_4"}
     )
 
     client_fii["Client OI"] = (
@@ -470,7 +470,7 @@ if view == "Index Futures OI":
 
     fig_cf = px.line(
         client_fii,
-        x="Date",
+        x="Date_4",
         y=["Client OI", "FII OI"],
         title="Client OI vs FII OI"
     )
@@ -574,6 +574,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
