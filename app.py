@@ -351,52 +351,51 @@ plot_single_line(
     height=600
 )
 
-    # ===============================
-    # CHART 2: RBI AMOUNT
-    # ===============================
+# ===============================
+# CHART 2: RBI AMOUNT (FIXED)
+# ===============================
+
 rbi_2 = df_rbi[["DATE_2", "AMOUNT"]].copy()
 
+# ---- DATE FIX ----
 rbi_2["DATE_2"] = pd.to_datetime(
-        rbi_2["DATE_2"],
-        errors="coerce",
-        dayfirst=True
-    )
+    rbi_2["DATE_2"],
+    errors="coerce",
+    dayfirst=True
+)
 
+# ---- VALUE FIX (REMOVE COMMAS) ----
 rbi_2["AMOUNT"] = (
-        rbi_2["AMOUNT"]
-        .astype(str)
-        .str.replace(",", "", regex=False)
-        .str.replace("₹", "", regex=False)
-        .str.replace("+", "", regex=False)
-        .str.strip()
-    )
+    rbi_2["AMOUNT"]
+    .astype(str)
+    .str.replace(",", "", regex=False)
+)
 
 rbi_2["AMOUNT"] = pd.to_numeric(
-        rbi_2["AMOUNT"],
-        errors="coerce"
-    )
+    rbi_2["AMOUNT"],
+    errors="coerce"
+)
 
-rbi_2 = rbi_2.dropna(subset=["DATE_2", "AMOUNT"])
-
+# ---- CLEAN & SORT ----
 rbi_2 = (
-        rbi_2
-        .groupby("DATE_2", as_index=False)
-        .sum()
-        .sort_values("DATE_2")
-    )
+    rbi_2
+    .dropna()
+    .sort_values("DATE_2")
+)
 
+# ---- PLOT ----
 plot_single_line(
-        rbi_2.rename(
-            columns={
-                "DATE_2": "Date",
-                "AMOUNT": "Amount"
-            }
-        ),
-        x="Date",
-        y="Amount",
-        title="RBI Amount",
-        height=600
-    )
+    rbi_2.rename(
+        columns={
+            "DATE_2": "Date",
+            "AMOUNT": "Amount"
+        }
+    ),
+    x="Date",
+    y="Amount",
+    title="RBI Durable Liquidity (Amount)",
+    height=600
+)
 
 # =================================================
 # INDEX FUTURES OI
@@ -603,6 +602,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
