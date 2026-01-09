@@ -23,6 +23,18 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+st.markdown(
+    """
+    <style>
+    .asset-chart img {
+        width: 100%;
+        height: 200px;
+        object-fit: contain;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 st.title("📊 Daily Excel Dashboard")
 
@@ -572,6 +584,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
