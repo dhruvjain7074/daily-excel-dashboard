@@ -22,7 +22,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
- st.title("📊 Daily Excel Dashboard")
+st.title("📊 Daily Excel Dashboard")
 
 # =================================================
 # LOAD DATA (MULTI-SHEET)
@@ -570,6 +570,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
