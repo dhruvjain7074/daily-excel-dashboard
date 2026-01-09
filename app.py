@@ -6,6 +6,61 @@ from datetime import datetime
 import gspread
 from google.oauth2.service_account import Credentials
 
+# =================================================
+# THEME TOGGLE
+# =================================================
+if "theme" not in st.session_state:
+    st.session_state.theme = "light"
+
+with st.sidebar:
+    st.markdown("### 🎨 Theme")
+    theme_choice = st.radio(
+        "Select theme",
+        ["Light", "Dark"],
+        index=0 if st.session_state.theme == "light" else 1
+    )
+
+st.session_state.theme = "dark" if theme_choice == "Dark" else "light"
+# =================================================
+# THEME STYLES
+# =================================================
+if st.session_state.theme == "dark":
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background-color: #0e1117;
+            color: #eaeaea;
+        }
+        .stMarkdown, .stText, label {
+            color: #eaeaea !important;
+        }
+        .block-container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    PLOTLY_THEME = "plotly_dark"
+else:
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background-color: white;
+            color: black;
+        }
+        .block-container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    PLOTLY_THEME = "plotly_white"
 
 # =================================================
 # PAGE CONFIG
@@ -573,6 +628,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
