@@ -7,90 +7,6 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 # =================================================
-# THEME TOGGLE
-# =================================================
-if "theme" not in st.session_state:
-    st.session_state.theme = "light"
-
-with st.sidebar:
-    st.markdown("### 🎨 Theme")
-    theme_choice = st.radio(
-        "Select theme",
-        ["Light", "Dark"],
-        index=0 if st.session_state.theme == "light" else 1
-    )
-
-st.session_state.theme = "dark" if theme_choice == "Dark" else "light"
-# =================================================
-# THEME STYLES
-# =================================================
-if st.session_state.theme == "dark":
-    st.markdown(
-    """
-    <style>
-    /* Remove top padding completely */
-    .block-container {
-        padding-top: 0rem !important;
-        padding-left: 1rem;
-        padding-right: 1rem;
-        max-width: 100%;
-    }
-
-    /* Remove Streamlit header space */
-    header {
-        visibility: hidden;
-        height: 0px;
-    }
-
-    /* Remove extra space above first element */
-    section.main > div {
-        padding-top: 0rem;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-    # =================================================
-# HEADER LAYOUT
-# =================================================
-header_left, header_right = st.columns([2.5, 1.5])
-
-with header_left:
-    st.markdown(
-        """
-        <h1 style="margin-bottom: 0.2rem;">📊 Daily Excel Dashboard</h1>
-        """,
-        unsafe_allow_html=True
-    )
-
-with header_right:
-    view = st.selectbox(
-        "Select View",
-        [
-            "52 Week Data",
-            "EMA 20 Data",
-            "EMA 200 Data",
-            "RBI Net Liquidity Injected",
-            "Index Futures OI",
-            "Asset Class Charts",
-            "Asset Class Charts Weekly"
-        ],
-        label_visibility="collapsed"
-    )
-# =================================================
-# RIGHT-ALIGNED DATE FILTER (ONLY FOR DATA VIEWS)
-# =================================================
-if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data", "Index Futures OI"]:
-
-    _, filter_col = st.columns([2.5, 1.5])
-
-    with filter_col:
-        start_date, end_date = st.date_input(
-            "Date Range",
-            [min_date, max_date],
-            label_visibility="collapsed"
-        )
-# =================================================
 # PAGE CONFIG
 # =================================================
 st.set_page_config(page_title="Daily Excel Dashboard", layout="wide")
@@ -106,7 +22,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# st.title("📊 Daily Excel Dashboard")
+ st.title("📊 Daily Excel Dashboard")
 
 # =================================================
 # LOAD DATA (MULTI-SHEET)
@@ -278,7 +194,7 @@ if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data"]:
 
     data = data.dropna(subset=[m["date"]])
 
-   # st.subheader("📅 Date Filter")
+    st.subheader("📅 Date Filter")
 
     start_date, end_date = st.date_input(
         "Select date range",
@@ -654,6 +570,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
