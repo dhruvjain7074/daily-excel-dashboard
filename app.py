@@ -61,6 +61,31 @@ else:
         unsafe_allow_html=True
     )
     PLOTLY_THEME = "plotly_white"
+st.markdown(
+    """
+    <style>
+    /* Remove top padding completely */
+    .block-container {
+        padding-top: 0rem !important;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        max-width: 100%;
+    }
+
+    /* Remove Streamlit header space */
+    header {
+        visibility: hidden;
+        height: 0px;
+    }
+
+    /* Remove extra space above first element */
+    section.main > div {
+        padding-top: 0rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # =================================================
 # PAGE CONFIG
@@ -628,6 +653,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
