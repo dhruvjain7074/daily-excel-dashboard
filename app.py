@@ -14,8 +14,10 @@ st.set_page_config(page_title="Daily Excel Dashboard", layout="wide")
 st.markdown(
     """
     <style>
-    div[data-testid="stHorizontalBlock"] > div {
-        align-items: flex-end;
+    .block-container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+        max-width: 100%;
     }
     </style>
     """,
@@ -570,6 +572,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
