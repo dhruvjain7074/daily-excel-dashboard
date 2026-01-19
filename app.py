@@ -543,14 +543,10 @@ if view == "Asset Class Charts":
 
             # ---- DISPLAY (ORIGINAL BEHAVIOR) ----
             for img in images:
-                st.markdown(
-    f"""
-    <div class="asset-chart">
-        <img src="{os.path.join(charts_folder, img)}">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+                st.image(
+                    os.path.join(charts_folder, img),
+                    use_container_width=True
+                )
 # =================================================
 # ASSET CLASS CHARTS (WEEKLY)
 # =================================================
@@ -588,6 +584,7 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+
 
 
 
