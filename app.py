@@ -586,25 +586,43 @@ if view == "Asset Class Charts (Weekly)":
                     use_container_width=True
                 )
 # =================================================
-# METAL CHARTS
+# METAL CHARTS (WITH SUB-FOLDERS)
 # =================================================
 if view == "Metal Charts":
 
     st.subheader("🔩 Metal Charts")
 
-    charts_folder = "metal_charts"
+    base_folder = "metal_charts"
 
-    if not os.path.exists(charts_folder):
+    metal_folders = {
+        "Hindustan Copper": "hindustan_copper",
+        "SAIL": "sail",
+        "NMDC": "nmdc",
+        "NMDC Steel": "nmdc_steel",
+        "NALCO": "nalco",
+        "Coal India": "coal_india",
+        "Hindustan Zinc": "hindustan_zinc",
+        "Vedanta": "vedanta",
+    }
+
+    if not os.path.exists(base_folder):
         st.warning("Folder 'metal_charts' not found.")
     else:
-        images = [
-            f for f in os.listdir(charts_folder)
-            if f.lower().endswith((".png", ".jpg", ".jpeg"))
-        ]
+        for display_name, folder_name in metal_folders.items():
 
-        if not images:
-            st.info("No images found.")
-        else:
+            folder_path = os.path.join(base_folder, folder_name)
+
+            if not os.path.exists(folder_path):
+                continue
+
+            images = [
+                f for f in os.listdir(folder_path)
+                if f.lower().endswith((".png", ".jpg", ".jpeg"))
+            ]
+
+            if not images:
+                continue
+
             # ---- SORT BY DATE & TIME FROM FILENAME ----
             def extract_datetime(filename):
                 try:
@@ -616,11 +634,12 @@ if view == "Metal Charts":
 
             images = sorted(images, key=extract_datetime)
 
+            st.markdown(f"### {display_name}")
+
             for img in images:
                 st.image(
-                    os.path.join(charts_folder, img),
+                    os.path.join(folder_path, img),
                     use_container_width=True
                 )
-
 
 
