@@ -512,42 +512,65 @@ if view == "Index Futures OI":
 
 
 # =================================================
-# ASSET CLASS CHARTS (ORIGINAL)
+# ASSET CLASS CHARTS (TABS)
 # =================================================
 if view == "Asset Class Charts":
 
-    st.subheader("📷 Asset Class Charts")
+    st.subheader("📊 Asset Class Charts")
 
-    charts_folder = "asset_class_charts"
+    base_folder = "asset_class_charts"
 
-    if not os.path.exists(charts_folder):
+    asset_tabs = {
+        "DXY": "dxy",
+        "USDINR": "usdinr",
+        "NIFTYGS10YR": "niftygs10yr",
+        "IN10Y": "in10y",
+        "GOLD": "gold",
+        "SILVER": "silver",
+        "UKOIL": "ukoil",
+        "SPX": "spx",
+    }
+
+    if not os.path.exists(base_folder):
         st.warning("Folder 'asset_class_charts' not found.")
     else:
-        images = [
-            f for f in os.listdir(charts_folder)
-            if f.lower().endswith((".png", ".jpg", ".jpeg"))
-        ]
+        tab_labels = list(asset_tabs.keys())
+        tabs = st.tabs(tab_labels)
 
-        if not images:
-            st.info("No images found.")
-        else:
-            # ---- SORT BY DATE & TIME FROM FILENAME ----
-            def extract_datetime(filename):
-                try:
-                    parts = filename.rsplit("_", 2)
-                    dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
-                    return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
-                except Exception:
-                    return datetime.min
+        for tab, (display_name, folder_name) in zip(tabs, asset_tabs.items()):
+            with tab:
+                folder_path = os.path.join(base_folder, folder_name)
 
-            images = sorted(images, key=extract_datetime)
+                if not os.path.exists(folder_path):
+                    st.info("No charts available.")
+                    continue
 
-            # ---- DISPLAY (ORIGINAL BEHAVIOR) ----
-            for img in images:
-                st.image(
-                    os.path.join(charts_folder, img),
-                    use_container_width=True
-                )
+                images = [
+                    f for f in os.listdir(folder_path)
+                    if f.lower().endswith((".png", ".jpg", ".jpeg"))
+                ]
+
+                if not images:
+                    st.info("No charts available.")
+                    continue
+
+                # ---- SORT BY DATE & TIME FROM FILENAME ----
+                def extract_datetime(filename):
+                    try:
+                        parts = filename.rsplit("_", 2)
+                        dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
+                        return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
+                    except Exception:
+                        return datetime.min
+
+                images = sorted(images, key=extract_datetime)
+
+                for img in images:
+                    st.image(
+                        os.path.join(folder_path, img),
+                        use_container_width=True
+                    )
+
 # =================================================
 # ASSET CLASS CHARTS (WEEKLY)
 # =================================================
@@ -644,6 +667,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
