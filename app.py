@@ -124,6 +124,7 @@ view = st.selectbox(
         "Index Futures OI",
         "Asset Class Charts",
         "Asset Class Charts (Weekly)"
+        "Metal Charts"
     ]
 )
 # =================================================
@@ -584,3 +585,40 @@ if view == "Asset Class Charts (Weekly)":
                     os.path.join(charts_folder, img),
                     use_container_width=True
                 )
+# =================================================
+# METAL CHARTS
+# =================================================
+if view == "Metal Charts":
+
+    st.subheader("🔩 Metal Charts")
+
+    charts_folder = "metal_charts"
+
+    if not os.path.exists(charts_folder):
+        st.warning("Folder 'metal_charts' not found.")
+    else:
+        images = [
+            f for f in os.listdir(charts_folder)
+            if f.lower().endswith((".png", ".jpg", ".jpeg"))
+        ]
+
+        if not images:
+            st.info("No images found.")
+        else:
+            # ---- SORT BY DATE & TIME FROM FILENAME ----
+            def extract_datetime(filename):
+                try:
+                    parts = filename.rsplit("_", 2)
+                    dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
+                    return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
+                except Exception:
+                    return datetime.min
+
+            images = sorted(images, key=extract_datetime)
+
+            for img in images:
+                st.image(
+                    os.path.join(charts_folder, img),
+                    use_container_width=True
+                )
+
