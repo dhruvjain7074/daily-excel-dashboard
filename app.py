@@ -586,7 +586,7 @@ if view == "Asset Class Charts (Weekly)":
                     use_container_width=True
                 )
 # =================================================
-# METAL CHARTS (WITH SUB-FOLDERS)
+# METAL CHARTS (TABS)
 # =================================================
 if view == "Metal Charts":
 
@@ -594,7 +594,7 @@ if view == "Metal Charts":
 
     base_folder = "metal_charts"
 
-    metal_folders = {
+    metal_tabs = {
         "Hindustan Copper": "hindustan_copper",
         "SAIL": "sail",
         "NMDC": "nmdc",
@@ -608,38 +608,43 @@ if view == "Metal Charts":
     if not os.path.exists(base_folder):
         st.warning("Folder 'metal_charts' not found.")
     else:
-        for display_name, folder_name in metal_folders.items():
+        tab_labels = list(metal_tabs.keys())
+        tabs = st.tabs(tab_labels)
 
-            folder_path = os.path.join(base_folder, folder_name)
+        for tab, (display_name, folder_name) in zip(tabs, metal_tabs.items()):
+            with tab:
+                folder_path = os.path.join(base_folder, folder_name)
 
-            if not os.path.exists(folder_path):
-                continue
+                if not os.path.exists(folder_path):
+                    st.info("No charts available.")
+                    continue
 
-            images = [
-                f for f in os.listdir(folder_path)
-                if f.lower().endswith((".png", ".jpg", ".jpeg"))
-            ]
+                images = [
+                    f for f in os.listdir(folder_path)
+                    if f.lower().endswith((".png", ".jpg", ".jpeg"))
+                ]
 
-            if not images:
-                continue
+                if not images:
+                    st.info("No charts available.")
+                    continue
 
-            # ---- SORT BY DATE & TIME FROM FILENAME ----
-            def extract_datetime(filename):
-                try:
-                    parts = filename.rsplit("_", 2)
-                    dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
-                    return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
-                except Exception:
-                    return datetime.min
+                # ---- SORT BY DATE & TIME FROM FILENAME ----
+                def extract_datetime(filename):
+                    try:
+                        parts = filename.rsplit("_", 2)
+                        dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
+                        return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
+                    except Exception:
+                        return datetime.min
 
-            images = sorted(images, key=extract_datetime)
+                images = sorted(images, key=extract_datetime)
 
-            st.markdown(f"### {display_name}")
+                for img in images:
+                    st.image(
+                        os.path.join(folder_path, img),
+                        use_container_width=True
+                    )
 
-            for img in images:
-                st.image(
-                    os.path.join(folder_path, img),
-                    use_container_width=True
-                )
+
 
 
