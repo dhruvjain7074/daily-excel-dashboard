@@ -581,7 +581,7 @@ if view == "Index (PE / PB / DIV YLD)":
         )
     if view == "Index (PE/PB/DIVYLD)":
 
-    st.subheader("📊 Index Valuation Metrics")
+        st.subheader("📊 Index Valuation Metrics")
 
     df = df_index_val.copy()
 
@@ -967,6 +967,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
