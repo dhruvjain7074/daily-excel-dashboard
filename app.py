@@ -174,9 +174,18 @@ mapping = {
 }
 
 # =================================================
-# COMMON PLOT FUNCTION
+# COMMON PLOT FUNCTION (FIXED WITH KEY)
 # =================================================
-def plot_single_line(df, x, y, height=600, y_label=None, title=None, color=None):
+def plot_single_line(
+    df,
+    x,
+    y,
+    height=600,
+    y_label=None,
+    title=None,
+    color=None,
+    key=None
+):
     fig = px.line(df, x=x, y=y)
 
     if color:
@@ -196,7 +205,7 @@ def plot_single_line(df, x, y, height=600, y_label=None, title=None, color=None)
         title=title,
         title_x=0.5,
         template="plotly_white",
-        margin=dict(l=40, r=40, t=60, b=40)  # 🔴 IMPORTANT
+        margin=dict(l=40, r=40, t=60, b=40)
     )
 
     fig.update_yaxes(
@@ -204,7 +213,12 @@ def plot_single_line(df, x, y, height=600, y_label=None, title=None, color=None)
         showexponent="none"
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(
+        fig,
+        use_container_width=True,
+        key=key
+    )
+
 
 # =================================================
 # DATASET 1 / 2 / 3 VIEW
@@ -840,6 +854,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
