@@ -174,7 +174,7 @@ mapping = {
 }
 
 # =================================================
-# COMMON PLOT FUNCTION (STABLE + RESPONSIVE)
+# COMMON PLOT FUNCTION (FINAL – BUG-FREE)
 # =================================================
 def plot_single_line(
     df,
@@ -183,24 +183,24 @@ def plot_single_line(
     height=600,
     y_label=None,
     title=None,
-    color=None,
+    color="#1f77b4",
     key=None
 ):
-    fig = px.line(df, x=x, y=y)
-
-    if color:
-        fig.update_traces(line=dict(color=color, width=2.6))
-    else:
-        fig.update_traces(line=dict(width=2.6))
+    fig = px.line(
+        df,
+        x=x,
+        y=y,
+        render_mode="svg"   # 🔴 THIS FIXES THE INVISIBLE LINE
+    )
 
     fig.update_traces(
+        line=dict(color=color, width=2.8),
         hovertemplate="Date: %{x|%d-%m-%y}<br>"
                       "Value: %{y}<extra></extra>"
     )
 
     fig.update_layout(
         height=height,
-        autosize=True,                 # 🔴 CRITICAL
         hovermode="x unified",
         yaxis_title=y_label,
         title=title,
@@ -217,8 +217,7 @@ def plot_single_line(
     st.plotly_chart(
         fig,
         use_container_width=True,
-        key=key,
-        config={"responsive": True}     # 🔴 CRITICAL
+        key=key
     )
 
 # =================================================
@@ -855,6 +854,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
