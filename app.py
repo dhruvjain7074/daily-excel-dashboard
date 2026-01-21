@@ -39,7 +39,7 @@ st.markdown(
 st.title("📊 Daily Excel Dashboard")
 
 # =================================================
-# LOAD DATA (MULTI-SHEET)
+# LOAD DATA (GOOGLE SHEETS – MULTI SHEET)
 # =================================================
 def load_data():
     scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
@@ -54,22 +54,37 @@ def load_data():
     SPREADSHEET_ID = "13UqMshnNj01OTGpsEjw7t1TEYZt6rBNpPWcTxLV2ZzM"
     sheet = client.open_by_key(SPREADSHEET_ID)
 
-    def read_worksheet(name):
-        ws = sheet.worksheet(name)
+    def read_worksheet(sheet_name):
+        ws = sheet.worksheet(sheet_name)
         values = ws.get_all_values()
+
+        if not values or len(values) < 2:
+            return pd.DataFrame()
+
         headers = values[0]
         rows = values[1:]
+
         df = pd.DataFrame(rows, columns=headers)
+
+        # clean column names
         df.columns = df.columns.str.strip()
+
+        # replace empty strings with NaN
+        df = df.replace("", pd.NA)
+
         return df
 
+    # ---- READ ALL REQUIRED SHEETS ----
     df_main = read_worksheet("comparision charts")
     df_rbi = read_worksheet("Rbi net liquidity")
     df_index_oi = read_worksheet("Index oi charts")
+    df_index_val = read_worksheet("index(pe/pb/divyld)")
 
-    return df_main, df_rbi, df_index_oi
+    return df_main, df_rbi, df_index_oi, df_index_val
 
-df_main, df_rbi, df_index_oi = load_data()
+
+# ---- CALL ONCE ----
+df_main, df_rbi, df_index_oi, df_index_val = load_data()
 
 # ===============================
 # CLEAN df_main (CRITICAL)
@@ -509,6 +524,118 @@ if view == "Index Futures OI":
     )
 
     st.plotly_chart(fig_cf, use_container_width=True)
+# =================================================
+# INDEX (PE / PB / DIV YIELD)
+# =================================================
+if view == "Index (PE / PB / DIV YLD)":
+
+    st.subheader("📈 Index Valuation Metrics")
+
+    pe = df_pe.copy()
+
+    # ---- DATE CONVERSION (SAFE) ----
+    for col in ["Date_1", "Date_2", "Date_3"]:
+        pe[col] = pd.to_datetime(pe[col], errors="coerce", dayfirst=True)
+
+    # ---- TABS ----
+    tabs = st.tabs([
+        "NIFTY 50",
+        "NIFTY MIDCAP 100",
+        "NIFTY SMALLCAP 250"
+    ])
+
+    # =================================================
+    # TAB 1: NIFTY 50
+    # =================================================
+    with tabs[0]:
+
+        st.markdown("### NIFTY 50")
+
+        plot_single_line(
+            pe.rename(columns={"Date_1": "Date", "P/E_1": "P/E"}),
+            "Date",
+            "P/E",
+            title="NIFTY 50 – P/E",
+            height=600
+        )
+
+        plot_single_line(
+            pe.rename(columns={"Date_1": "Date", "P/B_1": "P/B"}),
+            "Date",
+            "P/B",
+            title="NIFTY 50 – P/B",
+            height=600
+        )
+
+        plot_single_line(
+            pe.rename(columns={"Date_1": "Date", "Div Yield_1": "Dividend Yield"}),
+            "Date",
+            "Dividend Yield",
+            title="NIFTY 50 – Dividend Yield",
+            height=600
+        )
+
+    # =================================================
+    # TAB 2: NIFTY MIDCAP 100
+    # =================================================
+    with tabs[1]:
+
+        st.markdown("### NIFTY MIDCAP 100")
+
+        plot_single_line(
+            pe.rename(columns={"Date_2": "Date", "P/E_2": "P/E"}),
+            "Date",
+            "P/E",
+            title="MIDCAP 100 – P/E",
+            height=600
+        )
+
+        plot_single_line(
+            pe.rename(columns={"Date_2": "Date", "P/B_2": "P/B"}),
+            "Date",
+            "P/B",
+            title="MIDCAP 100 – P/B",
+            height=600
+        )
+
+        plot_single_line(
+            pe.rename(columns={"Date_2": "Date", "Div Yield_2": "Dividend Yield"}),
+            "Date",
+            "Dividend Yield",
+            title="MIDCAP 100 – Dividend Yield",
+            height=600
+        )
+
+    # =================================================
+    # TAB 3: NIFTY SMALLCAP 250
+    # =================================================
+    with tabs[2]:
+
+        st.markdown("### NIFTY SMALLCAP 250")
+
+        plot_single_line(
+            pe.rename(columns={"Date_3": "Date", "P/E_3": "P/E"}),
+            "Date",
+            "P/E",
+            title="SMALLCAP 250 – P/E",
+            height=600
+        )
+
+        plot_single_line(
+            pe.rename(columns={"Date_3": "Date", "P/B_3": "P/B"}),
+            "Date",
+            "P/B",
+            title="SMALLCAP 250 – P/B",
+            height=600
+        )
+
+        plot_single_line(
+            pe.rename(columns={"Date_3": "Date", "Div Yield_3": "Dividend Yield"}),
+            "Date",
+            "Dividend Yield",
+            title="SMALLCAP 250 – Dividend Yield",
+            height=600
+        )
 
 
 # =================================================
@@ -692,6 +819,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
