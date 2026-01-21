@@ -137,6 +137,7 @@ view = st.selectbox(
         "EMA 200 Data",
         "RBI Net Liquidity Injected",
         "Index Futures OI",
+        "Index (PE / PB / DIV YLD)",
         "Asset Class Charts",
         "Asset Class Charts Weekly",
         "Metal Charts"
@@ -819,6 +820,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
