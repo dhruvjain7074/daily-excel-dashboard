@@ -579,6 +579,119 @@ if view == "Index (PE / PB / DIV YLD)":
             title=title,
             height=600
         )
+        if view == "Index (PE/PB/DIVYLD)":
+
+    st.subheader("📊 Index Valuation Metrics")
+
+    df = df_index_val.copy()
+
+    # ===============================
+    # CLEAN & CONVERT DATES
+    # ===============================
+    date_cols = ["Date_1", "Date_2", "Date_3"]
+    for c in date_cols:
+        df[c] = pd.to_datetime(df[c], errors="coerce")
+
+    df = df.dropna(subset=date_cols, how="all")
+
+    # ===============================
+    # GLOBAL DATE FILTER
+    # ===============================
+    min_date = min(
+        df["Date_1"].min(),
+        df["Date_2"].min(),
+        df["Date_3"].min()
+    ).date()
+
+    max_date = max(
+        df["Date_1"].max(),
+        df["Date_2"].max(),
+        df["Date_3"].max()
+    ).date()
+
+    start_date, end_date = st.date_input(
+        "📅 Select date range",
+        [min_date, max_date]
+    )
+
+    start_dt = pd.to_datetime(start_date)
+    end_dt = pd.to_datetime(end_date)
+
+    # ===============================
+    # TABS
+    # ===============================
+    tab1, tab2, tab3 = st.tabs(
+        ["NIFTY 50", "NIFTY MIDCAP 100", "NIFTY SMALLCAP 250"]
+    )
+
+    # ===============================
+    # NIFTY 50
+    # ===============================
+    with tab1:
+        nifty = df[
+            (df["Date_1"] >= start_dt) &
+            (df["Date_1"] <= end_dt)
+        ][["Date_1", "P/E_1", "P/B_1", "Div Yield_1"]].rename(
+            columns={
+                "Date_1": "Date",
+                "P/E_1": "P/E",
+                "P/B_1": "P/B",
+                "Div Yield_1": "Dividend Yield"
+            }
+        )
+
+        nifty = nifty.apply(pd.to_numeric, errors="ignore")
+        nifty = nifty.dropna(subset=["Date"])
+
+        plot_single_line(nifty, "Date", "P/E", title="NIFTY 50 – P/E", key="n50_pe")
+        plot_single_line(nifty, "Date", "P/B", title="NIFTY 50 – P/B", key="n50_pb")
+        plot_single_line(nifty, "Date", "Dividend Yield", title="NIFTY 50 – Dividend Yield", key="n50_div")
+
+    # ===============================
+    # MIDCAP 100
+    # ===============================
+    with tab2:
+        mid = df[
+            (df["Date_2"] >= start_dt) &
+            (df["Date_2"] <= end_dt)
+        ][["Date_2", "P/E_2", "P/B_2", "Div Yield_2"]].rename(
+            columns={
+                "Date_2": "Date",
+                "P/E_2": "P/E",
+                "P/B_2": "P/B",
+                "Div Yield_2": "Dividend Yield"
+            }
+        )
+
+        mid = mid.apply(pd.to_numeric, errors="ignore")
+        mid = mid.dropna(subset=["Date"])
+
+        plot_single_line(mid, "Date", "P/E", title="MIDCAP 100 – P/E", key="mid_pe")
+        plot_single_line(mid, "Date", "P/B", title="MIDCAP 100 – P/B", key="mid_pb")
+        plot_single_line(mid, "Date", "Dividend Yield", title="MIDCAP 100 – Dividend Yield", key="mid_div")
+
+    # ===============================
+    # SMALLCAP 250
+    # ===============================
+    with tab3:
+        small = df[
+            (df["Date_3"] >= start_dt) &
+            (df["Date_3"] <= end_dt)
+        ][["Date_3", "P/E_3", "P/B_3", "Div Yield_3"]].rename(
+            columns={
+                "Date_3": "Date",
+                "P/E_3": "P/E",
+                "P/B_3": "P/B",
+                "Div Yield_3": "Dividend Yield"
+            }
+        )
+
+        small = small.apply(pd.to_numeric, errors="ignore")
+        small = small.dropna(subset=["Date"])
+
+        plot_single_line(small, "Date", "P/E", title="SMALLCAP 250 – P/E", key="sc_pe")
+        plot_single_line(small, "Date", "P/B", title="SMALLCAP 250 – P/B", key="sc_pb")
+        plot_single_line(small, "Date", "Dividend Yield", title="SMALLCAP 250 – Dividend Yield", key="sc_div")
 
     # -------------------------------------------------
     # TABS
@@ -854,6 +967,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
