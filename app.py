@@ -174,7 +174,7 @@ mapping = {
 }
 
 # =================================================
-# COMMON PLOT FUNCTION (FIXED WITH KEY)
+# COMMON PLOT FUNCTION (STABLE + RESPONSIVE)
 # =================================================
 def plot_single_line(
     df,
@@ -199,8 +199,9 @@ def plot_single_line(
     )
 
     fig.update_layout(
-        hovermode="x unified",
         height=height,
+        autosize=True,                 # 🔴 CRITICAL
+        hovermode="x unified",
         yaxis_title=y_label,
         title=title,
         title_x=0.5,
@@ -216,9 +217,9 @@ def plot_single_line(
     st.plotly_chart(
         fig,
         use_container_width=True,
-        key=key
+        key=key,
+        config={"responsive": True}     # 🔴 CRITICAL
     )
-
 
 # =================================================
 # DATASET 1 / 2 / 3 VIEW
@@ -854,6 +855,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
