@@ -534,11 +534,41 @@ if view == "Index (PE / PB / DIV YLD)":
 
     pe = df_index_val.copy()
 
-    # ---- DATE CONVERSION (SAFE) ----
-    for col in ["Date_1", "Date_2", "Date_3"]:
-        pe[col] = pd.to_datetime(pe[col], errors="coerce", dayfirst=True)
+    # -------------------------------------------------
+    # Helper function (safe, reusable)
+    # -------------------------------------------------
+    def plot_index_metric(df, date_col, value_col, title):
+        plot_df = df[[date_col, value_col]].copy()
 
-    # ---- TABS ----
+        plot_df[date_col] = pd.to_datetime(
+            plot_df[date_col],
+            errors="coerce",
+            dayfirst=True
+        )
+
+        plot_df[value_col] = pd.to_numeric(
+            plot_df[value_col],
+            errors="coerce"
+        )
+
+        plot_df = plot_df.dropna()
+
+        plot_df = plot_df.rename(columns={
+            date_col: "Date",
+            value_col: "Value"
+        })
+
+        plot_single_line(
+            plot_df,
+            x="Date",
+            y="Value",
+            title=title,
+            height=600
+        )
+
+    # -------------------------------------------------
+    # TABS
+    # -------------------------------------------------
     tabs = st.tabs([
         "NIFTY 50",
         "NIFTY MIDCAP 100",
@@ -552,28 +582,25 @@ if view == "Index (PE / PB / DIV YLD)":
 
         st.markdown("### NIFTY 50")
 
-        plot_single_line(
-            pe.rename(columns={"Date_1": "Date", "P/E_1": "P/E"}),
-            "Date",
-            "P/E",
-            title="NIFTY 50 – P/E",
-            height=600
+        plot_index_metric(
+            pe,
+            "Date_1",
+            "P/E_1",
+            "NIFTY 50 – P/E"
         )
 
-        plot_single_line(
-            pe.rename(columns={"Date_1": "Date", "P/B_1": "P/B"}),
-            "Date",
-            "P/B",
-            title="NIFTY 50 – P/B",
-            height=600
+        plot_index_metric(
+            pe,
+            "Date_1",
+            "P/B_1",
+            "NIFTY 50 – P/B"
         )
 
-        plot_single_line(
-            pe.rename(columns={"Date_1": "Date", "Div Yield_1": "Dividend Yield"}),
-            "Date",
-            "Dividend Yield",
-            title="NIFTY 50 – Dividend Yield",
-            height=600
+        plot_index_metric(
+            pe,
+            "Date_1",
+            "Div Yield_1",
+            "NIFTY 50 – Dividend Yield"
         )
 
     # =================================================
@@ -583,28 +610,25 @@ if view == "Index (PE / PB / DIV YLD)":
 
         st.markdown("### NIFTY MIDCAP 100")
 
-        plot_single_line(
-            pe.rename(columns={"Date_2": "Date", "P/E_2": "P/E"}),
-            "Date",
-            "P/E",
-            title="MIDCAP 100 – P/E",
-            height=600
+        plot_index_metric(
+            pe,
+            "Date_2",
+            "P/E_2",
+            "MIDCAP 100 – P/E"
         )
 
-        plot_single_line(
-            pe.rename(columns={"Date_2": "Date", "P/B_2": "P/B"}),
-            "Date",
-            "P/B",
-            title="MIDCAP 100 – P/B",
-            height=600
+        plot_index_metric(
+            pe,
+            "Date_2",
+            "P/B_2",
+            "MIDCAP 100 – P/B"
         )
 
-        plot_single_line(
-            pe.rename(columns={"Date_2": "Date", "Div Yield_2": "Dividend Yield"}),
-            "Date",
-            "Dividend Yield",
-            title="MIDCAP 100 – Dividend Yield",
-            height=600
+        plot_index_metric(
+            pe,
+            "Date_2",
+            "Div Yield_2",
+            "MIDCAP 100 – Dividend Yield"
         )
 
     # =================================================
@@ -614,30 +638,26 @@ if view == "Index (PE / PB / DIV YLD)":
 
         st.markdown("### NIFTY SMALLCAP 250")
 
-        plot_single_line(
-            pe.rename(columns={"Date_3": "Date", "P/E_3": "P/E"}),
-            "Date",
-            "P/E",
-            title="SMALLCAP 250 – P/E",
-            height=600
+        plot_index_metric(
+            pe,
+            "Date_3",
+            "P/E_3",
+            "SMALLCAP 250 – P/E"
         )
 
-        plot_single_line(
-            pe.rename(columns={"Date_3": "Date", "P/B_3": "P/B"}),
-            "Date",
-            "P/B",
-            title="SMALLCAP 250 – P/B",
-            height=600
+        plot_index_metric(
+            pe,
+            "Date_3",
+            "P/B_3",
+            "SMALLCAP 250 – P/B"
         )
 
-        plot_single_line(
-            pe.rename(columns={"Date_3": "Date", "Div Yield_3": "Dividend Yield"}),
-            "Date",
-            "Dividend Yield",
-            title="SMALLCAP 250 – Dividend Yield",
-            height=600
+        plot_index_metric(
+            pe,
+            "Date_3",
+            "Div Yield_3",
+            "SMALLCAP 250 – Dividend Yield"
         )
-
 
 # =================================================
 # ASSET CLASS CHARTS (TABS)
@@ -820,6 +840,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
