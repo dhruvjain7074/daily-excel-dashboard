@@ -532,7 +532,7 @@ if view == "Index (PE / PB / DIV YLD)":
 
     st.subheader("📈 Index Valuation Metrics")
 
-    pe = df_pe.copy()
+    pe = df_index_val.copy()
 
     # ---- DATE CONVERSION (SAFE) ----
     for col in ["Date_1", "Date_2", "Date_3"]:
@@ -820,6 +820,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
