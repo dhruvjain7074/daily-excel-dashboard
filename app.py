@@ -542,72 +542,25 @@ if view == "Index Futures OI":
 # =================================================
 # INDEX (PE / PB / DIV YIELD)
 # =================================================
-if view == "Index (PE / PB / DIV YLD)":
+if view == "Index (PE/PB/DIVYLD)":
 
     st.subheader("📈 Index Valuation Metrics")
-
-    pe = df_index_val.copy()
-
-    # -------------------------------------------------
-    # Helper function (safe, reusable)
-    # -------------------------------------------------
-    def plot_index_metric(df, date_col, value_col, title):
-        plot_df = df[[date_col, value_col]].copy()
-
-        plot_df[date_col] = pd.to_datetime(
-            plot_df[date_col],
-            errors="coerce",
-            dayfirst=True
-        )
-
-        plot_df[value_col] = pd.to_numeric(
-            plot_df[value_col],
-            errors="coerce"
-        )
-
-        plot_df = plot_df.dropna()
-
-        plot_df = plot_df.rename(columns={
-            date_col: "Date",
-            value_col: "Value"
-        })
-
-        plot_single_line(
-            plot_df,
-            x="Date",
-            y="Value",
-            title=title,
-            height=600
-        )
-    if view == "Index (PE/PB/DIVYLD)":
-
-        st.subheader("📊 Index Valuation Metrics")
 
     df = df_index_val.copy()
 
     # ===============================
-    # CLEAN & CONVERT DATES
+    # DATE CONVERSION
     # ===============================
-    date_cols = ["Date_1", "Date_2", "Date_3"]
-    for c in date_cols:
-        df[c] = pd.to_datetime(df[c], errors="coerce")
+    for c in ["Date_1", "Date_2", "Date_3"]:
+        df[c] = pd.to_datetime(df[c], errors="coerce", dayfirst=True)
 
-    df = df.dropna(subset=date_cols, how="all")
+    df = df.dropna(subset=["Date_1", "Date_2", "Date_3"], how="all")
 
     # ===============================
     # GLOBAL DATE FILTER
     # ===============================
-    min_date = min(
-        df["Date_1"].min(),
-        df["Date_2"].min(),
-        df["Date_3"].min()
-    ).date()
-
-    max_date = max(
-        df["Date_1"].max(),
-        df["Date_2"].max(),
-        df["Date_3"].max()
-    ).date()
+    min_date = min(df["Date_1"].min(), df["Date_2"].min(), df["Date_3"].min()).date()
+    max_date = max(df["Date_1"].max(), df["Date_2"].max(), df["Date_3"].max()).date()
 
     start_date, end_date = st.date_input(
         "📅 Select date range",
@@ -640,8 +593,7 @@ if view == "Index (PE / PB / DIV YLD)":
             }
         )
 
-        nifty = nifty.apply(pd.to_numeric, errors="ignore")
-        nifty = nifty.dropna(subset=["Date"])
+        nifty = nifty.apply(pd.to_numeric, errors="ignore").dropna(subset=["Date"])
 
         plot_single_line(nifty, "Date", "P/E", title="NIFTY 50 – P/E", key="n50_pe")
         plot_single_line(nifty, "Date", "P/B", title="NIFTY 50 – P/B", key="n50_pb")
@@ -663,8 +615,7 @@ if view == "Index (PE / PB / DIV YLD)":
             }
         )
 
-        mid = mid.apply(pd.to_numeric, errors="ignore")
-        mid = mid.dropna(subset=["Date"])
+        mid = mid.apply(pd.to_numeric, errors="ignore").dropna(subset=["Date"])
 
         plot_single_line(mid, "Date", "P/E", title="MIDCAP 100 – P/E", key="mid_pe")
         plot_single_line(mid, "Date", "P/B", title="MIDCAP 100 – P/B", key="mid_pb")
@@ -686,105 +637,12 @@ if view == "Index (PE / PB / DIV YLD)":
             }
         )
 
-        small = small.apply(pd.to_numeric, errors="ignore")
-        small = small.dropna(subset=["Date"])
+        small = small.apply(pd.to_numeric, errors="ignore").dropna(subset=["Date"])
 
         plot_single_line(small, "Date", "P/E", title="SMALLCAP 250 – P/E", key="sc_pe")
         plot_single_line(small, "Date", "P/B", title="SMALLCAP 250 – P/B", key="sc_pb")
         plot_single_line(small, "Date", "Dividend Yield", title="SMALLCAP 250 – Dividend Yield", key="sc_div")
 
-    # -------------------------------------------------
-    # TABS
-    # -------------------------------------------------
-    tabs = st.tabs([
-        "NIFTY 50",
-        "NIFTY MIDCAP 100",
-        "NIFTY SMALLCAP 250"
-    ])
-
-    # =================================================
-    # TAB 1: NIFTY 50
-    # =================================================
-    with tabs[0]:
-
-        st.markdown("### NIFTY 50")
-
-        plot_index_metric(
-            pe,
-            "Date_1",
-            "P/E_1",
-            "NIFTY 50 – P/E"
-        )
-
-        plot_index_metric(
-            pe,
-            "Date_1",
-            "P/B_1",
-            "NIFTY 50 – P/B"
-        )
-
-        plot_index_metric(
-            pe,
-            "Date_1",
-            "Div Yield_1",
-            "NIFTY 50 – Dividend Yield"
-        )
-
-    # =================================================
-    # TAB 2: NIFTY MIDCAP 100
-    # =================================================
-    with tabs[1]:
-
-        st.markdown("### NIFTY MIDCAP 100")
-
-        plot_index_metric(
-            pe,
-            "Date_2",
-            "P/E_2",
-            "MIDCAP 100 – P/E"
-        )
-
-        plot_index_metric(
-            pe,
-            "Date_2",
-            "P/B_2",
-            "MIDCAP 100 – P/B"
-        )
-
-        plot_index_metric(
-            pe,
-            "Date_2",
-            "Div Yield_2",
-            "MIDCAP 100 – Dividend Yield"
-        )
-
-    # =================================================
-    # TAB 3: NIFTY SMALLCAP 250
-    # =================================================
-    with tabs[2]:
-
-        st.markdown("### NIFTY SMALLCAP 250")
-
-        plot_index_metric(
-            pe,
-            "Date_3",
-            "P/E_3",
-            "SMALLCAP 250 – P/E"
-        )
-
-        plot_index_metric(
-            pe,
-            "Date_3",
-            "P/B_3",
-            "SMALLCAP 250 – P/B"
-        )
-
-        plot_index_metric(
-            pe,
-            "Date_3",
-            "Div Yield_3",
-            "SMALLCAP 250 – Dividend Yield"
-        )
 
 # =================================================
 # ASSET CLASS CHARTS (TABS)
@@ -967,6 +825,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
