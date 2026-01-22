@@ -222,7 +222,7 @@ def plot_single_line(
     
     st.plotly_chart(
         fig,
-        use_container_width=true,
+        use_container_width=True,
         key=key
     )
         
@@ -869,6 +869,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
