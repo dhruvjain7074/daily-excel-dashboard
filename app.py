@@ -74,12 +74,12 @@ df.columns = (
 )
 
     # 🔴 REMOVE EMPTY COLUMN NAMES (CRITICAL FIX)
-df = df.loc[:, df.columns != ""]
+    df = df.loc[:, df.columns != ""]
 
     # replace empty cell values with NA
-df = df.replace("", pd.NA)
+    df = df.replace("", pd.NA)
 
-return df
+    return df
 
     # ---- READ ALL REQUIRED SHEETS ----
     df_main = read_worksheet("comparision charts")
@@ -87,7 +87,7 @@ return df
     df_index_oi = read_worksheet("Index oi charts")
     df_index_val = read_worksheet("index (pe/pb/divyld)")
 
-return df_main, df_rbi, df_index_oi, df_index_val
+    return df_main, df_rbi, df_index_oi, df_index_val
 
 
 # ---- CALL ONCE ----
@@ -834,6 +834,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
