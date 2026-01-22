@@ -77,7 +77,7 @@ df.columns = (
 df = df.loc[:, df.columns != ""]
 
     # replace empty cell values with NA
-    df = df.replace("", pd.NA)
+df = df.replace("", pd.NA)
 
     return df
 
@@ -834,6 +834,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
