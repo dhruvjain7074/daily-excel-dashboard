@@ -200,9 +200,12 @@ def plot_single_line(
         hovertemplate="Date: %{x|%d-%m-%y}<br>Value: %{y}<extra></extra>"
     )
 
+    # 🔴 LOCK SIZE — THIS FIXES FLICKER
     fig.update_layout(
-        hovermode="x unified",
+        autosize=False,
         height=height,
+        width=1200,   # ✅ FIXED WIDTH
+        hovermode="x unified",
         yaxis_title=y_label,
         title=title,
         title_x=0.5,
@@ -212,8 +215,8 @@ def plot_single_line(
 
     fig.update_yaxes(tickformat=",", showexponent="none")
 
-    # 🔴 ONLY ONCE
-    st.plotly_chart(fig, use_container_width=True, key=key)
+    st.plotly_chart(fig, key=key)
+
 
 # =================================================
 # DATASET 1 / 2 / 3 VIEW
@@ -856,6 +859,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
