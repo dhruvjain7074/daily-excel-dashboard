@@ -37,7 +37,9 @@ st.markdown(
 )
 
 st.title("📊 Daily Excel Dashboard")
-# load data
+# =================================================
+# LOAD DATA (GOOGLE SHEETS – MULTI SHEET)
+# =================================================
 def load_data():
     scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
@@ -79,9 +81,9 @@ def load_data():
 
     return df_main, df_rbi, df_index_oi, df_index_val
 
+
 # ---- CALL ONCE ----
 df_main, df_rbi, df_index_oi, df_index_val = load_data()
-
 # ===============================
 # CLEAN df_main (CRITICAL)
 # ===============================
@@ -824,6 +826,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
