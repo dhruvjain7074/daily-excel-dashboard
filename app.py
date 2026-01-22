@@ -116,12 +116,13 @@ def load_data():
     df_main = read_worksheet("comparision charts")
     df_rbi = read_worksheet("Rbi net liquidity")
     df_index_oi = read_worksheet("Index oi charts")
+    df_index_oi = read_worksheet("index (pe/pb/divyld)")
 
-    return df_main, df_rbi, df_index_oi
+    return df_main, df_rbi, df_index_oi, df_index_val
 
 
 # ---- CALL ONCE ----
-df_main, df_rbi, df_index_oi = load_data()
+df_main, df_rbi, df_index_oi, df_index_val = load_data()
 
 # ===============================
 # CLEAN df_main (CRITICAL)
@@ -174,6 +175,7 @@ view = st.selectbox(
         "EMA 200 Data",
         "RBI Net Liquidity Injected",
         "Index Futures OI",
+        "Index (PE / PB / DIV YLD)",
         "Asset Class Charts",
         "Asset Class Charts Weekly",
         "Metal Charts"
@@ -568,6 +570,47 @@ if view == "Index Futures OI":
     st.plotly_chart(fig_cf, use_container_width=True)
 
 # =================================================
+# INDEX (PE / PB / DIV YLD) — PHASE 1
+# =================================================
+if view == "Index (PE / PB / DIV YLD)":
+
+    st.subheader("📈 Index Valuation Metrics")
+
+    df = df_index_val.copy()
+
+    # ---- remove empty columns ----
+    df = df.loc[:, df.columns != ""]
+
+    # ---- parse date ----
+    df["Date_1"] = pd.to_datetime(df["Date_1"], errors="coerce", dayfirst=True)
+
+    # ---- parse value ----
+    df["P/E_1"] = pd.to_numeric(df["P/E_1"], errors="coerce")
+
+    # ---- apply GLOBAL date filter ----
+    start_dt = pd.to_datetime(start_date)
+    end_dt = pd.to_datetime(end_date)
+
+    pe = df[
+        (df["Date_1"] >= start_dt) &
+        (df["Date_1"] <= end_dt)
+    ][["Date_1", "P/E_1"]].dropna()
+
+    pe = pe.rename(columns={
+        "Date_1": "Date",
+        "P/E_1": "P/E"
+    })
+
+    # ---- plot ----
+    plot_single_line(
+        pe,
+        "Date",
+        "P/E",
+        title="NIFTY 50 – P/E",
+        key="index_nifty50_pe"
+    )
+
+# =================================================
 # ASSET CLASS CHARTS (TABS)
 # =================================================
 if view == "Asset Class Charts":
@@ -748,6 +791,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
