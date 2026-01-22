@@ -40,26 +40,34 @@ st.title("📊 Daily Excel Dashboard")
 # =================================================
 # STABLE PLOT FUNCTION (INDEX PE / PB / DIV ONLY)
 # =================================================
-def plot_index_line(df, x, y, title, key):
+def plot_single_line(df, x, y, height=600, y_label=None, title=None, color=None, key=None):
     fig = px.line(df, x=x, y=y)
 
+    if color:
+        fig.update_traces(line=dict(color=color, width=2.6))
+    else:
+        fig.update_traces(line=dict(width=2.6))
+
     fig.update_traces(
-        line=dict(width=2.6),
-        hovertemplate="Date: %{x|%d-%m-%y}<br>Value: %{y}<extra></extra>"
+        hovertemplate="Date: %{x|%d-%m-%y}<br>"
+                      "Value: %{y}<extra></extra>"
     )
 
     fig.update_layout(
-        height=600,
         hovermode="x unified",
+        height=height,
+        yaxis_title=y_label,
         title=title,
         title_x=0.5,
-        template="plotly_white",
-        margin=dict(l=40, r=40, t=60, b=40)
+        template="plotly_white"
     )
 
-    fig.update_yaxes(tickformat=",", showexponent="none")
+    st.plotly_chart(
+        fig,
+        use_container_width=True,
+        key=key   # 🔴 THIS IS THE FIX
+    )
 
-    st.plotly_chart(fig, use_container_width=True, key=key)
 # =================================================
 # LOAD DATA (GOOGLE SHEETS – MULTI SHEET)
 # =================================================
@@ -859,6 +867,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
