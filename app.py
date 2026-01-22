@@ -617,13 +617,13 @@ if view == "Index (PE / PB / DIV YLD)":
         nifty = nifty.dropna(subset=["Date"])
 
         plot_single_line(nifty, "Date", "P/E",
-            title="NIFTY 50 – P/E", key="idx_pe_nifty50")
+            title="NIFTY 50 – P/E", key="n50_pe")
 
         plot_single_line(nifty, "Date", "P/B",
-            title="NIFTY 50 – P/B", key="idx_pb_nifty50")
+            title="NIFTY 50 – P/B", key="n50_pb")
 
         plot_single_line(nifty, "Date", "Dividend Yield",
-            title="NIFTY 50 – Dividend Yield", key="idx_div_nifty50")
+            title="NIFTY 50 – Dividend Yield", key="n50_div")
 
     # ===============================
     # MIDCAP 100
@@ -648,13 +648,13 @@ if view == "Index (PE / PB / DIV YLD)":
         mid = mid.dropna(subset=["Date"])
 
         plot_single_line(mid, "Date", "P/E",
-            title="MIDCAP 100 – P/E", key="idx_pe_midcap")
+            title="MIDCAP 100 – P/E", key="mid_pe")
 
         plot_single_line(mid, "Date", "P/B",
-            title="MIDCAP 100 – P/B", key="mid_pbidx_pb_midcap")
+            title="MIDCAP 100 – P/B", key="mid_pb")
 
         plot_single_line(mid, "Date", "Dividend Yield",
-            title="MIDCAP 100 – Dividend Yield", key="idx_div_midcap")
+            title="MIDCAP 100 – Dividend Yield", key="mid_div")
 
     # ===============================
     # SMALLCAP 250
@@ -679,13 +679,13 @@ if view == "Index (PE / PB / DIV YLD)":
         small = small.dropna(subset=["Date"])
 
         plot_single_line(small, "Date", "P/E",
-            title="SMALLCAP 250 – P/E", key="idx_pe_midcap")
+            title="SMALLCAP 250 – P/E", key="sc_pe")
 
         plot_single_line(small, "Date", "P/B",
-            title="SMALLCAP 250 – P/B", key="idx_pb_smallcap")
+            title="SMALLCAP 250 – P/B", key="sc_pb")
 
         plot_single_line(small, "Date", "Dividend Yield",
-            title="SMALLCAP 250 – Dividend Yield", key="idx_div_smallcap")
+            title="SMALLCAP 250 – Dividend Yield", key="sc_div")
 
 
 # =================================================
@@ -869,6 +869,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
