@@ -87,7 +87,7 @@ def load_data():
     df_index_oi = read_worksheet("Index oi charts")
     df_index_val = read_worksheet("index (pe/pb/divyld)")
 
-return df_main, df_rbi, df_index_oi, df_index_val
+    return df_main, df_rbi, df_index_oi, df_index_val
 
 
 # ---- CALL ONCE ----
@@ -834,6 +834,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
