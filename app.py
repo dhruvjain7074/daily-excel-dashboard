@@ -116,13 +116,12 @@ def load_data():
     df_main = read_worksheet("comparision charts")
     df_rbi = read_worksheet("Rbi net liquidity")
     df_index_oi = read_worksheet("Index oi charts")
-    df_index_val = read_worksheet("index (pe/pb/divyld)")
 
-    return df_main, df_rbi, df_index_oi, df_index_val
+    return df_main, df_rbi, df_index_oi
 
 
 # ---- CALL ONCE ----
-df_main, df_rbi, df_index_oi, df_index_val = load_data()
+df_main, df_rbi, df_index_oi = load_data()
 
 # ===============================
 # CLEAN df_main (CRITICAL)
@@ -175,7 +174,6 @@ view = st.selectbox(
         "EMA 200 Data",
         "RBI Net Liquidity Injected",
         "Index Futures OI",
-        "Index (PE / PB / DIV YLD)",
         "Asset Class Charts",
         "Asset Class Charts Weekly",
         "Metal Charts"
@@ -750,6 +748,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
