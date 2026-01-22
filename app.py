@@ -80,7 +80,7 @@ df = df.loc[:, df.columns != ""]
 df = df.replace("", pd.NA)
 
 
-        return df
+    return df
 
     # ---- READ ALL REQUIRED SHEETS ----
     df_main = read_worksheet("comparision charts")
@@ -835,6 +835,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
