@@ -569,7 +569,7 @@ if view == "Index Futures OI":
     st.plotly_chart(fig_cf, use_container_width=True)
 
 # =================================================
-# INDEX (PE / PB / DIV YLD) — PHASE 1
+# INDEX (PE / PB / DIV YLD) — TABS, NO DATE FILTER
 # =================================================
 if view == "Index (PE / PB / DIV YLD)":
 
@@ -580,34 +580,75 @@ if view == "Index (PE / PB / DIV YLD)":
     # ---- remove empty columns ----
     df = df.loc[:, df.columns != ""]
 
-    # ---- parse date ----
-    df["Date_1"] = pd.to_datetime(df["Date_1"], errors="coerce", dayfirst=True)
+    # ---- convert dates ----
+    for c in ["Date_1", "Date_2", "Date_3"]:
+        df[c] = pd.to_datetime(df[c], errors="coerce", dayfirst=True)
 
-    # ---- parse value ----
-    df["P/E_1"] = pd.to_numeric(df["P/E_1"], errors="coerce")
+    # ---- convert numeric values ----
+    for c in [
+        "P/E_1", "P/B_1", "Div Yield_1",
+        "P/E_2", "P/B_2", "Div Yield_2",
+        "P/E_3", "P/B_3", "Div Yield_3"
+    ]:
+        df[c] = pd.to_numeric(df[c], errors="coerce")
 
-    # ---- apply GLOBAL date filter ----
-    start_dt = pd.to_datetime(start_date)
-    end_dt = pd.to_datetime(end_date)
+    # =================================================
+    # TABS
+    # =================================================
+    tab1, tab2, tab3 = st.tabs([
+        "NIFTY 50",
+        "NIFTY MIDCAP 100",
+        "NIFTY SMALLCAP 250"
+    ])
 
-    pe = df[
-        (df["Date_1"] >= start_dt) &
-        (df["Date_1"] <= end_dt)
-    ][["Date_1", "P/E_1"]].dropna()
+    # ===============================
+    # TAB 1 — NIFTY 50
+    # ===============================
+    with tab1:
+        data = df[["Date_1", "P/E_1", "P/B_1", "Div Yield_1"]].dropna()
+        data = data.rename(columns={
+            "Date_1": "Date",
+            "P/E_1": "P/E",
+            "P/B_1": "P/B",
+            "Div Yield_1": "Dividend Yield"
+        })
 
-    pe = pe.rename(columns={
-        "Date_1": "Date",
-        "P/E_1": "P/E"
-    })
+        plot_single_line(data, "Date", "P/E", title="NIFTY 50 – P/E", key="n50_pe")
+        plot_single_line(data, "Date", "P/B", title="NIFTY 50 – P/B", key="n50_pb")
+        plot_single_line(data, "Date", "Dividend Yield", title="NIFTY 50 – Dividend Yield", key="n50_div")
 
-    # ---- plot ----
-    plot_single_line(
-        pe,
-        "Date",
-        "P/E",
-        title="NIFTY 50 – P/E",
-        key="index_nifty50_pe"
-    )
+    # ===============================
+    # TAB 2 — MIDCAP 100
+    # ===============================
+    with tab2:
+        data = df[["Date_2", "P/E_2", "P/B_2", "Div Yield_2"]].dropna()
+        data = data.rename(columns={
+            "Date_2": "Date",
+            "P/E_2": "P/E",
+            "P/B_2": "P/B",
+            "Div Yield_2": "Dividend Yield"
+        })
+
+        plot_single_line(data, "Date", "P/E", title="MIDCAP 100 – P/E", key="mid_pe")
+        plot_single_line(data, "Date", "P/B", title="MIDCAP 100 – P/B", key="mid_pb")
+        plot_single_line(data, "Date", "Dividend Yield", title="MIDCAP 100 – Dividend Yield", key="mid_div")
+
+    # ===============================
+    # TAB 3 — SMALLCAP 250
+    # ===============================
+    with tab3:
+        data = df[["Date_3", "P/E_3", "P/B_3", "Div Yield_3"]].dropna()
+        data = data.rename(columns={
+            "Date_3": "Date",
+            "P/E_3": "P/E",
+            "P/B_3": "P/B",
+            "Div Yield_3": "Dividend Yield"
+        })
+
+        plot_single_line(data, "Date", "P/E", title="SMALLCAP 250 – P/E", key="sc_pe")
+        plot_single_line(data, "Date", "P/B", title="SMALLCAP 250 – P/B", key="sc_pb")
+        plot_single_line(data, "Date", "Dividend Yield", title="SMALLCAP 250 – Dividend Yield", key="sc_div")
+
 
 # =================================================
 # ASSET CLASS CHARTS (TABS)
@@ -790,6 +831,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
