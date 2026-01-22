@@ -588,10 +588,7 @@ def build_line_figure(df, x, y, title=None, color=None, height=600):
 
     return fig
 # =================================================
-# INDEX (PE / PB / DIV YLD) — STABLE VERSION
-# =================================================
-# =================================================
-# INDEX (PE / PB / DIV YLD)
+# INDEX (PE / PB / DIV YLD) — GUARANTEED STABLE
 # =================================================
 if view == "Index (PE / PB / DIV YLD)":
 
@@ -599,7 +596,7 @@ if view == "Index (PE / PB / DIV YLD)":
 
     df = df_index_val.copy()
 
-    # ---- remove empty columns ----
+    # ---- clean columns ----
     df = df.loc[:, df.columns != ""]
 
     # ---- date conversion ----
@@ -607,29 +604,18 @@ if view == "Index (PE / PB / DIV YLD)":
         df[c] = pd.to_datetime(df[c], errors="coerce", dayfirst=True)
 
     # ---- numeric conversion ----
-    num_cols = [
+    for c in [
         "P/E_1","P/B_1","Div Yield_1",
         "P/E_2","P/B_2","Div Yield_2",
         "P/E_3","P/B_3","Div Yield_3"
-    ]
-
-    for c in num_cols:
+    ]:
         df[c] = pd.to_numeric(df[c], errors="coerce")
 
     df = df.dropna(how="all")
 
     # ---- date filter ----
-    min_date = min(
-        df["Date_1"].min(),
-        df["Date_2"].min(),
-        df["Date_3"].min()
-    ).date()
-
-    max_date = max(
-        df["Date_1"].max(),
-        df["Date_2"].max(),
-        df["Date_3"].max()
-    ).date()
+    min_date = min(df["Date_1"].min(), df["Date_2"].min(), df["Date_3"].min()).date()
+    max_date = max(df["Date_1"].max(), df["Date_2"].max(), df["Date_3"].max()).date()
 
     start_date, end_date = st.date_input(
         "📅 Select date range",
@@ -639,64 +625,58 @@ if view == "Index (PE / PB / DIV YLD)":
     start_dt = pd.to_datetime(start_date)
     end_dt = pd.to_datetime(end_date)
 
-    # ---- tabs ----
     tab1, tab2, tab3 = st.tabs(
         ["NIFTY 50", "NIFTY MIDCAP 100", "NIFTY SMALLCAP 250"]
     )
 
-    # ================= NIFTY 50 =================
+    def draw_fixed(fig):
+        st.plotly_chart(fig, use_container_width=False, width=1200)
+
+    # ---------------- NIFTY 50 ----------------
     with tab1:
-        d = df[
-            (df["Date_1"] >= start_dt) &
-            (df["Date_1"] <= end_dt)
-        ][["Date_1","P/E_1","P/B_1","Div Yield_1"]].dropna()
+        d = df[(df["Date_1"] >= start_dt) & (df["Date_1"] <= end_dt)]
+        d = d[["Date_1","P/E_1","P/B_1","Div Yield_1"]].dropna()
+        d.columns = ["Date","P/E","P/B","Dividend Yield"]
 
-        d = d.rename(columns={
-            "Date_1":"Date",
-            "P/E_1":"P/E",
-            "P/B_1":"P/B",
-            "Div Yield_1":"Dividend Yield"
-        })
+        for col, title in [
+            ("P/E", "NIFTY 50 – P/E"),
+            ("P/B", "NIFTY 50 – P/B"),
+            ("Dividend Yield", "NIFTY 50 – Dividend Yield")
+        ]:
+            fig = px.line(d, x="Date", y=col, title=title)
+            fig.update_layout(height=600, hovermode="x unified", template="plotly_white")
+            draw_fixed(fig)
 
-        plot_index_line(d, "Date", "P/E", "NIFTY 50 – P/E", "idx_n50_pe")
-        plot_index_line(d, "Date", "P/B", "NIFTY 50 – P/B", "idx_n50_pb")
-        plot_index_line(d, "Date", "Dividend Yield", "NIFTY 50 – Dividend Yield", "idx_n50_div")
-
-    # ================= MIDCAP 100 =================
+    # ---------------- MIDCAP 100 ----------------
     with tab2:
-        d = df[
-            (df["Date_2"] >= start_dt) &
-            (df["Date_2"] <= end_dt)
-        ][["Date_2","P/E_2","P/B_2","Div Yield_2"]].dropna()
+        d = df[(df["Date_2"] >= start_dt) & (df["Date_2"] <= end_dt)]
+        d = d[["Date_2","P/E_2","P/B_2","Div Yield_2"]].dropna()
+        d.columns = ["Date","P/E","P/B","Dividend Yield"]
 
-        d = d.rename(columns={
-            "Date_2":"Date",
-            "P/E_2":"P/E",
-            "P/B_2":"P/B",
-            "Div Yield_2":"Dividend Yield"
-        })
+        for col, title in [
+            ("P/E", "MIDCAP 100 – P/E"),
+            ("P/B", "MIDCAP 100 – P/B"),
+            ("Dividend Yield", "MIDCAP 100 – Dividend Yield")
+        ]:
+            fig = px.line(d, x="Date", y=col, title=title)
+            fig.update_layout(height=600, hovermode="x unified", template="plotly_white")
+            draw_fixed(fig)
 
-        plot_index_line(d, "Date", "P/E", "MIDCAP 100 – P/E", "idx_mid_pe")
-        plot_index_line(d, "Date", "P/B", "MIDCAP 100 – P/B", "idx_mid_pb")
-        plot_index_line(d, "Date", "Dividend Yield", "MIDCAP 100 – Dividend Yield", "idx_mid_div")
-
-    # ================= SMALLCAP 250 =================
+    # ---------------- SMALLCAP 250 ----------------
     with tab3:
-        d = df[
-            (df["Date_3"] >= start_dt) &
-            (df["Date_3"] <= end_dt)
-        ][["Date_3","P/E_3","P/B_3","Div Yield_3"]].dropna()
+        d = df[(df["Date_3"] >= start_dt) & (df["Date_3"] <= end_dt)]
+        d = d[["Date_3","P/E_3","P/B_3","Div Yield_3"]].dropna()
+        d.columns = ["Date","P/E","P/B","Dividend Yield"]
 
-        d = d.rename(columns={
-            "Date_3":"Date",
-            "P/E_3":"P/E",
-            "P/B_3":"P/B",
-            "Div Yield_3":"Dividend Yield"
-        })
+        for col, title in [
+            ("P/E", "SMALLCAP 250 – P/E"),
+            ("P/B", "SMALLCAP 250 – P/B"),
+            ("Dividend Yield", "SMALLCAP 250 – Dividend Yield")
+        ]:
+            fig = px.line(d, x="Date", y=col, title=title)
+            fig.update_layout(height=600, hovermode="x unified", template="plotly_white")
+            draw_fixed(fig)
 
-        plot_index_line(d, "Date", "P/E", "SMALLCAP 250 – P/E", "idx_sc_pe")
-        plot_index_line(d, "Date", "P/B", "SMALLCAP 250 – P/B", "idx_sc_pb")
-        plot_index_line(d, "Date", "Dividend Yield", "SMALLCAP 250 – Dividend Yield", "idx_sc_div")
 
 # =================================================
 # ASSET CLASS CHARTS (TABS)
@@ -879,6 +859,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
