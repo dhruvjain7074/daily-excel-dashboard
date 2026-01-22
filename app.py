@@ -549,9 +549,6 @@ if view == "Index Futures OI":
 # =================================================
 # INDEX (PE / PB / DIV YIELD)
 # =================================================
-st.write("DEBUG df_index_val rows:", df_index_val.shape)
-st.write("DEBUG df_index_val columns:", list(df_index_val.columns))
-
 if view == "Index (PE/PB/DIVYLD)":
 
     st.subheader("📈 Index Valuation Metrics")
@@ -835,6 +832,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
