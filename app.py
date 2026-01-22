@@ -190,25 +190,24 @@ def plot_single_line(
     height=600,
     y_label=None,
     title=None,
-    color="#1f77b4",
-    key=None
+    color=None,
+    key=None,              # 🔴 REQUIRED
 ):
-    fig = px.line(
-        df,
-        x=x,
-        y=y,
-        render_mode="svg"   # 🔴 THIS FIXES THE INVISIBLE LINE
-    )
+    fig = px.line(df, x=x, y=y)
+
+    if color:
+        fig.update_traces(line=dict(color=color, width=2.6))
+    else:
+        fig.update_traces(line=dict(width=2.6))
 
     fig.update_traces(
-        line=dict(color=color, width=2.8),
         hovertemplate="Date: %{x|%d-%m-%y}<br>"
                       "Value: %{y}<extra></extra>"
     )
 
     fig.update_layout(
-        height=height,
         hovermode="x unified",
+        height=height,
         yaxis_title=y_label,
         title=title,
         title_x=0.5,
@@ -221,11 +220,7 @@ def plot_single_line(
         showexponent="none"
     )
 
-    st.plotly_chart(
-        fig,
-        use_container_width=True,
-        key=key
-    )
+    st.plotly_chart(fig, use_container_width=True, key=key)
 
 # =================================================
 # DATASET 1 / 2 / 3 VIEW
@@ -547,27 +542,36 @@ if view == "Index Futures OI":
 
     st.plotly_chart(fig_cf, use_container_width=True)
 # =================================================
-# INDEX (PE / PB / DIV YIELD)
+# INDEX (PE / PB / DIV YLD)
 # =================================================
-if view == "Index (PE/PB/DIVYLD)":
+if view == "Index (PE / PB / DIV YLD)":
 
     st.subheader("📈 Index Valuation Metrics")
 
     df = df_index_val.copy()
 
-    # ===============================
-    # DATE CONVERSION
-    # ===============================
+    # -------------------------------
+    # Convert dates safely
+    # -------------------------------
     for c in ["Date_1", "Date_2", "Date_3"]:
         df[c] = pd.to_datetime(df[c], errors="coerce", dayfirst=True)
 
     df = df.dropna(subset=["Date_1", "Date_2", "Date_3"], how="all")
 
-    # ===============================
-    # GLOBAL DATE FILTER
-    # ===============================
-    min_date = min(df["Date_1"].min(), df["Date_2"].min(), df["Date_3"].min()).date()
-    max_date = max(df["Date_1"].max(), df["Date_2"].max(), df["Date_3"].max()).date()
+    # -------------------------------
+    # Global date filter
+    # -------------------------------
+    min_date = min(
+        df["Date_1"].min(),
+        df["Date_2"].min(),
+        df["Date_3"].min()
+    ).date()
+
+    max_date = max(
+        df["Date_1"].max(),
+        df["Date_2"].max(),
+        df["Date_3"].max()
+    ).date()
 
     start_date, end_date = st.date_input(
         "📅 Select date range",
@@ -577,9 +581,9 @@ if view == "Index (PE/PB/DIVYLD)":
     start_dt = pd.to_datetime(start_date)
     end_dt = pd.to_datetime(end_date)
 
-    # ===============================
-    # TABS
-    # ===============================
+    # -------------------------------
+    # Tabs
+    # -------------------------------
     tab1, tab2, tab3 = st.tabs(
         ["NIFTY 50", "NIFTY MIDCAP 100", "NIFTY SMALLCAP 250"]
     )
@@ -600,11 +604,20 @@ if view == "Index (PE/PB/DIVYLD)":
             }
         )
 
-        nifty = nifty.apply(pd.to_numeric, errors="ignore").dropna(subset=["Date"])
+        nifty[["P/E", "P/B", "Dividend Yield"]] = nifty[
+            ["P/E", "P/B", "Dividend Yield"]
+        ].apply(pd.to_numeric, errors="coerce")
 
-        plot_single_line(nifty, "Date", "P/E", title="NIFTY 50 – P/E", key="n50_pe")
-        plot_single_line(nifty, "Date", "P/B", title="NIFTY 50 – P/B", key="n50_pb")
-        plot_single_line(nifty, "Date", "Dividend Yield", title="NIFTY 50 – Dividend Yield", key="n50_div")
+        nifty = nifty.dropna(subset=["Date"])
+
+        plot_single_line(nifty, "Date", "P/E",
+            title="NIFTY 50 – P/E", key="n50_pe")
+
+        plot_single_line(nifty, "Date", "P/B",
+            title="NIFTY 50 – P/B", key="n50_pb")
+
+        plot_single_line(nifty, "Date", "Dividend Yield",
+            title="NIFTY 50 – Dividend Yield", key="n50_div")
 
     # ===============================
     # MIDCAP 100
@@ -622,11 +635,20 @@ if view == "Index (PE/PB/DIVYLD)":
             }
         )
 
-        mid = mid.apply(pd.to_numeric, errors="ignore").dropna(subset=["Date"])
+        mid[["P/E", "P/B", "Dividend Yield"]] = mid[
+            ["P/E", "P/B", "Dividend Yield"]
+        ].apply(pd.to_numeric, errors="coerce")
 
-        plot_single_line(mid, "Date", "P/E", title="MIDCAP 100 – P/E", key="mid_pe")
-        plot_single_line(mid, "Date", "P/B", title="MIDCAP 100 – P/B", key="mid_pb")
-        plot_single_line(mid, "Date", "Dividend Yield", title="MIDCAP 100 – Dividend Yield", key="mid_div")
+        mid = mid.dropna(subset=["Date"])
+
+        plot_single_line(mid, "Date", "P/E",
+            title="MIDCAP 100 – P/E", key="mid_pe")
+
+        plot_single_line(mid, "Date", "P/B",
+            title="MIDCAP 100 – P/B", key="mid_pb")
+
+        plot_single_line(mid, "Date", "Dividend Yield",
+            title="MIDCAP 100 – Dividend Yield", key="mid_div")
 
     # ===============================
     # SMALLCAP 250
@@ -644,11 +666,20 @@ if view == "Index (PE/PB/DIVYLD)":
             }
         )
 
-        small = small.apply(pd.to_numeric, errors="ignore").dropna(subset=["Date"])
+        small[["P/E", "P/B", "Dividend Yield"]] = small[
+            ["P/E", "P/B", "Dividend Yield"]
+        ].apply(pd.to_numeric, errors="coerce")
 
-        plot_single_line(small, "Date", "P/E", title="SMALLCAP 250 – P/E", key="sc_pe")
-        plot_single_line(small, "Date", "P/B", title="SMALLCAP 250 – P/B", key="sc_pb")
-        plot_single_line(small, "Date", "Dividend Yield", title="SMALLCAP 250 – Dividend Yield", key="sc_div")
+        small = small.dropna(subset=["Date"])
+
+        plot_single_line(small, "Date", "P/E",
+            title="SMALLCAP 250 – P/E", key="sc_pe")
+
+        plot_single_line(small, "Date", "P/B",
+            title="SMALLCAP 250 – P/B", key="sc_pb")
+
+        plot_single_line(small, "Date", "Dividend Yield",
+            title="SMALLCAP 250 – Dividend Yield", key="sc_div")
 
 
 # =================================================
@@ -832,6 +863,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
