@@ -191,18 +191,13 @@ def plot_single_line(
     y_label=None,
     title=None,
     color=None,
-    key=None,              # 🔴 REQUIRED
+    key=None,
 ):
     fig = px.line(df, x=x, y=y)
 
-    if color:
-        fig.update_traces(line=dict(color=color, width=2.6))
-    else:
-        fig.update_traces(line=dict(width=2.6))
-
     fig.update_traces(
-        hovertemplate="Date: %{x|%d-%m-%y}<br>"
-                      "Value: %{y}<extra></extra>"
+        line=dict(width=2.6, color=color) if color else dict(width=2.6),
+        hovertemplate="Date: %{x|%d-%m-%y}<br>Value: %{y}<extra></extra>"
     )
 
     fig.update_layout(
@@ -215,17 +210,9 @@ def plot_single_line(
         margin=dict(l=40, r=40, t=60, b=40)
     )
 
-    fig.update_yaxes(
-        tickformat=",",
-        showexponent="none"
-    )
-    
-    st.plotly_chart(
-        fig,
-        use_container_width=True,
-        key=key
-    )
-        
+    fig.update_yaxes(tickformat=",", showexponent="none")
+
+    # 🔴 ONLY ONCE
     st.plotly_chart(fig, use_container_width=True, key=key)
 
 # =================================================
@@ -869,6 +856,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
