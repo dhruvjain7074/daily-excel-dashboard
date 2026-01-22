@@ -638,7 +638,7 @@ if view == "Index (PE / PB / DIV YLD)":
     )
 
     def draw_fixed(fig):
-        st.plotly_chart(fig, use_container_width=False, width=1200)
+        st.plotly_chart(fig, use_container_width=True)
 
     # ---------------- NIFTY 50 ----------------
     with tab1:
@@ -867,6 +867,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
