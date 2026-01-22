@@ -540,6 +540,33 @@ if view == "Index Futures OI":
 # =================================================
 # INDEX (PE / PB / DIV YLD) — STABLE VERSION
 # =================================================
+# =================================================
+# PLOTLY FIGURE BUILDER (ANTI-FLICKER)
+# =================================================
+def build_line_figure(df, x, y, title=None, color=None, height=600):
+    fig = px.line(df, x=x, y=y)
+
+    fig.update_traces(
+        line=dict(width=2.6, color=color) if color else dict(width=2.6),
+        hovertemplate="Date: %{x|%d-%m-%y}<br>Value: %{y}<extra></extra>"
+    )
+
+    fig.update_layout(
+        height=height,
+        hovermode="x unified",
+        title=title,
+        title_x=0.5,
+        template="plotly_white",
+        margin=dict(l=40, r=40, t=60, b=40)
+    )
+
+    fig.update_yaxes(
+        tickformat=",",
+        showexponent="none"
+    )
+
+    return fig
+
 if view == "Index (PE / PB / DIV YLD)":
 
     st.subheader("📈 Index Valuation Metrics")
@@ -886,6 +913,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
