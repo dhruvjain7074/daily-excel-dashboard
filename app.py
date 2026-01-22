@@ -65,11 +65,20 @@ def load_data():
 
         df = pd.DataFrame(rows, columns=headers)
 
-        # clean column names
-        df.columns = df.columns.str.strip()
+       # clean column names
+df.columns = (
+    pd.Series(df.columns)
+    .astype(str)
+    .str.strip()
+    .str.replace("\u00a0", " ", regex=True)
+)
 
-        # replace empty strings with NaN
-        df = df.replace("", pd.NA)
+# 🔴 REMOVE EMPTY COLUMN NAMES (CRITICAL FIX)
+df = df.loc[:, df.columns != ""]
+
+# replace empty cell values with NA
+df = df.replace("", pd.NA)
+
 
         return df
 
@@ -826,6 +835,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
