@@ -38,6 +38,29 @@ st.markdown(
 
 st.title("📊 Daily Excel Dashboard")
 # =================================================
+# STABLE PLOT FUNCTION (INDEX PE / PB / DIV ONLY)
+# =================================================
+def plot_index_line(df, x, y, title, key):
+    fig = px.line(df, x=x, y=y)
+
+    fig.update_traces(
+        line=dict(width=2.6),
+        hovertemplate="Date: %{x|%d-%m-%y}<br>Value: %{y}<extra></extra>"
+    )
+
+    fig.update_layout(
+        height=600,
+        hovermode="x unified",
+        title=title,
+        title_x=0.5,
+        template="plotly_white",
+        margin=dict(l=40, r=40, t=60, b=40)
+    )
+
+    fig.update_yaxes(tickformat=",", showexponent="none")
+
+    st.plotly_chart(fig, use_container_width=True, key=key)
+# =================================================
 # LOAD DATA (GOOGLE SHEETS – MULTI SHEET)
 # =================================================
 def load_data():
@@ -537,9 +560,7 @@ if view == "Index Futures OI":
     )
 
     st.plotly_chart(fig_cf, use_container_width=True)
-# =================================================
-# INDEX (PE / PB / DIV YLD) — STABLE VERSION
-# =================================================
+
 # =================================================
 # PLOTLY FIGURE BUILDER (ANTI-FLICKER)
 # =================================================
@@ -566,38 +587,38 @@ def build_line_figure(df, x, y, title=None, color=None, height=600):
     )
 
     return fig
-
+# =================================================
+# INDEX (PE / PB / DIV YLD) — STABLE VERSION
+# =================================================
+# =================================================
+# INDEX (PE / PB / DIV YLD)
+# =================================================
 if view == "Index (PE / PB / DIV YLD)":
 
     st.subheader("📈 Index Valuation Metrics")
 
     df = df_index_val.copy()
 
-    # -------------------------------------------------
-    # CLEAN EMPTY COLUMNS (CRITICAL)
-    # -------------------------------------------------
+    # ---- remove empty columns ----
     df = df.loc[:, df.columns != ""]
 
-    # -------------------------------------------------
-    # CONVERT DATES & NUMBERS SAFELY
-    # -------------------------------------------------
-    for col in ["Date_1", "Date_2", "Date_3"]:
-        df[col] = pd.to_datetime(df[col], errors="coerce", dayfirst=True)
+    # ---- date conversion ----
+    for c in ["Date_1", "Date_2", "Date_3"]:
+        df[c] = pd.to_datetime(df[c], errors="coerce", dayfirst=True)
 
+    # ---- numeric conversion ----
     num_cols = [
-        "P/E_1", "P/B_1", "Div Yield_1",
-        "P/E_2", "P/B_2", "Div Yield_2",
-        "P/E_3", "P/B_3", "Div Yield_3",
+        "P/E_1","P/B_1","Div Yield_1",
+        "P/E_2","P/B_2","Div Yield_2",
+        "P/E_3","P/B_3","Div Yield_3"
     ]
 
-    for col in num_cols:
-        df[col] = pd.to_numeric(df[col], errors="coerce")
+    for c in num_cols:
+        df[c] = pd.to_numeric(df[c], errors="coerce")
 
     df = df.dropna(how="all")
 
-    # -------------------------------------------------
-    # GLOBAL DATE FILTER
-    # -------------------------------------------------
+    # ---- date filter ----
     min_date = min(
         df["Date_1"].min(),
         df["Date_2"].min(),
@@ -618,119 +639,64 @@ if view == "Index (PE / PB / DIV YLD)":
     start_dt = pd.to_datetime(start_date)
     end_dt = pd.to_datetime(end_date)
 
-    # -------------------------------------------------
-    # TABS
-    # -------------------------------------------------
+    # ---- tabs ----
     tab1, tab2, tab3 = st.tabs(
         ["NIFTY 50", "NIFTY MIDCAP 100", "NIFTY SMALLCAP 250"]
     )
 
-    # =================================================
-    # TAB 1 — NIFTY 50
-    # =================================================
+    # ================= NIFTY 50 =================
     with tab1:
-        nifty = df[
+        d = df[
             (df["Date_1"] >= start_dt) &
             (df["Date_1"] <= end_dt)
-        ][["Date_1", "P/E_1", "P/B_1", "Div Yield_1"]].rename(
-            columns={
-                "Date_1": "Date",
-                "P/E_1": "P/E",
-                "P/B_1": "P/B",
-                "Div Yield_1": "Dividend Yield"
-            }
-        ).dropna()
+        ][["Date_1","P/E_1","P/B_1","Div Yield_1"]].dropna()
 
-        if "idx_nifty_pe" not in st.session_state:
-            st.session_state.idx_nifty_pe = build_line_figure(
-                nifty, "Date", "P/E", "NIFTY 50 – P/E"
-            )
+        d = d.rename(columns={
+            "Date_1":"Date",
+            "P/E_1":"P/E",
+            "P/B_1":"P/B",
+            "Div Yield_1":"Dividend Yield"
+        })
 
-        if "idx_nifty_pb" not in st.session_state:
-            st.session_state.idx_nifty_pb = build_line_figure(
-                nifty, "Date", "P/B", "NIFTY 50 – P/B"
-            )
+        plot_index_line(d, "Date", "P/E", "NIFTY 50 – P/E", "idx_n50_pe")
+        plot_index_line(d, "Date", "P/B", "NIFTY 50 – P/B", "idx_n50_pb")
+        plot_index_line(d, "Date", "Dividend Yield", "NIFTY 50 – Dividend Yield", "idx_n50_div")
 
-        if "idx_nifty_div" not in st.session_state:
-            st.session_state.idx_nifty_div = build_line_figure(
-                nifty, "Date", "Dividend Yield", "NIFTY 50 – Dividend Yield"
-            )
-
-        st.plotly_chart(st.session_state.idx_nifty_pe, use_container_width=True)
-        st.plotly_chart(st.session_state.idx_nifty_pb, use_container_width=True)
-        st.plotly_chart(st.session_state.idx_nifty_div, use_container_width=True)
-
-    # =================================================
-    # TAB 2 — MIDCAP 100
-    # =================================================
+    # ================= MIDCAP 100 =================
     with tab2:
-        mid = df[
+        d = df[
             (df["Date_2"] >= start_dt) &
             (df["Date_2"] <= end_dt)
-        ][["Date_2", "P/E_2", "P/B_2", "Div Yield_2"]].rename(
-            columns={
-                "Date_2": "Date",
-                "P/E_2": "P/E",
-                "P/B_2": "P/B",
-                "Div Yield_2": "Dividend Yield"
-            }
-        ).dropna()
+        ][["Date_2","P/E_2","P/B_2","Div Yield_2"]].dropna()
 
-        if "idx_mid_pe" not in st.session_state:
-            st.session_state.idx_mid_pe = build_line_figure(
-                mid, "Date", "P/E", "MIDCAP 100 – P/E"
-            )
+        d = d.rename(columns={
+            "Date_2":"Date",
+            "P/E_2":"P/E",
+            "P/B_2":"P/B",
+            "Div Yield_2":"Dividend Yield"
+        })
 
-        if "idx_mid_pb" not in st.session_state:
-            st.session_state.idx_mid_pb = build_line_figure(
-                mid, "Date", "P/B", "MIDCAP 100 – P/B"
-            )
+        plot_index_line(d, "Date", "P/E", "MIDCAP 100 – P/E", "idx_mid_pe")
+        plot_index_line(d, "Date", "P/B", "MIDCAP 100 – P/B", "idx_mid_pb")
+        plot_index_line(d, "Date", "Dividend Yield", "MIDCAP 100 – Dividend Yield", "idx_mid_div")
 
-        if "idx_mid_div" not in st.session_state:
-            st.session_state.idx_mid_div = build_line_figure(
-                mid, "Date", "Dividend Yield", "MIDCAP 100 – Dividend Yield"
-            )
-
-        st.plotly_chart(st.session_state.idx_mid_pe, use_container_width=True)
-        st.plotly_chart(st.session_state.idx_mid_pb, use_container_width=True)
-        st.plotly_chart(st.session_state.idx_mid_div, use_container_width=True)
-
-    # =================================================
-    # TAB 3 — SMALLCAP 250
-    # =================================================
+    # ================= SMALLCAP 250 =================
     with tab3:
-        small = df[
+        d = df[
             (df["Date_3"] >= start_dt) &
             (df["Date_3"] <= end_dt)
-        ][["Date_3", "P/E_3", "P/B_3", "Div Yield_3"]].rename(
-            columns={
-                "Date_3": "Date",
-                "P/E_3": "P/E",
-                "P/B_3": "P/B",
-                "Div Yield_3": "Dividend Yield"
-            }
-        ).dropna()
+        ][["Date_3","P/E_3","P/B_3","Div Yield_3"]].dropna()
 
-        if "idx_small_pe" not in st.session_state:
-            st.session_state.idx_small_pe = build_line_figure(
-                small, "Date", "P/E", "SMALLCAP 250 – P/E"
-            )
+        d = d.rename(columns={
+            "Date_3":"Date",
+            "P/E_3":"P/E",
+            "P/B_3":"P/B",
+            "Div Yield_3":"Dividend Yield"
+        })
 
-        if "idx_small_pb" not in st.session_state:
-            st.session_state.idx_small_pb = build_line_figure(
-                small, "Date", "P/B", "SMALLCAP 250 – P/B"
-            )
-
-        if "idx_small_div" not in st.session_state:
-            st.session_state.idx_small_div = build_line_figure(
-                small, "Date", "Dividend Yield", "SMALLCAP 250 – Dividend Yield"
-            )
-
-        st.plotly_chart(st.session_state.idx_small_pe, use_container_width=True)
-        st.plotly_chart(st.session_state.idx_small_pb, use_container_width=True)
-        st.plotly_chart(st.session_state.idx_small_div, use_container_width=True)
-
-
+        plot_index_line(d, "Date", "P/E", "SMALLCAP 250 – P/E", "idx_sc_pe")
+        plot_index_line(d, "Date", "P/B", "SMALLCAP 250 – P/B", "idx_sc_pb")
+        plot_index_line(d, "Date", "Dividend Yield", "SMALLCAP 250 – Dividend Yield", "idx_sc_div")
 
 # =================================================
 # ASSET CLASS CHARTS (TABS)
@@ -913,6 +879,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
