@@ -570,123 +570,6 @@ if view == "Index Futures OI":
     st.plotly_chart(fig_cf, use_container_width=True)
 
 # =================================================
-# PLOTLY FIGURE BUILDER (ANTI-FLICKER)
-# =================================================
-def build_line_figure(df, x, y, title=None, color=None, height=600):
-    fig = px.line(df, x=x, y=y)
-
-    fig.update_traces(
-        line=dict(width=2.6, color=color) if color else dict(width=2.6),
-        hovertemplate="Date: %{x|%d-%m-%y}<br>Value: %{y}<extra></extra>"
-    )
-
-    fig.update_layout(
-        height=height,
-        hovermode="x unified",
-        title=title,
-        title_x=0.5,
-        template="plotly_white",
-        margin=dict(l=40, r=40, t=60, b=40)
-    )
-
-    fig.update_yaxes(
-        tickformat=",",
-        showexponent="none"
-    )
-
-    return fig
-# =================================================
-# INDEX (PE / PB / DIV YLD) — GUARANTEED STABLE
-# =================================================
-if view == "Index (PE / PB / DIV YLD)":
-
-    st.subheader("📈 Index Valuation Metrics")
-
-    df = df_index_val.copy()
-
-    # ---- clean columns ----
-    df = df.loc[:, df.columns != ""]
-
-    # ---- date conversion ----
-    for c in ["Date_1", "Date_2", "Date_3"]:
-        df[c] = pd.to_datetime(df[c], errors="coerce", dayfirst=True)
-
-    # ---- numeric conversion ----
-    for c in [
-        "P/E_1","P/B_1","Div Yield_1",
-        "P/E_2","P/B_2","Div Yield_2",
-        "P/E_3","P/B_3","Div Yield_3"
-    ]:
-        df[c] = pd.to_numeric(df[c], errors="coerce")
-
-    df = df.dropna(how="all")
-
-    # ---- date filter ----
-    min_date = min(df["Date_1"].min(), df["Date_2"].min(), df["Date_3"].min()).date()
-    max_date = max(df["Date_1"].max(), df["Date_2"].max(), df["Date_3"].max()).date()
-
-    start_date, end_date = st.date_input(
-        "📅 Select date range",
-        [min_date, max_date]
-    )
-
-    start_dt = pd.to_datetime(start_date)
-    end_dt = pd.to_datetime(end_date)
-
-    tab1, tab2, tab3 = st.tabs(
-        ["NIFTY 50", "NIFTY MIDCAP 100", "NIFTY SMALLCAP 250"]
-    )
-
-    def draw_fixed(fig):
-        st.plotly_chart(fig, use_container_width=True)
-
-    # ---------------- NIFTY 50 ----------------
-    with tab1:
-        d = df[(df["Date_1"] >= start_dt) & (df["Date_1"] <= end_dt)]
-        d = d[["Date_1","P/E_1","P/B_1","Div Yield_1"]].dropna()
-        d.columns = ["Date","P/E","P/B","Dividend Yield"]
-
-        for col, title in [
-            ("P/E", "NIFTY 50 – P/E"),
-            ("P/B", "NIFTY 50 – P/B"),
-            ("Dividend Yield", "NIFTY 50 – Dividend Yield")
-        ]:
-            fig = px.line(d, x="Date", y=col, title=title)
-            fig.update_layout(height=600, hovermode="x unified", template="plotly_white")
-            draw_fixed(fig)
-
-    # ---------------- MIDCAP 100 ----------------
-    with tab2:
-        d = df[(df["Date_2"] >= start_dt) & (df["Date_2"] <= end_dt)]
-        d = d[["Date_2","P/E_2","P/B_2","Div Yield_2"]].dropna()
-        d.columns = ["Date","P/E","P/B","Dividend Yield"]
-
-        for col, title in [
-            ("P/E", "MIDCAP 100 – P/E"),
-            ("P/B", "MIDCAP 100 – P/B"),
-            ("Dividend Yield", "MIDCAP 100 – Dividend Yield")
-        ]:
-            fig = px.line(d, x="Date", y=col, title=title)
-            fig.update_layout(height=600, hovermode="x unified", template="plotly_white")
-            draw_fixed(fig)
-
-    # ---------------- SMALLCAP 250 ----------------
-    with tab3:
-        d = df[(df["Date_3"] >= start_dt) & (df["Date_3"] <= end_dt)]
-        d = d[["Date_3","P/E_3","P/B_3","Div Yield_3"]].dropna()
-        d.columns = ["Date","P/E","P/B","Dividend Yield"]
-
-        for col, title in [
-            ("P/E", "SMALLCAP 250 – P/E"),
-            ("P/B", "SMALLCAP 250 – P/B"),
-            ("Dividend Yield", "SMALLCAP 250 – Dividend Yield")
-        ]:
-            fig = px.line(d, x="Date", y=col, title=title)
-            fig.update_layout(height=600, hovermode="x unified", template="plotly_white")
-            draw_fixed(fig)
-
-
-# =================================================
 # ASSET CLASS CHARTS (TABS)
 # =================================================
 if view == "Asset Class Charts":
@@ -867,6 +750,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
