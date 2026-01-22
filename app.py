@@ -73,13 +73,13 @@ df.columns = (
     .str.replace("\u00a0", " ", regex=True)
 )
 
-# 🔴 REMOVE EMPTY COLUMN NAMES (CRITICAL FIX)
-df = df.loc[:, df.columns != ""]
+    # 🔴 REMOVE EMPTY COLUMN NAMES (CRITICAL FIX)
+    df = df.loc[:, df.columns != ""]
 
-# replace empty cell values with NA
-df = df.replace("", pd.NA)
+    # replace empty cell values with NA
+    df = df.replace("", pd.NA)
 
-return df
+    return df
 
     # ---- READ ALL REQUIRED SHEETS ----
     df_main = read_worksheet("comparision charts")
@@ -834,6 +834,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
