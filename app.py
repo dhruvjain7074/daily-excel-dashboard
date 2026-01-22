@@ -37,7 +37,7 @@ st.markdown(
 )
 
 st.title("📊 Daily Excel Dashboard")
-
+# load data
 def load_data():
     scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
@@ -51,32 +51,31 @@ def load_data():
     SPREADSHEET_ID = "13UqMshnNj01OTGpsEjw7t1TEYZt6rBNpPWcTxLV2ZzM"
     sheet = client.open_by_key(SPREADSHEET_ID)
 
-    def read_worksheet(name):
-        ws = sheet.worksheet(name)
+    def read_worksheet(sheet_name):
+        ws = sheet.worksheet(sheet_name)
         values = ws.get_all_values()
+
+        if not values or len(values) < 2:
+            return pd.DataFrame()
 
         headers = values[0]
         rows = values[1:]
 
         df = pd.DataFrame(rows, columns=headers)
 
-        # 🔴 IMPORTANT CLEANING (DO NOT REMOVE)
-        df.columns = (
-            pd.Series(df.columns)
-            .astype(str)
-            .str.strip()
-            .str.replace("\u00a0", " ", regex=True)
-        )
+        # clean column names
+        df.columns = df.columns.str.strip()
 
-        # 🔴 REMOVE BLANK COLUMNS (THIS FIXES YOUR ISSUE)
-        df = df.loc[:, df.columns != ""]
+        # replace empty strings with NaN
+        df = df.replace("", pd.NA)
 
         return df
 
+    # ---- READ ALL REQUIRED SHEETS ----
     df_main = read_worksheet("comparision charts")
     df_rbi = read_worksheet("Rbi net liquidity")
     df_index_oi = read_worksheet("Index oi charts")
-    df_index_val = read_worksheet("index(pe/pb/divyld)")
+    df_index_val = read_worksheet("index (pe/pb/divyld)")
 
     return df_main, df_rbi, df_index_oi, df_index_val
 
@@ -825,6 +824,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
