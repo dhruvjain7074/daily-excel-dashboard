@@ -66,7 +66,7 @@ def load_data():
         df = pd.DataFrame(rows, columns=headers)
 
        # clean column names
-df.columns = (
+    df.columns = (
     pd.Series(df.columns)
     .astype(str)
     .str.strip()
@@ -74,18 +74,18 @@ df.columns = (
 )
 
     # 🔴 REMOVE EMPTY COLUMN NAMES (CRITICAL FIX)
-df = df.loc[:, df.columns != ""]
+    df = df.loc[:, df.columns != ""]
 
     # replace empty cell values with NA
-df = df.replace("", pd.NA)
+    df = df.replace("", pd.NA)
 
     return df
 
     # ---- READ ALL REQUIRED SHEETS ----
-df_main = read_worksheet("comparision charts")
-df_rbi = read_worksheet("Rbi net liquidity")
-df_index_oi = read_worksheet("Index oi charts")
-df_index_val = read_worksheet("index (pe/pb/divyld)")
+    df_main = read_worksheet("comparision charts")
+    df_rbi = read_worksheet("Rbi net liquidity")
+    df_index_oi = read_worksheet("Index oi charts")
+    df_index_val = read_worksheet("index (pe/pb/divyld)")
 
 return df_main, df_rbi, df_index_oi, df_index_val
 
@@ -834,6 +834,7 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+
 
 
 
