@@ -838,12 +838,36 @@ if view == "Metal Charts":
 # =================================================
 if view == "Tariff Timeline":
 
-    st.subheader("📜 Tariff Timeline (RAW)")
+    st.subheader("📜 Tariff Timeline")
 
-    st.write("Shape:", df_tariff.shape)
-    st.write("Columns:", list(df_tariff.columns))
+    col = df_tariff.columns[0]
 
-    st.dataframe(df_tariff, use_container_width=True)
+    st.markdown(
+        """
+        <style>
+        .tariff-box {
+            white-space: pre-wrap;      /* 🔴 THIS ENABLES WRAPPING */
+            word-wrap: break-word;
+            line-height: 1.6;
+            font-size: 15px;
+            padding: 10px;
+            border-left: 4px solid #4A90E2;
+            margin-bottom: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    for text in df_tariff[col].dropna():
+        st.markdown(
+            f'<div class="tariff-box">{text}</div>',
+            unsafe_allow_html=True
+        )
+
+
 
 
 
