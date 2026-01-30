@@ -117,11 +117,12 @@ def load_data():
     df_rbi = read_worksheet("Rbi net liquidity")
     df_index_oi = read_worksheet("Index oi charts")
     df_index_val = read_worksheet("index (pe/pb/divyld)")
+    df_tariff = read_worksheet("Tariff Timeline")
 
-    return df_main, df_rbi, df_index_oi, df_index_val
+    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff
 
 # ---- CALL ONCE ----
-df_main, df_rbi, df_index_oi, df_index_val = load_data()
+df_main, df_rbi, df_index_oi, df_index_val, df_tariff = load_data()
 
 # ===============================
 # CLEAN df_main (CRITICAL)
@@ -149,7 +150,8 @@ numeric_cols_oi = [
     "Future Index Short",
     "total client oi",
     "Client OI",
-    "FII OI"
+    "FII OI",
+    "Tariff Timeline"
 ]
 
 for col in numeric_cols_oi:
@@ -831,59 +833,23 @@ if view == "Metal Charts":
                         os.path.join(folder_path, img),
                         use_container_width=True
                     )
+# =================================================
+# TARIFF TIMELINE
+# =================================================
+if view == "Tariff Timeline":
 
+    st.subheader("📜 Tariff Timeline")
 
+    df = df_tariff.copy()
 
+    # Remove empty columns
+    df = df.loc[:, df.columns != ""]
 
+    # Convert everything to string (safe for text)
+    df = df.fillna("").astype(str)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    # Display each row as text
+    for _, row in df.iterrows():
+        for cell in row:
+            if cell.strip():
+                st.markdown(f"- {cell}")
