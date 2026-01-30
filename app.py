@@ -837,9 +837,6 @@ if view == "Metal Charts":
 # TARIFF TIMELINE
 # =================================================
 if view == "Tariff Timeline":
-    st.write("Rows:", df_tariff.shape)
-    st.write(df_tariff.head())
-
     st.subheader("📜 Tariff Timeline")
 
     df = df_tariff.copy()
@@ -855,4 +852,5 @@ if view == "Tariff Timeline":
         for cell in row:
             if cell.strip():
                 st.markdown(f"- {cell}")
+
 
