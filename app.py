@@ -839,7 +839,7 @@ if view == "Metal Charts":
 if view == "Tariff Timeline":
     st.error("🔥 ENTERED TARIFF TIMELINE BLOCK")
     
-    if view == "Tariff_Timeline":
+if view == "Tariff_Timeline":
 
     st.subheader("📜 Tariff Timeline")
 
@@ -853,6 +853,7 @@ if view == "Tariff Timeline":
             for col in text_cols:
                 if pd.notna(row[col]):
                     st.markdown(f"- {row[col]}")
+
 
 
 
