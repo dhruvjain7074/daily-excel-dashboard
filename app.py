@@ -837,9 +837,6 @@ if view == "Metal Charts":
 # TARIFF TIMELINE
 # =================================================
 if view == "Tariff Timeline":
-    st.error("🔥 ENTERED TARIFF TIMELINE BLOCK")
-    
-if view == "Tariff Timeline":
 
     st.subheader("📜 Tariff Timeline (RAW)")
 
@@ -847,6 +844,7 @@ if view == "Tariff Timeline":
     st.write("Columns:", list(df_tariff.columns))
 
     st.dataframe(df_tariff, use_container_width=True)
+
 
 
 
