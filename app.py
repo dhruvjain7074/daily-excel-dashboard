@@ -840,10 +840,11 @@ if view == "Tariff Timeline":
 
     st.subheader("📜 Tariff Timeline")
 
-    col = df_tariff.columns[0]  # first column only
+    
+    st.write("Columns:", list(df_tariff.columns))
 
-    for text in df_tariff[col].dropna():
-        st.markdown(f"• {text}")
+    st.dataframe(df_tariff, use_container_width=True)
+
 
 
 
