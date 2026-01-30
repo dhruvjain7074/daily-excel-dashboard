@@ -117,7 +117,7 @@ def load_data():
     df_rbi = read_worksheet("Rbi net liquidity")
     df_index_oi = read_worksheet("Index oi charts")
     df_index_val = read_worksheet("index (pe/pb/divyld)")
-    df_tariff = read_worksheet("Tariff Timeline")
+    df_tariff = read_worksheet("Tariff_Timeline")
 
     return df_main, df_rbi, df_index_oi, df_index_val, df_tariff
 
@@ -836,7 +836,7 @@ if view == "Metal Charts":
 # =================================================
 # TARIFF TIMELINE
 # =================================================
-if view == "Tariff Timeline":
+if view == "Tariff_Timeline":
 
     st.subheader("📜 Tariff Timeline")
 
@@ -850,6 +850,7 @@ if view == "Tariff Timeline":
             for col in text_cols:
                 if pd.notna(row[col]):
                     st.markdown(f"- {row[col]}")
+
 
 
 
