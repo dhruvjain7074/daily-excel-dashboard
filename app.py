@@ -151,7 +151,7 @@ numeric_cols_oi = [
     "total client oi",
     "Client OI",
     "FII OI",
-    "Tariff Timeline"
+    "Tariff Timeline",
 ]
 
 for col in numeric_cols_oi:
@@ -850,6 +850,7 @@ if view == "Tariff Timeline":
             for col in text_cols:
                 if pd.notna(row[col]):
                     st.markdown(f"- {row[col]}")
+
 
 
 
