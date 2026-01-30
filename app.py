@@ -839,20 +839,15 @@ if view == "Metal Charts":
 if view == "Tariff Timeline":
     st.error("🔥 ENTERED TARIFF TIMELINE BLOCK")
     
-if view == "Tariff_Timeline":
+if view == "Tariff Timeline":
 
-    st.subheader("📜 Tariff Timeline")
+    st.subheader("📜 Tariff Timeline (RAW)")
 
-    if df_tariff.empty:
-        st.info("No data found in Tariff Timeline sheet.")
-    else:
-        # Join all non-empty text into readable paragraphs
-        text_cols = df_tariff.columns.tolist()
+    st.write("Shape:", df_tariff.shape)
+    st.write("Columns:", list(df_tariff.columns))
 
-        for _, row in df_tariff.iterrows():
-            for col in text_cols:
-                if pd.notna(row[col]):
-                    st.markdown(f"- {row[col]}")
+    st.dataframe(df_tariff, use_container_width=True)
+
 
 
 
