@@ -151,7 +151,6 @@ numeric_cols_oi = [
     "total client oi",
     "Client OI",
     "FII OI",
-    "Tariff Timeline",
 ]
 
 for col in numeric_cols_oi:
@@ -179,7 +178,8 @@ view = st.selectbox(
         "Index (PE / PB / DIV YLD)",
         "Asset Class Charts",
         "Asset Class Charts Weekly",
-        "Metal Charts"
+        "Metal Charts",
+        "Tariff Timeline"
     ]
 )
 # =================================================
@@ -850,6 +850,7 @@ if view == "Tariff_Timeline":
             for col in text_cols:
                 if pd.notna(row[col]):
                     st.markdown(f"- {row[col]}")
+
 
 
 
