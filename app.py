@@ -837,20 +837,20 @@ if view == "Metal Charts":
 # TARIFF TIMELINE
 # =================================================
 if view == "Tariff Timeline":
+
     st.subheader("📜 Tariff Timeline")
 
-    df = df_tariff.copy()
+    if df_tariff.empty:
+        st.info("No data found in Tariff Timeline sheet.")
+    else:
+        # Join all non-empty text into readable paragraphs
+        text_cols = df_tariff.columns.tolist()
 
-    # Remove empty columns
-    df = df.loc[:, df.columns != ""]
+        for _, row in df_tariff.iterrows():
+            for col in text_cols:
+                if pd.notna(row[col]):
+                    st.markdown(f"- {row[col]}")
 
-    # Convert everything to string (safe for text)
-    df = df.fillna("").astype(str)
 
-    # Display each row as text
-    for _, row in df.iterrows():
-        for cell in row:
-            if cell.strip():
-                st.markdown(f"- {cell}")
 
 
