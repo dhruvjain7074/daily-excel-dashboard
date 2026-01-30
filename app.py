@@ -840,10 +840,8 @@ if view == "Tariff Timeline":
 
     st.subheader("📜 Tariff Timeline")
 
-    
-    st.write("Columns:", list(df_tariff.columns))
-
     st.dataframe(df_tariff, use_container_width=True)
+
 
 
 
