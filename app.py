@@ -840,32 +840,11 @@ if view == "Tariff Timeline":
 
     st.subheader("📜 Tariff Timeline")
 
-    col = df_tariff.columns[0]
-
-    st.markdown(
-        """
-        <style>
-        .tariff-box {
-            white-space: pre-wrap;      /* 🔴 THIS ENABLES WRAPPING */
-            word-wrap: break-word;
-            line-height: 1.6;
-            font-size: 15px;
-            padding: 10px;
-            border-left: 4px solid #4A90E2;
-            margin-bottom: 8px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
+    col = df_tariff.columns[0]  # first column only
 
     for text in df_tariff[col].dropna():
-        st.markdown(
-            f'<div class="tariff-box">{text}</div>',
-            unsafe_allow_html=True
-        )
+        st.markdown(f"• {text}")
+
 
 
 
