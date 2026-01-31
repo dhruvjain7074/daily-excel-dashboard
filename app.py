@@ -177,7 +177,6 @@ view = st.selectbox(
         "Index Futures OI",
         "Index (PE / PB / DIV YLD)",
         "Asset Class Charts",
-        "Asset Class Charts Weekly",
         "Metal Charts",
         "Tariff Timeline"
     ]
@@ -653,126 +652,68 @@ if view == "Index (PE / PB / DIV YLD)":
 
 
 # =================================================
-# ASSET CLASS CHARTS (TABS)
+# ASSET CLASS CHARTS (DAILY / WEEKLY)
 # =================================================
 if view == "Asset Class Charts":
 
-    st.subheader("📊 Asset Class Charts")
+    st.subheader("📷 Asset Class Charts")
 
-    base_folder = "asset_class_charts"
+    # ---- DAILY / WEEKLY SELECTOR ----
+    freq = st.radio(
+        "Select Frequency",
+        ["Daily", "Weekly"],
+        horizontal=True
+    )
 
-    asset_tabs = {
-        "DXY": "dxy",
-        "USDINR": "usdinr",
-        "NIFTYGS10YR": "niftygs10yr",
-        "IN10Y": "in10y",
-        "GOLD": "gold",
-        "SILVER": "silver",
-        "UKOIL": "ukoil",
-        "SPX": "spx",
-    }
+    base_folder = "asset_class_charts/daily" if freq == "Daily" else "asset_class_charts/weekly"
 
-    if not os.path.exists(base_folder):
-        st.warning("Folder 'asset_class_charts' not found.")
-    else:
-        tab_labels = list(asset_tabs.keys())
-        tabs = st.tabs(tab_labels)
+    assets = [
+        "DXY",
+        "USDINR",
+        "IN10Y",
+        "NIFTYGS10YR",
+        "GOLD",
+        "SILVER",
+        "UKOIL",
+        "SPX"
+    ]
 
-        for tab, (display_name, folder_name) in zip(tabs, asset_tabs.items()):
-            with tab:
-                folder_path = os.path.join(base_folder, folder_name)
+    tabs = st.tabs(assets)
 
-                if not os.path.exists(folder_path):
-                    st.info("No charts available.")
-                    continue
+    from datetime import datetime
 
-                images = [
-                    f for f in os.listdir(folder_path)
-                    if f.lower().endswith((".png", ".jpg", ".jpeg"))
-                ]
+    def extract_datetime(filename):
+        try:
+            parts = filename.rsplit("_", 2)
+            dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
+            return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
+        except Exception:
+            return datetime.min
 
-                if not images:
-                    st.info("No charts available.")
-                    continue
+    for tab, asset in zip(tabs, assets):
+        with tab:
+            folder = os.path.join(base_folder, asset)
 
-                # ---- SORT BY DATE & TIME FROM FILENAME ----
-                def extract_datetime(filename):
-                    try:
-                        parts = filename.rsplit("_", 2)
-                        dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
-                        return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
-                    except Exception:
-                        return datetime.min
+            if not os.path.exists(folder):
+                st.warning(f"No folder found for {asset}")
+                continue
 
-                images = sorted(images, key=extract_datetime)
+            images = [
+                f for f in os.listdir(folder)
+                if f.lower().endswith((".png", ".jpg", ".jpeg"))
+            ]
 
-                for img in images:
-                    st.image(
-                        os.path.join(folder_path, img),
-                        use_container_width=True
-                    )
+            if not images:
+                st.info("No images available.")
+                continue
 
-# =================================================
-# ASSET CLASS CHARTS WEEKLY (TABS)
-# =================================================
-if view == "Asset Class Charts Weekly":
+            images = sorted(images, key=extract_datetime)
 
-    st.subheader("📊 Asset Class Charts Weekly")
-
-    base_folder = "asset_class_charts_weekly"
-
-    weekly_tabs = {
-        "DXY": "dxy",
-        "USDINR": "usdinr",
-        "NIFTYGS10YR": "niftygs10yr",
-        "GOLD": "gold",
-        "SILVER": "silver",
-        "UKOIL": "ukoil",
-        "IN10Y": "in10y",
-        "SPX": "spx",
-        "EURINR": "eurinr",
-        "AW1!": "aw1",
-    }
-
-    if not os.path.exists(base_folder):
-        st.warning("Folder 'asset_class_charts_weekly' not found.")
-    else:
-        tab_labels = list(weekly_tabs.keys())
-        tabs = st.tabs(tab_labels)
-
-        for tab, (display_name, folder_name) in zip(tabs, weekly_tabs.items()):
-            with tab:
-                folder_path = os.path.join(base_folder, folder_name)
-
-                if not os.path.exists(folder_path):
-                    st.info("No charts available.")
-                    continue
-
-                images = [
-                    f for f in os.listdir(folder_path)
-                    if f.lower().endswith((".png", ".jpg", ".jpeg"))
-                ]
-
-                if not images:
-                    st.info("No charts available.")
-                    continue
-
-                # ---- SORT BY DATE & TIME FROM FILENAME ----
-                def extract_datetime(filename):
-                    try:
-                        parts = filename.rsplit("_", 2)
-                        dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
-                        return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
-                    except Exception:
-                        return datetime.min
-
-                images = sorted(images, key=extract_datetime)
-
-                for img in images:
-                    st.image(
-                        os.path.join(folder_path, img),
-                        use_container_width=True
-                    )
+            for img in images:
+                st.image(
+                    os.path.join(folder, img),
+                    use_container_width=True
+                )
 
 # =================================================
 # METAL CHARTS (TABS)
@@ -841,6 +782,7 @@ if view == "Tariff Timeline":
     st.subheader("📜 Tariff Timeline")
 
     st.dataframe(df_tariff, use_container_width=True)
+
 
 
 
