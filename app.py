@@ -760,7 +760,7 @@ if view == "Metal Charts":
         "Coal India",
         "Hindustan Zinc",
         "Vedanta",
-        "Dxy"
+        "DXY"
     ]
 
     tabs = st.tabs(metals)
@@ -788,6 +788,7 @@ if view == "Tariff Timeline":
     st.subheader("📜 Tariff Timeline")
 
     st.dataframe(df_tariff, use_container_width=True)
+
 
 
 
