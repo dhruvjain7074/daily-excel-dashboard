@@ -708,7 +708,8 @@ if view == "Asset Class Charts":
         "UKOIL",
         "SPX",
         "EURINR",
-        "AW1"
+        "AW1",
+        "EEM"
     ]
 
     tabs = st.tabs(assets)
@@ -788,6 +789,7 @@ if view == "Tariff Timeline":
     st.subheader("📜 Tariff Timeline")
 
     st.dataframe(df_tariff, use_container_width=True)
+
 
 
 
