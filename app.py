@@ -7,6 +7,32 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 # =================================================
+# IMAGE LOADER (CACHED – PERFORMANCE FIX)
+# =================================================
+from datetime import datetime
+
+@st.cache_data(show_spinner=False)
+def get_sorted_images(folder):
+    def extract_datetime(filename):
+        try:
+            parts = filename.rsplit("_", 2)
+            dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
+            return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
+        except Exception:
+            return datetime.min
+
+    if not os.path.exists(folder):
+        return []
+
+    images = [
+        f for f in os.listdir(folder)
+        if f.lower().endswith((".png", ".jpg", ".jpeg"))
+    ]
+
+    return sorted(images, key=extract_datetime)
+
+
+# =================================================
 # PAGE CONFIG
 # =================================================
 st.set_page_config(page_title="Daily Excel Dashboard", layout="wide")
@@ -658,7 +684,6 @@ if view == "Asset Class Charts":
 
     st.subheader("📷 Asset Class Charts")
 
-    # ---- FREQUENCY SELECTOR ----
     freq = st.radio(
         "Select Frequency",
         ["Daily", "Weekly", "Monthly"],
@@ -676,65 +701,46 @@ if view == "Asset Class Charts":
     assets = [
         "DXY",
         "USDINR",
-        "IN10Y",
         "NIFTYGS10YR",
+        "IN10Y",
         "GOLD",
         "SILVER",
         "UKOIL",
         "SPX",
         "EURINR",
-        "AW1!",
+        "AW1"
     ]
 
     tabs = st.tabs(assets)
-
-    from datetime import datetime
-
-    def extract_datetime(filename):
-        try:
-            parts = filename.rsplit("_", 2)
-            dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
-            return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
-        except Exception:
-            return datetime.min
 
     for tab, asset in zip(tabs, assets):
         with tab:
             folder = os.path.join(base_folder, asset)
 
-            if not os.path.exists(folder):
-                st.warning(f"No folder found for {asset}")
-                continue
-
-            images = [
-                f for f in os.listdir(folder)
-                if f.lower().endswith((".png", ".jpg", ".jpeg"))
-            ]
+            images = get_sorted_images(folder)
 
             if not images:
-                st.info("No images available.")
-                continue
+                st.info("No charts available.")
+            else:
+                for img in images:
+                    st.image(
+                        os.path.join(folder, img),
+                        use_container_width=True
+                    )
 
-            images = sorted(images, key=extract_datetime)
-
-            for img in images:
-                st.image(
-                    os.path.join(folder, img),
-                    use_container_width=True
-                )
 
 # =================================================
 # METAL CHARTS (DAILY / WEEKLY / MONTHLY)
 # =================================================
 if view == "Metal Charts":
 
-    st.subheader("🏗️ Metal Charts")
+    st.subheader("⛏️ Metal Charts")
 
-    # ---- FREQUENCY SELECTOR ----
     freq = st.radio(
         "Select Frequency",
         ["Daily", "Weekly", "Monthly"],
-        horizontal=True
+        horizontal=True,
+        key="metal_freq"
     )
 
     base_folder_map = {
@@ -758,40 +764,21 @@ if view == "Metal Charts":
 
     tabs = st.tabs(metals)
 
-    from datetime import datetime
-
-    def extract_datetime(filename):
-        try:
-            parts = filename.rsplit("_", 2)
-            dt_str = parts[-2] + "_" + parts[-1].split(".")[0]
-            return datetime.strptime(dt_str, "%Y-%m-%d_%H-%M-%S")
-        except Exception:
-            return datetime.min
-
     for tab, metal in zip(tabs, metals):
         with tab:
             folder = os.path.join(base_folder, metal)
 
-            if not os.path.exists(folder):
-                st.warning(f"No folder found for {metal}")
-                continue
-
-            images = [
-                f for f in os.listdir(folder)
-                if f.lower().endswith((".png", ".jpg", ".jpeg"))
-            ]
+            images = get_sorted_images(folder)
 
             if not images:
-                st.info("No images available.")
-                continue
+                st.info("No charts available.")
+            else:
+                for img in images:
+                    st.image(
+                        os.path.join(folder, img),
+                        use_container_width=True
+                    )
 
-            images = sorted(images, key=extract_datetime)
-
-            for img in images:
-                st.image(
-                    os.path.join(folder, img),
-                    use_container_width=True
-                )
 # =================================================
 # TARIFF TIMELINE
 # =================================================
@@ -800,6 +787,7 @@ if view == "Tariff Timeline":
     st.subheader("📜 Tariff Timeline")
 
     st.dataframe(df_tariff, use_container_width=True)
+
 
 
 
