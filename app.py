@@ -652,20 +652,26 @@ if view == "Index (PE / PB / DIV YLD)":
 
 
 # =================================================
-# ASSET CLASS CHARTS (DAILY / WEEKLY)
+# ASSET CLASS CHARTS (DAILY / WEEKLY / MONTHLY)
 # =================================================
 if view == "Asset Class Charts":
 
     st.subheader("📷 Asset Class Charts")
 
-    # ---- DAILY / WEEKLY SELECTOR ----
+    # ---- FREQUENCY SELECTOR ----
     freq = st.radio(
         "Select Frequency",
-        ["Daily", "Weekly"],
+        ["Daily", "Weekly", "Monthly"],
         horizontal=True
     )
 
-    base_folder = "asset_class_charts/daily" if freq == "Daily" else "asset_class_charts/weekly"
+    base_folder_map = {
+        "Daily": "asset_class_charts/daily",
+        "Weekly": "asset_class_charts/weekly",
+        "Monthly": "asset_class_charts/monthly"
+    }
+
+    base_folder = base_folder_map[freq]
 
     assets = [
         "DXY",
@@ -782,6 +788,7 @@ if view == "Tariff Timeline":
     st.subheader("📜 Tariff Timeline")
 
     st.dataframe(df_tariff, use_container_width=True)
+
 
 
 
