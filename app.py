@@ -144,11 +144,13 @@ def load_data():
     df_index_oi = read_worksheet("Index oi charts")
     df_index_val = read_worksheet("index (pe/pb/divyld)")
     df_tariff = read_worksheet("Tariff_Timeline")
+    df_global_rates = read_worksheet("Global interest rates")
 
-    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff
+
+    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates
 
 # ---- CALL ONCE ----
-df_main, df_rbi, df_index_oi, df_index_val, df_tariff = load_data()
+df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates = load_data()
 
 # ===============================
 # CLEAN df_main (CRITICAL)
@@ -204,7 +206,8 @@ view = st.selectbox(
         "Index (PE / PB / DIV YLD)",
         "Asset Class Charts",
         "Metal Charts",
-        "Tariff Timeline"
+        "Tariff Timeline",
+        "Global Interest Rates",
     ]
 )
 # =================================================
@@ -789,6 +792,61 @@ if view == "Tariff Timeline":
     st.subheader("📜 Tariff Timeline")
 
     st.dataframe(df_tariff, use_container_width=True)
+
+# =================================================
+# GLOBAL INTEREST RATES
+# =================================================
+if view == "Global Interest Rates":
+
+    st.subheader("🌍 Global Interest Rates")
+
+    rates = df_global_rates.copy()
+
+    # ---- Convert date columns safely ----
+    date_cols = ["Date_1", "Date_2", "Date_3", "Date_4", "Date_5"]
+    int_cols  = ["Int_1", "Int_2", "Int_3", "Int_4", "Int_5"]
+
+    for c in date_cols:
+        if c in rates.columns:
+            rates[c] = pd.to_datetime(rates[c], errors="coerce", dayfirst=True)
+
+    for c in int_cols:
+        if c in rates.columns:
+            rates[c] = pd.to_numeric(rates[c], errors="coerce")
+
+    tabs = st.tabs(["US", "India", "UK", "China", "Japan"])
+
+    # ---------------- US ----------------
+    with tabs[0]:
+        df_us = rates[["Date_1", "Int_1"]].dropna()
+        df_us = df_us.rename(columns={"Date_1": "Date", "Int_1": "Interest Rate"})
+        plot_single_line(df_us, "Date", "Interest Rate", title="US Interest Rates")
+
+    # ---------------- INDIA ----------------
+    with tabs[1]:
+        df_in = rates[["Date_2", "Int_2"]].dropna()
+        df_in = df_in.rename(columns={"Date_2": "Date", "Int_2": "Interest Rate"})
+        plot_single_line(df_in, "Date", "Interest Rate", title="India Interest Rates")
+
+    # ---------------- UK ----------------
+    with tabs[2]:
+        df_uk = rates[["Date_3", "Int_3"]].dropna()
+        df_uk = df_uk.rename(columns={"Date_3": "Date", "Int_3": "Interest Rate"})
+        plot_single_line(df_uk, "Date", "Interest Rate", title="UK Interest Rates")
+
+    # ---------------- CHINA ----------------
+    with tabs[3]:
+        df_cn = rates[["Date_4", "Int_4"]].dropna()
+        df_cn = df_cn.rename(columns={"Date_4": "Date", "Int_4": "Interest Rate"})
+        plot_single_line(df_cn, "Date", "Interest Rate", title="China Interest Rates")
+
+    # ---------------- JAPAN ----------------
+    with tabs[4]:
+        df_jp = rates[["Date_5", "Int_5"]].dropna()
+        df_jp = df_jp.rename(columns={"Date_5": "Date", "Int_5": "Interest Rate"})
+        plot_single_line(df_jp, "Date", "Interest Rate", title="Japan Interest Rates")
+
+
 
 
 
