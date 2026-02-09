@@ -764,7 +764,8 @@ if view == "Metal Charts":
         "Coal India",
         "Hindustan Zinc",
         "Vedanta",
-        "DXY"
+        "DXY",
+        "stock-dxy"
     ]
 
     tabs = st.tabs(metals)
@@ -845,6 +846,7 @@ if view == "Global Interest Rates":
         df_jp = rates[["Date_5", "Int_5"]].dropna()
         df_jp = df_jp.rename(columns={"Date_5": "Date", "Int_5": "Interest Rate"})
         plot_single_line(df_jp, "Date", "Interest Rate", title="Japan Interest Rates")
+
 
 
 
