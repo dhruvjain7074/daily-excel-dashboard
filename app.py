@@ -145,7 +145,7 @@ def load_data():
     df_index_val = read_worksheet("index (pe/pb/divyld)")
     df_tariff = read_worksheet("Tariff_Timeline")
     df_global_rates = read_worksheet("Global interest rates")
-    df_automobile_sales = read_worksheet("AUTOMOBILE SALES VOLUME")
+    df_auto_sales = read_worksheet("AUTOMOBILE SALES VOLUME")
 
 
     return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates
@@ -965,6 +965,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_7", "MARUTI TOTAL SALES", "Maruti – Total Sales")
         plot_auto_chart(auto, "DATE_7", "MARUTI PV", "Maruti – PV")
         plot_auto_chart(auto, "DATE_7", "MARUTI EXPORT", "Maruti – Export")
+
 
 
 
