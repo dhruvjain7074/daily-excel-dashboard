@@ -935,7 +935,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_2", "TMCV HCV TRUCKS", "TMCV – HCV Trucks")
         plot_auto_chart(auto, "DATE_2", "TMCV SCV CARGO & PICKUP", "TMCV – SCV Cargo & Pickup")
         plot_auto_chart(auto, "DATE_2", "TMCV ILMCV TRUCKS", "TMCV – LMCV")
-        plot_auto_chart(auto, "DATE_2", "TMCV PASSANGER CARRIERS", "TMCV – PASSANGER CARRIERS")
+        plot_auto_chart(auto, "DATE_2", "TMCV PASSENGER CARRIERS", "TMCV – PASSANGER CARRIERS")
         plot_auto_chart(auto, "DATE_2", "TMCV TOTAL DOMESTIC SALES", "TMCV – TOTAL DOMESTIC SALES")
         plot_auto_chart(auto, "DATE_2", "TMCV INTL BUSINESS", "TMCV – INTL BUSINESS")
 
@@ -978,6 +978,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_7", "MARUTI TOTAL SALES", "Maruti – Total Sales")
         plot_auto_chart(auto, "DATE_7", "MARUTI PV", "Maruti – PV")
         plot_auto_chart(auto, "DATE_7", "MARUTI EXPORT", "Maruti – Export")
+
 
 
 
