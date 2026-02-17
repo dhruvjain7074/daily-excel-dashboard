@@ -148,10 +148,10 @@ def load_data():
     df_auto_sales = read_worksheet("AUTOMOBILE SALES VOLUME")
 
 
-    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates
+    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales
 
 # ---- CALL ONCE ----
-df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates = load_data()
+df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales = load_data()
 
 # ===============================
 # CLEAN df_main (CRITICAL)
@@ -965,6 +965,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_7", "MARUTI TOTAL SALES", "Maruti – Total Sales")
         plot_auto_chart(auto, "DATE_7", "MARUTI PV", "Maruti – PV")
         plot_auto_chart(auto, "DATE_7", "MARUTI EXPORT", "Maruti – Export")
+
 
 
 
