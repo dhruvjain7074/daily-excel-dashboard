@@ -895,7 +895,7 @@ if view == "Automobile Sales Volumes":
             value_col: "Value"
         })
 
-    plot_single_line(
+        plot_single_line(
     plot_df,
     x="Date",
     y="Value",
@@ -974,6 +974,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_7", "MARUTI TOTAL SALES", "Maruti – Total Sales")
         plot_auto_chart(auto, "DATE_7", "MARUTI PV", "Maruti – PV")
         plot_auto_chart(auto, "DATE_7", "MARUTI EXPORT", "Maruti – Export")
+
 
 
 
