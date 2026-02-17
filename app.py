@@ -67,7 +67,7 @@ st.title("📊 Daily Excel Dashboard")
 # STABLE PLOT FUNCTION (INDEX PE / PB / DIV ONLY)
 # =================================================
 def plot_single_line(df, x, y, height=600, y_label=None, title=None, color=None, key=None):
-    fig = px.line(df, x=x, y=y)
+    fig = px.line(df, x=x, y=y, connectgaps=False)
 
     if color:
         fig.update_traces(line=dict(color=color, width=2.6))
@@ -890,12 +890,14 @@ if view == "Automobile Sales Volumes":
         })
 
         plot_single_line(
-            plot_df,
-            x="Date",
-            y="Value",
-            title=title,
-            height=600
+    plot_df,
+    x="Date",
+    y="Value",
+    title=title,
+    height=600,
+    connectgaps=False
         )
+
 
     # -----------------------------
     # TABS (OEM-wise)
@@ -967,6 +969,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_7", "MARUTI TOTAL SALES", "Maruti – Total Sales")
         plot_auto_chart(auto, "DATE_7", "MARUTI PV", "Maruti – PV")
         plot_auto_chart(auto, "DATE_7", "MARUTI EXPORT", "Maruti – Export")
+
 
 
 
