@@ -917,6 +917,8 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_1", "TMPV TOTAL", "TMPV – Total Sales")
         plot_auto_chart(auto, "DATE_1", "TMPV DOMESTIC SALES", "TMPV – Domestic Sales")
         plot_auto_chart(auto, "DATE_1", "TMPV INTL SALES", "TMPV – Export Sales")
+        plot_auto_chart(auto, "DATE_1", "TMPV EV SALES", "TMPV – EV Sales")
+        plot_auto_chart(auto, "DATE_1", "TMPV ICE SALES", "TMPV – ICE Sales")
 
     # =============================
     # TMCV
@@ -965,6 +967,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_7", "MARUTI TOTAL SALES", "Maruti – Total Sales")
         plot_auto_chart(auto, "DATE_7", "MARUTI PV", "Maruti – PV")
         plot_auto_chart(auto, "DATE_7", "MARUTI EXPORT", "Maruti – Export")
+
 
 
 
