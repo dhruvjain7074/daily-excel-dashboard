@@ -896,7 +896,7 @@ if view == "Automobile Sales Volumes":
     title=title,
     height=600,
     connectgaps=False
-        )
+    )
 
 
     # -----------------------------
@@ -969,6 +969,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_7", "MARUTI TOTAL SALES", "Maruti – Total Sales")
         plot_auto_chart(auto, "DATE_7", "MARUTI PV", "Maruti – PV")
         plot_auto_chart(auto, "DATE_7", "MARUTI EXPORT", "Maruti – Export")
+
 
 
 
