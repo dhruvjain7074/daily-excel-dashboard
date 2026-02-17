@@ -145,6 +145,7 @@ def load_data():
     df_index_val = read_worksheet("index (pe/pb/divyld)")
     df_tariff = read_worksheet("Tariff_Timeline")
     df_global_rates = read_worksheet("Global interest rates")
+    df_automobile_sales = read_worksheet("AUTOMOBILE SALES VOLUME")
 
 
     return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates
@@ -208,6 +209,7 @@ view = st.selectbox(
         "Metal Charts",
         "Tariff Timeline",
         "Global Interest Rates",
+        "Automobile Sales Volumes"
     ]
 )
 # =================================================
@@ -846,6 +848,124 @@ if view == "Global Interest Rates":
         df_jp = rates[["Date_5", "Int_5"]].dropna()
         df_jp = df_jp.rename(columns={"Date_5": "Date", "Int_5": "Interest Rate"})
         plot_single_line(df_jp, "Date", "Interest Rate", title="Japan Interest Rates")
+# =================================================
+# AUTOMOBILE SALES VOLUMES
+# =================================================
+if view == "Automobile Sales Volumes":
+
+    st.subheader("🚗 Automobile Sales Volumes")
+
+    auto = df_auto_sales.copy()  # this comes from load_data()
+
+    # -----------------------------
+    # Helper: clean & plot safely
+    # -----------------------------
+    def plot_auto_chart(df, date_col, value_col, title):
+        if date_col not in df.columns or value_col not in df.columns:
+            st.warning(f"Missing column: {value_col}")
+            return
+
+        plot_df = df[[date_col, value_col]].copy()
+
+        plot_df[date_col] = pd.to_datetime(
+            plot_df[date_col],
+            errors="coerce",
+            dayfirst=True
+        )
+
+        plot_df[value_col] = pd.to_numeric(
+            plot_df[value_col],
+            errors="coerce"
+        )
+
+        plot_df = plot_df.dropna()
+
+        if plot_df.empty:
+            st.info(f"No data for {title}")
+            return
+
+        plot_df = plot_df.rename(columns={
+            date_col: "Date",
+            value_col: "Value"
+        })
+
+        plot_single_line(
+            plot_df,
+            x="Date",
+            y="Value",
+            title=title,
+            height=600
+        )
+
+    # -----------------------------
+    # TABS (OEM-wise)
+    # -----------------------------
+    tabs = st.tabs([
+        "TMPV",
+        "TMCV",
+        "M&M",
+        "HYUNDAI",
+        "FORCE MOTORS",
+        "SML MAHINDRA",
+        "MARUTI"
+    ])
+
+    # =============================
+    # TMPV
+    # =============================
+    with tabs[0]:
+        plot_auto_chart(auto, "DATE_1", "TMPV TOTAL", "TMPV – Total Sales")
+        plot_auto_chart(auto, "DATE_1", "TMPV DOMESTIC SALES", "TMPV – Domestic Sales")
+        plot_auto_chart(auto, "DATE_1", "TMPV INTL SALES", "TMPV – Export Sales")
+
+    # =============================
+    # TMCV
+    # =============================
+    with tabs[1]:
+        plot_auto_chart(auto, "DATE_2", "TMCV TOTAL SALES", "TMCV – Total Sales")
+        plot_auto_chart(auto, "DATE_2", "TMCV HCV TRUCKS", "TMCV – HCV Trucks")
+        plot_auto_chart(auto, "DATE_2", "TMCV SCV CARGO & PICKUP", "TMCV – SCV Cargo & Pickup")
+
+    # =============================
+    # M&M
+    # =============================
+    with tabs[2]:
+        plot_auto_chart(auto, "DATE_3", "M&M TOTAL SALES", "M&M – Total Sales")
+        plot_auto_chart(auto, "DATE_3", "M&M TOTAL PV", "M&M – Total PV")
+        plot_auto_chart(auto, "DATE_3", "M&M TRACTOR TOTAL", "M&M – Tractor Total")
+
+    # =============================
+    # HYUNDAI
+    # =============================
+    with tabs[3]:
+        plot_auto_chart(auto, "DATE_4", "HYUNDAI TOTAL SALES", "Hyundai – Total Sales")
+        plot_auto_chart(auto, "DATE_4", "HYUNDAI DOMESTIC SALES", "Hyundai – Domestic Sales")
+        plot_auto_chart(auto, "DATE_4", "HYUNDAI EXPORT SALES", "Hyundai – Export Sales")
+
+    # =============================
+    # FORCE MOTORS
+    # =============================
+    with tabs[4]:
+        plot_auto_chart(auto, "DATE_5", "FORCE TOTAL SALES", "Force Motors – Total Sales")
+        plot_auto_chart(auto, "DATE_5", "FORCE DOMESTIC SALES", "Force – Domestic Sales")
+        plot_auto_chart(auto, "DATE_5", "FORCE EXPORTSALES", "Force – Export Sales")
+
+    # =============================
+    # SML MAHINDRA
+    # =============================
+    with tabs[5]:
+        plot_auto_chart(auto, "DATE_6", "SML MAHINDRA TOTAL SALES", "SML Mahindra – Total Sales")
+        plot_auto_chart(auto, "DATE_6", "SML MAHINDRA CV", "SML Mahindra – CV")
+        plot_auto_chart(auto, "DATE_6", "SML MAHINDRA PV", "SML Mahindra – PV")
+
+    # =============================
+    # MARUTI
+    # =============================
+    with tabs[6]:
+        plot_auto_chart(auto, "DATE_7", "MARUTI TOTAL SALES", "Maruti – Total Sales")
+        plot_auto_chart(auto, "DATE_7", "MARUTI PV", "Maruti – PV")
+        plot_auto_chart(auto, "DATE_7", "MARUTI EXPORT", "Maruti – Export")
+
 
 
 
