@@ -954,7 +954,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_3", "M&M TOTAL EXPORT", "M&M – TOTAL EXPORT")
         plot_auto_chart(auto, "DATE_3", "M&M TOTAL SALES", "M&M – TOTAL SALES")
         plot_auto_chart(auto, "DATE_3", "M&M TRACTOR DOMESTIC", "M&M – TRACTOR DOMESTIC")
-        plot_auto_chart(auto, "DATE_3", "M&M  TOTAL EXPORT", "M&M – TRACTOR EXPORT")
+        plot_auto_chart(auto, "DATE_3", "M&M TOTAL EXPORT", "M&M – TRACTOR EXPORT")
         plot_auto_chart(auto, "DATE_3", "M&M TRACTOR TOTAL", "M&M – TRACTOR TOTAL")
 
     # =============================
@@ -990,6 +990,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_7", "MARUTI OEM", "Maruti – OEM")
         plot_auto_chart(auto, "DATE_7", "MARUTI EXPORT", "Maruti – Export")
         plot_auto_chart(auto, "DATE_7", "MARUTI TOTAL SALES", "Maruti – TOTAL SALES")
+
 
 
 
