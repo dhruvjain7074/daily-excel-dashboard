@@ -943,9 +943,19 @@ if view == "Automobile Sales Volumes":
     # M&M
     # =============================
     with tabs[2]:
-        plot_auto_chart(auto, "DATE_3", "M&M TOTAL SALES", "M&M – Total Sales")
-        plot_auto_chart(auto, "DATE_3", "M&M TOTAL PV", "M&M – Total PV")
-        plot_auto_chart(auto, "DATE_3", "M&M TRACTOR TOTAL", "M&M – Tractor Total")
+        plot_auto_chart(auto, "DATE_3", "M&M UTILITY VELICLES", "M&M – UTILITY VELICLES")
+        plot_auto_chart(auto, "DATE_3", "M&M CARS+VANS", "M&M – CARS+VANS")
+        plot_auto_chart(auto, "DATE_3", "M&M TOTAL PV", "M&M – TOTAL PV")
+        plot_auto_chart(auto, "DATE_3", "M&M LCV < 2T", "M&M – LCV < 2T")
+        plot_auto_chart(auto, "DATE_3", "M&M LCV 2-3.5T", "M&M – M&M LCV 2-3.5T")
+        plot_auto_chart(auto, "DATE_3", "M&M LCV 3.5 + MHCV", "M&M – LCV 3.5 + MHCV")
+        plot_auto_chart(auto, "DATE_3", "M&M 3 W INC EV", "M&M – 3 W INC EV")
+        plot_auto_chart(auto, "DATE_3", "M&M DOMESTIC CV", "M&M – DOMESTIC CV")
+        plot_auto_chart(auto, "DATE_3", "M&M TOTAL EXPORT", "M&M – TOTAL EXPORT")
+        plot_auto_chart(auto, "DATE_3", "M&M TOTAL SALES", "M&M – TOTAL SALES")
+        plot_auto_chart(auto, "DATE_3", "M&M TRACTOR DOMESTIC", "M&M – TRACTOR DOMESTIC")
+        plot_auto_chart(auto, "DATE_3", "M&M TRACTOR EXPORT", "M&M – TRACTOR EXPORT")
+        plot_auto_chart(auto, "DATE_3", "M&M TRACTOR TOTAL", "M&M – TRACTOR TOTAL")
 
     # =============================
     # HYUNDAI
@@ -975,9 +985,12 @@ if view == "Automobile Sales Volumes":
     # MARUTI
     # =============================
     with tabs[6]:
-        plot_auto_chart(auto, "DATE_7", "MARUTI TOTAL SALES", "Maruti – Total Sales")
         plot_auto_chart(auto, "DATE_7", "MARUTI PV", "Maruti – PV")
+        plot_auto_chart(auto, "DATE_7", "MARUTI LCV", "Maruti – LCV")
+        plot_auto_chart(auto, "DATE_7", "MARUTI OEM", "Maruti – OEM")
         plot_auto_chart(auto, "DATE_7", "MARUTI EXPORT", "Maruti – Export")
+        plot_auto_chart(auto, "DATE_7", "MARUTI TOTAL SALES", "Maruti – TOTAL SALES")
+
 
 
 
