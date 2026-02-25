@@ -1002,7 +1002,6 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_8", "ATUL Domestic EV L5", "ATUL Domestic EV L5")
         plot_auto_chart(auto, "DATE_8", "ATUL Total Domestic sales", "ATUL Total Domestic sales")
         plot_auto_chart(auto, "DATE_8", "ATUL Export 3w - IC Engine", "ATUL Export 3w - IC Engine")
-        plot_auto_chart(auto, "DATE_8", "ATUL Export EV L3", "ATUL Export EV L3")
         plot_auto_chart(auto, "DATE_8", "ATUL Export EV L5", "ATUL Export EV L5")
         plot_auto_chart(auto, "DATE_8", "ATUL Total 3w - IC Engine", "ATUL Total 3w - IC Engine")
         plot_auto_chart(auto, "DATE_8", "ATUL Total EV L3", "ATUL Total EV L3")
@@ -1027,6 +1026,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_8", "AL TOTAL D+E", "AL TOTAL D+E")
         plot_auto_chart(auto, "DATE_8", "AL LCV D+E", "AL LCV D+E")
         plot_auto_chart(auto, "DATE_8", "AL TOTAL VEHICLES D+E", "AL TOTAL VEHICLES D+E")
+
 
 
 
