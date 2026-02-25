@@ -914,7 +914,8 @@ if view == "Automobile Sales Volumes":
         "HYUNDAI",
         "FORCE MOTORS",
         "SML MAHINDRA",
-        "MARUTI"
+        "MARUTI",
+        "Atul auto"
     ])
 
     # =============================
@@ -991,7 +992,40 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_7", "MARUTI EXPORT", "Maruti – Export")
         plot_auto_chart(auto, "DATE_7", "MARUTI TOTAL SALES", "Maruti – TOTAL SALES")
 
+    # =============================
+    # Atul Auto
+    # =============================
+    with tabs[7]:
+        plot_auto_chart(auto, "DATE_8", "ATUL Domestic 3w - IC Engine", "ATUL Domestic 3w - IC Engine")
+        plot_auto_chart(auto, "DATE_8", "ATUL Domestic EV L3", "ATUL Domestic EV L3")
+        plot_auto_chart(auto, "DATE_8", "ATUL Domestic EV L5", "ATUL Domestic EV L5")
+        plot_auto_chart(auto, "DATE_8", "ATUL Total Domestic sales", "ATUL Total Domestic sales")
+        plot_auto_chart(auto, "DATE_8", "ATUL Export 3w - IC Engine", "ATUL Export 3w - IC Engine")
+        plot_auto_chart(auto, "DATE_8", "ATUL Export EV L3", "ATUL Export EV L3")
+        plot_auto_chart(auto, "DATE_8", "ATUL Export EV L5", "ATUL Export EV L5")
+        plot_auto_chart(auto, "DATE_8", "ATUL Total 3w - IC Engine", "ATUL Total 3w - IC Engine")
+        plot_auto_chart(auto, "DATE_8", "ATUL Total EV L3", "ATUL Total EV L3")
+        plot_auto_chart(auto, "DATE_8", "ATUL Total EV L5", "ATUL Total EV L5")
+        plot_auto_chart(auto, "DATE_8", "ATUL Total sales D+E", "ATUL Total sales D+E")
 
+    # =============================
+    # Atul Auto
+    # =============================
+    with tabs[8]:
+        plot_auto_chart(auto, "DATE_8", "AL DOMESTIC M&HCV TRUCKS", "AL DOMESTIC M&HCV TRUCKS")
+        plot_auto_chart(auto, "DATE_8", "AL DOMESTIC M&HCV BUS", "AL DOMESTIC M&HCV BUS")
+        plot_auto_chart(auto, "DATE_8", "AL Total DOMESTIC M&HCV", "AL Total DOMESTIC M&HCV")
+        plot_auto_chart(auto, "DATE_8", "AL DOMESTIC LCV", "AL DOMESTIC LCV")
+        plot_auto_chart(auto, "DATE_8", "AL TOTAL DOMESTIC VEHICLES", "AL TOTAL DOMESTIC VEHICLES")
+        plot_auto_chart(auto, "DATE_8", "AL EXPORT M&HCV TRUCKS", "AL EXPORT M&HCV TRUCKS")
+        plot_auto_chart(auto, "DATE_8", "AL EXPORT M&HCV BUS", "AL EXPORT M&HCV BUS")
+        plot_auto_chart(auto, "DATE_8", "AL TOTAL M&HCV EXPORT", "AL TOTAL M&HCV EXPORT")
+        plot_auto_chart(auto, "DATE_8", "AL EXPORT LCV", "AL EXPORT LCV")
+        plot_auto_chart(auto, "DATE_8", "AL M&HCV TRUCKS D+E", "AL M&HCV TRUCKS D+E")
+        plot_auto_chart(auto, "DATE_8", "AL M&HCV BUS D+E", "AL M&HCV BUS D+E")
+        plot_auto_chart(auto, "DATE_8", "AL TOTAL D+E", "AL TOTAL D+E")
+        plot_auto_chart(auto, "DATE_8", "AL LCV D+E", "AL LCV D+E")
+        plot_auto_chart(auto, "DATE_8", "AL TOTAL VEHICLES D+E", "AL TOTAL VEHICLES D+E")
 
 
 
