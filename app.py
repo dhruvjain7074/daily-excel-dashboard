@@ -915,7 +915,8 @@ if view == "Automobile Sales Volumes":
         "FORCE MOTORS",
         "SML MAHINDRA",
         "MARUTI",
-        "Atul auto"
+        "Atul auto",
+        "Ashok Leyland"
     ])
 
     # =============================
@@ -1026,6 +1027,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_8", "AL TOTAL D+E", "AL TOTAL D+E")
         plot_auto_chart(auto, "DATE_8", "AL LCV D+E", "AL LCV D+E")
         plot_auto_chart(auto, "DATE_8", "AL TOTAL VEHICLES D+E", "AL TOTAL VEHICLES D+E")
+
 
 
 
