@@ -918,7 +918,8 @@ if view == "Automobile Sales Volumes":
         "Atul auto",
         "Ashok Leyland",
         "Bajaj",
-        "Hero Motocorp"
+        "Hero Motocorp",
+        "OLA Electric"
     ])
 
     # =============================
@@ -1050,7 +1051,11 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_11", "Hero Total Sales D+E", "Hero Total Sales D+E")
         plot_auto_chart(auto, "DATE_11", "Hero Domestic Sales", "Hero Domestic Sales")
         plot_auto_chart(auto, "DATE_11", "Hero Export Sales", "Hero Export Sales")
-
+    # =============================
+    # Hero Motocorp
+    # =============================
+    with tabs[11]:
+        plot_auto_chart(auto, "DATE_12", "OLA Total Sales", "OLA Total Sales")
 
 
 
