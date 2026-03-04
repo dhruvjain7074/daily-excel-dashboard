@@ -919,7 +919,8 @@ if view == "Automobile Sales Volumes":
         "Ashok Leyland",
         "Bajaj",
         "Hero Motocorp",
-        "OLA Electric"
+        "OLA Electric",
+        "Eicher Motors PV"
     ])
 
     # =============================
@@ -1052,10 +1053,19 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_11", "Hero Domestic Sales", "Hero Domestic Sales")
         plot_auto_chart(auto, "DATE_11", "Hero Export Sales", "Hero Export Sales")
     # =============================
-    # Hero Motocorp
+    # OLA Electric
     # =============================
     with tabs[11]:
         plot_auto_chart(auto, "DATE_12", "OLA Total Sales", "OLA Total Sales")
+    # =============================
+    # Eicher Motors PV
+    # =============================
+        plot_auto_chart(auto, "DATE_13", "Eicher Less than 350 cc", "Eicher Less than 350 cc")
+        plot_auto_chart(auto, "DATE_13", "Eicher greater than 350 cc", "Eicher greater than 350 cc")
+        plot_auto_chart(auto, "DATE_13", "Eicher Total Sales", "Eicher Total Sales")
+        plot_auto_chart(auto, "DATE_13", "Eicher Total Export", "Eicher Total Export")
+
+
 
 
 
