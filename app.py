@@ -920,7 +920,8 @@ if view == "Automobile Sales Volumes":
         "Bajaj",
         "Hero Motocorp",
         "OLA Electric",
-        "Eicher Motors PV"
+        "Eicher Motors PV",
+        "Eicher Motors CV"
     ])
 
     # =============================
@@ -1064,45 +1065,11 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_13", "Eicher greater than 350 cc", "Eicher greater than 350 cc")
         plot_auto_chart(auto, "DATE_13", "Eicher Total Sales", "Eicher Total Sales")
         plot_auto_chart(auto, "DATE_13", "Eicher Total Export", "Eicher Total Export")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    # =============================
+    # Eicher Motors CV
+    # =============================
+        plot_auto_chart(auto, "DATE_14", "Eicher CV Domestic sales", "Eicher CV Domestic sales")
+        plot_auto_chart(auto, "DATE_14", "Eicher CV Export Sales", "Eicher CV Export Sales")
+        plot_auto_chart(auto, "DATE_14", "Eicher CV Volvo Sales", "Eicher CV Volvo Sales")
+        plot_auto_chart(auto, "DATE_14", "Eicher CV Total Sales D+E", "Eicher CV Total Sales D+E")
 
