@@ -1061,6 +1061,7 @@ if view == "Automobile Sales Volumes":
     # =============================
     # Eicher Motors PV
     # =============================
+    with tabs[12]:
         plot_auto_chart(auto, "DATE_13", "Eicher Less than 350 cc", "Eicher Less than 350 cc")
         plot_auto_chart(auto, "DATE_13", "Eicher greater than 350 cc", "Eicher greater than 350 cc")
         plot_auto_chart(auto, "DATE_13", "Eicher Total Sales", "Eicher Total Sales")
@@ -1068,8 +1069,10 @@ if view == "Automobile Sales Volumes":
     # =============================
     # Eicher Motors CV
     # =============================
+    with tabs[13]:
         plot_auto_chart(auto, "DATE_14", "Eicher CV Domestic sales", "Eicher CV Domestic sales")
         plot_auto_chart(auto, "DATE_14", "Eicher CV Export Sales", "Eicher CV Export Sales")
         plot_auto_chart(auto, "DATE_14", "Eicher CV Volvo Sales", "Eicher CV Volvo Sales")
         plot_auto_chart(auto, "DATE_14", "Eicher CV Total Sales D+E", "Eicher CV Total Sales D+E")
+
 
