@@ -1116,10 +1116,12 @@ if view == "Magazine Cover":
         if not images:
             st.info("No Other covers available.")
         else:
-            for img in images:
-                st.image(
+            cols = st.columns(2)
+
+            for i, img in enumerate(images):
+                with cols[i % 2]:
+                    st.image(
                     os.path.join(folder, img),
                     use_container_width=True
-                )
-
+                    )
 
