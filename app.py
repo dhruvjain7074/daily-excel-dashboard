@@ -216,7 +216,7 @@ view = st.selectbox(
         "Tariff Timeline",
         "Global Interest Rates",
         "Automobile Sales Volumes",
-        "Magazines Cover"
+        "Magazine Cover"
     ]
 )
 # =================================================
