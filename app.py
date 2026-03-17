@@ -215,7 +215,8 @@ view = st.selectbox(
         "Metal Charts",
         "Tariff Timeline",
         "Global Interest Rates",
-        "Automobile Sales Volumes"
+        "Automobile Sales Volumes",
+        "Magazines Cover"
     ]
 )
 # =================================================
@@ -1074,5 +1075,48 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_14", "Eicher CV Export Sales", "Eicher CV Export Sales")
         plot_auto_chart(auto, "DATE_14", "Eicher CV Volvo Sales", "Eicher CV Volvo Sales")
         plot_auto_chart(auto, "DATE_14", "Eicher CV Total Sales D+E", "Eicher CV Total Sales D+E")
+
+    # =================================================
+# MAGAZINE COVER (INDIA / OTHERS)
+# =================================================
+if view == "Magazine Cover":
+
+    st.subheader("📰 Magazine Cover")
+
+    tab1, tab2 = st.tabs(["India", "Others"])
+
+    # =============================
+    # INDIA TAB
+    # =============================
+    with tab1:
+        folder = "magazine_cover/india"
+
+        images = get_sorted_images(folder)
+
+        if not images:
+            st.info("No India covers available.")
+        else:
+            for img in images:
+                st.image(
+                    os.path.join(folder, img),
+                    use_container_width=True
+                )
+
+    # =============================
+    # OTHERS TAB
+    # =============================
+    with tab2:
+        folder = "magazine_cover/others"
+
+        images = get_sorted_images(folder)
+
+        if not images:
+            st.info("No Other covers available.")
+        else:
+            for img in images:
+                st.image(
+                    os.path.join(folder, img),
+                    use_container_width=True
+                )
 
 
