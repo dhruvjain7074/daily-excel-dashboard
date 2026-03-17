@@ -1100,10 +1100,10 @@ if view == "Magazine Cover":
 
             for i, img in enumerate(images):
                 with cols[i % 2]:
-                st.image(
+                    st.image(
                     os.path.join(folder, img),
                     use_container_width=True
-                )
+                    )
 
     # =============================
     # OTHERS TAB
