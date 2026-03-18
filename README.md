@@ -1,2 +1,2 @@
-# daily-excel-dashboard
-Streamlit dashboard from Excel
+# stock market dashboard
+Streamlit dashboard from sheets
