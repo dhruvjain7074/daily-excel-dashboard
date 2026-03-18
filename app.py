@@ -855,6 +855,72 @@ if view == "Global Interest Rates":
         df_jp = rates[["Date_5", "Int_5"]].dropna()
         df_jp = df_jp.rename(columns={"Date_5": "Date", "Int_5": "Interest Rate"})
         plot_single_line(df_jp, "Date", "Interest Rate", title="Japan Interest Rates")
+
+# =================================================
+# INDIA MACROECONOMIC INDICATORS (NO TABS)
+# =================================================
+if view == "India Macroeconomic Indicators":
+
+    st.subheader("🇮🇳 India Macroeconomic Indicators")
+
+    macro = df_india_macro.copy()
+
+    # 🔴 remove empty columns (important)
+    macro = macro.loc[:, macro.columns != ""]
+
+    # ===============================
+    # GDP
+    # ===============================
+    gdp = macro[["Date_1", "GDP %"]].copy()
+
+    gdp["Date_1"] = pd.to_datetime(gdp["Date_1"], errors="coerce", dayfirst=True)
+    gdp["GDP %"] = pd.to_numeric(gdp["GDP %"], errors="coerce")
+
+    gdp = gdp.dropna()
+
+    plot_single_line(
+        gdp.rename(columns={"Date_1": "Date", "GDP": "Value"}),
+        "Date",
+        "Value",
+        title="GDP",
+        height=600
+    )
+
+    # ===============================
+    # INFLATION
+    # ===============================
+    inflation = macro[["Date_2", "INFLATION %"]].copy()
+
+    inflation["Date_2"] = pd.to_datetime(inflation["Date_2"], errors="coerce", dayfirst=True)
+    inflation["INFLATION %"] = pd.to_numeric(inflation["INFLATION %"], errors="coerce")
+
+    inflation = inflation.dropna()
+
+    plot_single_line(
+        inflation.rename(columns={"Date_2": "Date", "INFLATION %": "Value"}),
+        "Date",
+        "Value",
+        title="Inflation",
+        height=600
+    )
+
+    # ===============================
+    # CREDIT GROWTH
+    # ===============================
+    credit = macro[["Date_3", "LOAN Growth %"]].copy()
+
+    credit["Date_3"] = pd.to_datetime(credit["Date_3"], errors="coerce", dayfirst=True)
+    credit["Credit Growth"] = pd.to_numeric(credit["LOAN Growth %"], errors="coerce")
+
+    credit = credit.dropna()
+
+    plot_single_line(
+        credit.rename(columns={"Date_3": "Date", "LOAN Growth %": "Value"}),
+        "Date",
+        "Value",
+        title="Credit Growth",
+        height=600
+    )
 # =================================================
 # AUTOMOBILE SALES VOLUMES
 # =================================================
