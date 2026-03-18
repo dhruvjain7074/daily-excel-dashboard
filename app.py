@@ -219,7 +219,7 @@ view = st.selectbox(
         "India Macroeconomic Indicators",
         "Automobile Sales Volumes",
         "Magazine Cover",
-        "Multiasset chart (one View)"
+        "Multiasset Chart (One View)"
     ]
 )
 # =================================================
