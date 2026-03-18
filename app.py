@@ -218,7 +218,8 @@ view = st.selectbox(
         "Global Interest Rates",
         "India Macroeconomic Indicators",
         "Automobile Sales Volumes",
-        "Magazine Cover"
+        "Magazine Cover",
+        "Multiasset chart (one View)"
     ]
 )
 # =================================================
@@ -1213,4 +1214,55 @@ if view == "Magazine Cover":
                     os.path.join(folder, img),
                     use_container_width=True
                     )
+# =================================================
+# MULTIASSET CHART (ONE VIEW)
+# =================================================
+if view == "Multiasset Chart (One View)":
 
+    st.subheader("📊 Multiasset Chart (One View)")
+
+    tab1, tab2, tab3 = st.tabs([
+        "MAIN",
+        "BROAD INDICES",
+        "SECTORAL INDICES"
+    ])
+
+    # =============================
+    # FUNCTION: 3 IMAGES PER ROW
+    # =============================
+    def show_images_grid(folder):
+        images = get_sorted_images(folder)
+
+        if not images:
+            st.info("No images available.")
+            return
+
+        cols = st.columns(3)
+
+        for i, img in enumerate(images):
+            with cols[i % 3]:
+                st.image(
+                    os.path.join(folder, img),
+                    use_container_width=True
+                )
+
+    # =============================
+    # TAB 1: MAIN
+    # =============================
+    with tab1:
+        folder = "multiasset_charts/main"
+        show_images_grid(folder)
+
+    # =============================
+    # TAB 2: BROAD INDICES
+    # =============================
+    with tab2:
+        folder = "multiasset_charts/broad_indices"
+        show_images_grid(folder)
+
+    # =============================
+    # TAB 3: SECTORAL INDICES
+    # =============================
+    with tab3:
+        folder = "multiasset_charts/sectoral_indices"
+        show_images_grid(folder)
