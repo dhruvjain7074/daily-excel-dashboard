@@ -151,13 +151,14 @@ def load_data():
     df_index_val = read_worksheet("index (pe/pb/divyld)")
     df_tariff = read_worksheet("Tariff_Timeline")
     df_global_rates = read_worksheet("Global interest rates")
+    df_india_macro = read_worksheet("India macroeconomic indicators")
     df_auto_sales = read_worksheet("AUTOMOBILE SALES VOLUME")
 
 
-    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales
+    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales, df_india_macro
 
 # ---- CALL ONCE ----
-df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales = load_data()
+df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales,df_india_macro = load_data()
 
 # ===============================
 # CLEAN df_main (CRITICAL)
@@ -215,6 +216,7 @@ view = st.selectbox(
         "Metal Charts",
         "Tariff Timeline",
         "Global Interest Rates",
+        "India Macroeconomic Indicators",
         "Automobile Sales Volumes",
         "Magazine Cover"
     ]
