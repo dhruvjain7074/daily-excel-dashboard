@@ -220,7 +220,7 @@ view = st.selectbox(
         "India Macroeconomic Indicators",
         "Automobile Sales Volumes",
         "Magazine Cover",
-        "Multiasset Chart (One View)"
+        "Multiasset Chart (One View)",
         "NET MTF OUTSTANDING"
     ]
 )
