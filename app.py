@@ -153,13 +153,13 @@ def load_data():
     df_global_rates = read_worksheet("Global interest rates")
     df_india_macro = read_worksheet("India macroeconomic indicators")
     df_auto_sales = read_worksheet("AUTOMOBILE SALES VOLUME")
-    df_mtf_outstanding = read_worksheet("MTF OUTSTANDING")
+    df_mtf = read_worksheet("mtf outstanding ")
 
 
-    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales, df_india_macro, df_mtf_outstanding
+    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales, df_india_macro, df_mtf
 
 # ---- CALL ONCE ----
-df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales,df_india_macro,df_mtf_outstanding = load_data()
+df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales,df_india_macro,df_mtf = load_data()
 
 # ===============================
 # CLEAN df_main (CRITICAL)
@@ -1278,7 +1278,7 @@ plot_single_line(
 # =================================================
 # NET MTF OUTSTANDING
 # =================================================
-if view == "MTF OUTSTANDING":
+if view == "Net MTF Outstanding":
 
     st.subheader("📊 Net MTF Outstanding")
 
