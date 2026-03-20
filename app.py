@@ -153,12 +153,13 @@ def load_data():
     df_global_rates = read_worksheet("Global interest rates")
     df_india_macro = read_worksheet("India macroeconomic indicators")
     df_auto_sales = read_worksheet("AUTOMOBILE SALES VOLUME")
+    df_mtf_outstanding = read_worksheet("MTF OUTSTANDING")
 
 
-    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales, df_india_macro
+    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales, df_india_macro, df_mtf_outstanding
 
 # ---- CALL ONCE ----
-df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales,df_india_macro = load_data()
+df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales,df_india_macro,df_mtf_outstanding = load_data()
 
 # ===============================
 # CLEAN df_main (CRITICAL)
@@ -220,6 +221,7 @@ view = st.selectbox(
         "Automobile Sales Volumes",
         "Magazine Cover",
         "Multiasset Chart (One View)"
+        "NET MTF OUTSTANDING"
     ]
 )
 # =================================================
