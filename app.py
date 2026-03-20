@@ -1268,3 +1268,67 @@ if view == "Multiasset Chart (One View)":
     with tab3:
         folder = "multiasset_charts/sectoral_indices"
         show_images_grid(folder)
+plot_single_line(
+        credit.rename(columns={"Date_3": "Date", "LOAN Growth %": "Value"}),
+        "Date",
+        "Value",
+        title="Loan Growth %",
+        height=600
+    )
+# =================================================
+# NET MTF OUTSTANDING
+# =================================================
+if view == "MTF OUTSTANDING":
+
+    st.subheader("📊 Net MTF Outstanding")
+
+    mtf = df_mtf.copy()
+
+    # 🔴 remove empty columns
+    mtf = mtf.loc[:, mtf.columns != ""]
+
+    # ===============================
+    # 🔥 CHECK YOUR COLUMN NAMES
+    # ===============================
+    # Replace these if needed
+    DATE_COL = mtf.columns[0]
+    VALUE_COL = mtf.columns[1]
+
+    df_plot = mtf[[DATE_COL, VALUE_COL]].copy()
+
+    # ---- CLEAN DATE ----
+    df_plot[DATE_COL] = pd.to_datetime(
+        df_plot[DATE_COL],
+        errors="coerce",
+        dayfirst=True
+    )
+
+    # ---- CLEAN VALUE ----
+    df_plot[VALUE_COL] = (
+        df_plot[VALUE_COL]
+        .astype(str)
+        .str.replace(",", "", regex=False)
+        .str.strip()
+    )
+
+    df_plot[VALUE_COL] = pd.to_numeric(
+        df_plot[VALUE_COL],
+        errors="coerce"
+    )
+
+    # 🔴 drop only invalid dates
+    df_plot = df_plot.dropna(subset=[DATE_COL])
+
+    # ===============================
+    # PLOT
+    # ===============================
+    plot_single_line(
+        df_plot.rename(columns={
+            DATE_COL: "Date",
+            VALUE_COL: "Net MTF Outstanding"
+        }),
+        "Date",
+        "Net MTF Outstanding",
+        title="Net MTF Outstanding",
+        height=600
+    )
