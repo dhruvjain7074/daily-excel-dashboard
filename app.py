@@ -221,7 +221,7 @@ view = st.selectbox(
         "Automobile Sales Volumes",
         "Magazine Cover",
         "Multiasset Chart (One View)",
-        "NET MTF OUTSTANDING"
+        "Net MTF Outstanding"
     ]
 )
 # =================================================
