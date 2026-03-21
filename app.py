@@ -1268,13 +1268,13 @@ if view == "Multiasset Chart (One View)":
     with tab3:
         folder = "multiasset_charts/sectoral_indices"
         show_images_grid(folder)
-plot_single_line(
+        plot_single_line(
         credit.rename(columns={"Date_3": "Date", "LOAN Growth %": "Value"}),
         "Date",
         "Value",
         title="Loan Growth %",
         height=600
-    )
+        )
 # =================================================
 # NET MTF OUTSTANDING
 # =================================================
