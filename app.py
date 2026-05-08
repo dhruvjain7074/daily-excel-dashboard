@@ -510,9 +510,7 @@ for col in ["NET LIQ INC TODAY", "AMOUNT"]:
 # NAV DROPDOWN
 # =================================================
 VIEWS = [
-    "52 Week Data",
-    "EMA 20 Data",
-    "EMA 200 Data",
+    "Breadth Data",
     "RBI Net Liquidity Injected",
     "Index Futures OI",
     "Index (PE / PB / DIV YLD)",
@@ -543,60 +541,71 @@ mapping = {
 
 
 # =================================================
-# DATASET 1 / 2 / 3 VIEW
+# BREADTH DATA — 52 WEEK / EMA 20 / EMA 200 (TABBED)
 # =================================================
-if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data"]:
+if view == "Breadth Data":
 
-    m = mapping[view]
+    st.markdown("#### Breadth Data")
 
-    data = df_main[
-        [m["date"], m["high"], m["low"], m["hl"], m["hr"], m["lr"]]
-    ].dropna()
+    # Pre-build all three datasets before entering tabs
+    def build_breadth(m_key):
+        m = mapping[m_key]
+        data = df_main[
+            [m["date"], m["high"], m["low"], m["hl"], m["hr"], m["lr"]]
+        ].dropna()
+        data[m["date"]] = pd.to_datetime(data[m["date"]], format="%d/%m/%Y", errors="coerce")
+        data = data.dropna(subset=[m["date"]])
+        return data, m
 
-    data[m["date"]] = pd.to_datetime(data[m["date"]], format="%d/%m/%Y", errors="coerce")
-    data = data.dropna(subset=[m["date"]])
+    d52, m52   = build_breadth("52 Week Data")
+    d20, m20   = build_breadth("EMA 20 Data")
+    d200, m200 = build_breadth("EMA 200 Data")
 
-    st.markdown(f"**{view}** — Date range")
-    start_date, end_date = st.date_input(
-        "Date range",
-        [data[m["date"]].min().date(), data[m["date"]].max().date()],
-        label_visibility="collapsed",
-    )
+    tab1, tab2, tab3 = st.tabs(["52 Week", "EMA 20", "EMA 200"])
 
-    filtered = data[
-        (data[m["date"]] >= pd.to_datetime(start_date)) &
-        (data[m["date"]] <= pd.to_datetime(end_date))
-    ]
+    def render_breadth_tab(data, m, prefix):
+        all_min = data[m["date"]].min().date()
+        all_max = data[m["date"]].max().date()
+        start_date, end_date = st.date_input(
+            "Date range",
+            [all_min, all_max],
+            key=f"dr_{prefix}",
+            label_visibility="collapsed",
+        )
+        filtered = data[
+            (data[m["date"]] >= pd.to_datetime(start_date)) &
+            (data[m["date"]] <= pd.to_datetime(end_date))
+        ]
 
-    # Chart 1: HIGH & LOW
-    plot_df1 = filtered[[m["date"], m["high"], m["low"]]].rename(
-        columns={m["date"]: "Date", m["high"]: "HIGH", m["low"]: "LOW"}
-    )
-    fig1 = px.line(
-        plot_df1, x="Date", y=["HIGH", "LOW"],
-        color_discrete_map={"HIGH": GREEN, "LOW": RED},
-        title="High & Low Count",
-    )
-    fig1.update_traces(line=dict(width=1.8))
-    fig1.update_traces(
-        selector=dict(name="HIGH"),
-        hovertemplate="<b>%{x|%d %b %Y}</b><br>High: %{y:,.0f}<extra></extra>",
-    )
-    fig1.update_traces(
-        selector=dict(name="LOW"),
-        hovertemplate="<b>%{x|%d %b %Y}</b><br>Low: %{y:,.0f}<extra></extra>",
-    )
-    fig1.update_layout(**{**PLOT_LAYOUT, "height": 520})
-    st.plotly_chart(fig1, use_container_width=True, config=PLOTLY_CONFIG)
+        plot_df1 = filtered[[m["date"], m["high"], m["low"]]].rename(
+            columns={m["date"]: "Date", m["high"]: "HIGH", m["low"]: "LOW"}
+        )
+        fig1 = px.line(
+            plot_df1, x="Date", y=["HIGH", "LOW"],
+            color_discrete_map={"HIGH": GREEN, "LOW": RED},
+            title="High & Low Count",
+        )
+        fig1.update_traces(line=dict(width=1.8))
+        fig1.update_traces(selector=dict(name="HIGH"),
+            hovertemplate="<b>%{x|%d %b %Y}</b><br>High: %{y:,.0f}<extra></extra>")
+        fig1.update_traces(selector=dict(name="LOW"),
+            hovertemplate="<b>%{x|%d %b %Y}</b><br>Low: %{y:,.0f}<extra></extra>")
+        fig1.update_layout(**{**PLOT_LAYOUT, "height": 520})
+        st.plotly_chart(fig1, use_container_width=True, config=PLOTLY_CONFIG, key=f"{prefix}_hl")
 
-    plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
-                     "Date", "HIGH/LOW RATIO", title="High / Low Ratio")
+        plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
+                         "Date", "HIGH/LOW RATIO", title="High / Low Ratio", key=f"{prefix}_hlr")
+        plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
+                         "Date", "HIGH / EMA 200", title="High / EMA 200", color=GREEN, key=f"{prefix}_hr")
+        plot_single_line(filtered.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
+                         "Date", "LOW / EMA 200", title="Low / EMA 200", color=RED, key=f"{prefix}_lr")
 
-    plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
-                     "Date", "HIGH / EMA 200", title="High / EMA 200", color=GREEN)
-
-    plot_single_line(filtered.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
-                     "Date", "LOW / EMA 200", title="Low / EMA 200", color=RED)
+    with tab1:
+        render_breadth_tab(d52, m52, "w52")
+    with tab2:
+        render_breadth_tab(d20, m20, "e20")
+    with tab3:
+        render_breadth_tab(d200, m200, "e200")
 
 
 # =================================================
