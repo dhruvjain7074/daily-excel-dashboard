@@ -853,7 +853,7 @@ if view == "Automobile Sales Volumes":
             st.warning(f"Missing column: {value_col}")
             return
         plot_df = df[[date_col, value_col]].copy()
-        plot_df[date_col]  = pd.to_datetime(plot_df[date_col], format="%d/%m/%Y", errors="coerce")
+        plot_df[date_col]  = pd.to_datetime(plot_df[date_col], format="%d-%b-%Y", errors="coerce")
         plot_df[value_col] = pd.to_numeric(
             plot_df[value_col].astype(str).str.replace(",", "", regex=False).str.strip(),
             errors="coerce"
@@ -935,13 +935,6 @@ if view == "Automobile Sales Volumes":
             "Eicher CV Volvo Sales", "Eicher CV Total Sales D+E",
         ]),
     }
-
-    # ── DEBUG ──
-    with st.expander("🔍 Debug — raw data sample"):
-        st.write("Shape:", auto.shape)
-        st.write("First 5 rows of DATE_1, TMPV TOTAL:")
-        st.write(auto[["DATE_1", "TMPV TOTAL"]].head(10))
-        st.write("DATE_1 unique sample:", auto["DATE_1"].dropna().unique()[:10])
 
     # Radio selector — avoids Plotly hidden-tab width=0 bug
     company_choice = st.radio(
