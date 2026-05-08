@@ -852,34 +852,14 @@ if view == "Automobile Sales Volumes":
         if date_col not in df.columns or value_col not in df.columns:
             st.warning(f"Missing column: {value_col}")
             return
-
         plot_df = df[[date_col, value_col]].copy()
-        plot_df[date_col] = pd.to_datetime(
-            plot_df[date_col],
-            format="%d/%m/%Y",
-            errors="coerce"
-        )
-
-        plot_df[value_col] = pd.to_numeric(
-            plot_df[value_col],
-            errors="coerce"
-        )
-
+        plot_df[date_col]  = pd.to_datetime(plot_df[date_col], format="%d/%m/%Y", errors="coerce")
+        plot_df[value_col] = pd.to_numeric(plot_df[value_col], errors="coerce")
         plot_df = plot_df.dropna()
-
         if plot_df.empty:
             st.info(f"No data for {title}")
             return
-
-        plot_single_line(
-            plot_df.rename(columns={
-                date_col: "Date",
-                value_col: "Value"
-            }),
-            "Date",
-            "Value",
-            title=title
-        )
+        plot_single_line(plot_df.rename(columns={date_col: "Date", value_col: "Value"}), "Date", "Value", title=title)
 
     # OUTSIDE the function
     company_tabs = st.tabs([
