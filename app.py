@@ -879,7 +879,7 @@ if view == "Automobile Sales Volumes":
         ])
 
     # Tab 0 — Maruti
-    with tabs[0]:
+    with company_tabs[0]:
         plot_auto_chart(auto, "DATE_1", "TMPV TOTAL", "TMPV – Total Sales")
         plot_auto_chart(auto, "DATE_1", "TMPV DOMESTIC SALES", "TMPV – Domestic Sales")
         plot_auto_chart(auto, "DATE_1", "TMPV INTL SALES", "TMPV – Export Sales")
@@ -888,7 +888,7 @@ if view == "Automobile Sales Volumes":
 
 
     # Tab 1 — Hyundai
-    with tabs[1]:
+    with company_tabs[1]:
         plot_auto_chart(auto, "DATE_2", "TMCV TOTAL SALES", "TMCV – Total Sales")
         plot_auto_chart(auto, "DATE_2", "TMCV HCV TRUCKS", "TMCV – HCV Trucks")
         plot_auto_chart(auto, "DATE_2", "TMCV SCV CARGO & PICKUP", "TMCV – SCV Cargo & Pickup")
@@ -898,7 +898,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_2", "TMCV INTL BUSINESS", "TMCV – INTL BUSINESS")
 
     # Tab 2 — Tata Motors
-    with tabs[2]:
+    with company_tabs[2]:
         plot_auto_chart(auto, "DATE_3", "M&M UTILITY VEHICLES", "M&M – UTILITY VEHICLES")
         plot_auto_chart(auto, "DATE_3", "M&M CARS+VANS", "M&M – CARS+VANS")
         plot_auto_chart(auto, "DATE_3", "M&M TOTAL PV", "M&M – TOTAL PV")
@@ -916,26 +916,26 @@ if view == "Automobile Sales Volumes":
 
 
     # Tab 3 — M&M
-    with tabs[3]:
+    with company_tabs[3]:
         plot_auto_chart(auto, "DATE_4", "HYUNDAI TOTAL SALES", "Hyundai – Total Sales")
         plot_auto_chart(auto, "DATE_4", "HYUNDAI DOMESTIC SALES", "Hyundai – Domestic Sales")
         plot_auto_chart(auto, "DATE_4", "HYUNDAI EXPORT SALES", "Hyundai – Export Sales")
 
     # Tab 4 — Kia
-    with tabs[4]:
+    with company_tabs[4]:
         plot_auto_chart(auto, "DATE_5", "FORCE TOTAL SALES", "Force Motors – Total Sales")
         plot_auto_chart(auto, "DATE_5", "FORCE DOMESTIC SALES", "Force – Domestic Sales")
         plot_auto_chart(auto, "DATE_5", "FORCE EXPORTSALES", "Force – Export Sales")
 
 
     # Tab 5 — Toyota
-    with tabs[5]:
+    with company_tabs[5]:
         plot_auto_chart(auto, "DATE_6", "SML MAHINDRA TOTAL SALES", "SML Mahindra – Total Sales")
         plot_auto_chart(auto, "DATE_6", "SML MAHINDRA CV", "SML Mahindra – CV")
         plot_auto_chart(auto, "DATE_6", "SML MAHINDRA PV", "SML Mahindra – PV")
         
     # Tab 6 — MSIL
-    with tabs[6]:
+    with company_tabs[6]:
         plot_auto_chart(auto, "DATE_7", "MARUTI PV", "Maruti – PV")
         plot_auto_chart(auto, "DATE_7", "MARUTI LCV", "Maruti – LCV")
         plot_auto_chart(auto, "DATE_7", "MARUTI OEM", "Maruti – OEM")
@@ -944,7 +944,7 @@ if view == "Automobile Sales Volumes":
 
 
     # Tab 7 — Atul Auto
-    with tabs[7]:
+    with company_tabs[7]:
         plot_auto_chart(auto, "DATE_8", "ATUL Domestic 3w - IC Engine", "ATUL Domestic 3w - IC Engine")
         plot_auto_chart(auto, "DATE_8", "ATUL Domestic EV L3", "ATUL Domestic EV L3")
         plot_auto_chart(auto, "DATE_8", "ATUL Domestic EV L5", "ATUL Domestic EV L5")
@@ -957,7 +957,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_8", "ATUL Total sales D+E", "ATUL Total sales D+E")
 
     # Tab 8 — Ashok Leyland
-    with tabs[8]:
+    with company_tabs[8]:
         plot_auto_chart(auto, "DATE_9", "AL DOMESTIC M&HCV TRUCKS", "AL DOMESTIC M&HCV TRUCKS")
         plot_auto_chart(auto, "DATE_9", "AL DOMESTIC M&HCV BUS", "AL DOMESTIC M&HCV BUS")
         plot_auto_chart(auto, "DATE_9", "AL Total DOMESTIC M&HCV", "AL Total DOMESTIC M&HCV")
@@ -974,7 +974,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_9", "AL TOTAL VEHICLES D+E", "AL TOTAL VEHICLES D+E")
 
     # Tab 9 — Bajaj Auto
-    with tabs[9]:
+    with company_tabs[9]:
         plot_auto_chart(auto, "DATE_10", "Bajaj 2W Domestic", "Bajaj 2W Domestic")
         plot_auto_chart(auto, "DATE_10", "Bajaj 2W Export", "Bajaj 2W Export")
         plot_auto_chart(auto, "DATE_10", "Bajaj Total 2W D+E", "Bajaj Total 2W D+E")
@@ -986,7 +986,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_10", "Bajaj Total Sales D+E", "Bajaj Total Sales D+E")
 
     # Tab 10 — Hero MotoCorp
-    with tabs[10]:
+    with company_tabs[10]:
         plot_auto_chart(auto, "DATE_11", "Hero Motorcycles Total", "Hero Motorcycles Total")
         plot_auto_chart(auto, "DATE_11", "Hero Scooters Total", "Hero Scooters Total")
         plot_auto_chart(auto, "DATE_11", "Hero Total Sales D+E", "Hero Total Sales D+E")
@@ -994,18 +994,18 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_11", "Hero Export Sales", "Hero Export Sales")
         
     # Tab 11 — OLA Electric
-    with tabs[11]:
+    with company_tabs[11]:
         plot_auto_chart(auto, "DATE_12", "OLA Total Sales", "OLA Total Sales")
         
     # Tab 12 — Eicher PV
-    with tabs[12]:
+    with company_tabs[12]:
         plot_auto_chart(auto, "DATE_13", "Eicher Less than 350 cc", "Eicher Less than 350 cc")
         plot_auto_chart(auto, "DATE_13", "Eicher greater than 350 cc", "Eicher greater than 350 cc")
         plot_auto_chart(auto, "DATE_13", "Eicher Total Sales", "Eicher Total Sales")
         plot_auto_chart(auto, "DATE_13", "Eicher Total Export", "Eicher Total Export")
 
     # Tab 13 — Eicher CV
-    with tabs[13]:
+    with company_tabs[13]:
         plot_auto_chart(auto, "DATE_14", "Eicher CV Domestic sales", "Eicher CV Domestic sales")
         plot_auto_chart(auto, "DATE_14", "Eicher CV Export Sales", "Eicher CV Export Sales")
         plot_auto_chart(auto, "DATE_14", "Eicher CV Volvo Sales", "Eicher CV Volvo Sales")
