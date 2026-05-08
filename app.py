@@ -879,7 +879,7 @@ if view == "Automobile Sales Volumes":
         ])
 
     # Tab 0 — Maruti
-    with company_tabs[14]:
+    with company_tabs[1]:
         for col in ["Maruti Total Domestic", "Maruti Export", "Maruti Total D+E"]:
             plot_auto_chart(auto, "DATE_1", col, col)
 
