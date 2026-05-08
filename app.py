@@ -879,7 +879,7 @@ if view == "Automobile Sales Volumes":
         ])
 
     # Tab 0 — Maruti
-     with tabs[0]:
+    with tabs[0]:
         plot_auto_chart(auto, "DATE_1", "TMPV TOTAL", "TMPV – Total Sales")
         plot_auto_chart(auto, "DATE_1", "TMPV DOMESTIC SALES", "TMPV – Domestic Sales")
         plot_auto_chart(auto, "DATE_1", "TMPV INTL SALES", "TMPV – Export Sales")
