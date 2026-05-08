@@ -749,7 +749,7 @@ if view == "Asset Class Charts":
                 st.info("No charts available.")
             else:
                 for img in images:
-                    st.image(os.path.join(folder, img), width=None)
+                    st.image(os.path.join(folder, img))
 
 
 # =================================================
@@ -779,7 +779,7 @@ if view == "Metal Charts":
                 st.info("No charts available.")
             else:
                 for img in images:
-                    st.image(os.path.join(folder, img), width=None)
+                    st.image(os.path.join(folder, img))
 
 
 # =================================================
@@ -975,7 +975,7 @@ if view == "Magazine Cover":
             cols = st.columns(3)
             for i, img in enumerate(images):
                 with cols[i % 3]:
-                    st.image(os.path.join(folder, img), width=None)
+                    st.image(os.path.join(folder, img))
 
     with tab2:
         folder = "magazine_cover/others"
@@ -986,7 +986,7 @@ if view == "Magazine Cover":
             cols = st.columns(3)
             for i, img in enumerate(images):
                 with cols[i % 3]:
-                    st.image(os.path.join(folder, img), width=None)
+                    st.image(os.path.join(folder, img))
 
 
 # =================================================
@@ -1004,7 +1004,7 @@ if view == "Multiasset Chart (One View)":
         cols = st.columns(3)
         for i, img in enumerate(images):
             with cols[i % 3]:
-                st.image(os.path.join(folder, img), width=None)
+                st.image(os.path.join(folder, img))
 
     tab1, tab2, tab3 = st.tabs(["Main", "Broad Indices", "Sectoral Indices"])
 
