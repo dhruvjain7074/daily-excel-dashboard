@@ -400,28 +400,34 @@ PLOT_LAYOUT = dict(
     ),
 )
 
-# Responsive config — forces Plotly to reflow when tab becomes visible
-PLOTLY_CONFIG = {"responsive": True, "displayModeBar": False}
+import streamlit.components.v1 as components
 
-LINE_COLOR = "#1a56db"   # primary line
+PLOTLY_CONFIG = {"responsive": False, "displayModeBar": False}
+
+LINE_COLOR = "#1a56db"
 GREEN = "#16a34a"
 RED   = "#dc2626"
 
+CHART_HEIGHT = 520
 
-def plot_single_line(df, x, y, height=520, y_label=None, title=None, color=None, key=None):
+
+def _render(fig, height=CHART_HEIGHT):
+    html = fig.to_html(full_html=False, include_plotlyjs="cdn", config=PLOTLY_CONFIG)
+    wrapped = f"""<div style="width:100%;overflow:hidden;">{html}</div>"""
+    components.html(wrapped, height=height + 24, scrolling=False)
+
+
+def plot_single_line(df, x, y, height=CHART_HEIGHT, y_label=None, title=None, color=None, key=None):
     fig = px.line(df, x=x, y=y)
-
     line_color = color if color else LINE_COLOR
     fig.update_traces(
         line=dict(width=1.8, color=line_color),
         hovertemplate="<b>%{x|%d %b %Y}</b><br>%{y:,.2f}<extra></extra>",
     )
-
-    layout = dict(**PLOT_LAYOUT, height=height, yaxis_title=y_label, title=title)
+    layout = dict(**PLOT_LAYOUT, height=height, width=None, yaxis_title=y_label, title=title)
     fig.update_layout(**layout)
     fig.update_yaxes(tickformat=",", showexponent="none")
-
-    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG, key=key)
+    _render(fig, height)
 
 
 # =================================================
@@ -591,7 +597,7 @@ if view == "Breadth Data":
         fig1.update_traces(selector=dict(name="LOW"),
             hovertemplate="<b>%{x|%d %b %Y}</b><br>Low: %{y:,.0f}<extra></extra>")
         fig1.update_layout(**{**PLOT_LAYOUT, "height": 520})
-        st.plotly_chart(fig1, use_container_width=True, config=PLOTLY_CONFIG, key=f"{prefix}_hl")
+        _render(fig1)
 
         plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
                          "Date", "HIGH/LOW RATIO", title="High / Low Ratio", key=f"{prefix}_hlr")
@@ -680,7 +686,7 @@ if view == "Index Futures OI":
     fig_cf.update_traces(line=dict(width=1.8))
     fig_cf.update_layout(**{**PLOT_LAYOUT, "height": 520})
     fig_cf.update_yaxes(tickformat=",", showexponent="none")
-    st.plotly_chart(fig_cf, use_container_width=True, config=PLOTLY_CONFIG)
+    _render(fig_cf)
 
 
 # =================================================
@@ -751,7 +757,7 @@ if view == "Asset Class Charts":
                 st.info("No charts available.")
             else:
                 for img in images:
-                    st.image(os.path.join(folder, img), use_container_width=True)
+                    st.image(os.path.join(folder, img), width=None)
 
 
 # =================================================
@@ -781,7 +787,7 @@ if view == "Metal Charts":
                 st.info("No charts available.")
             else:
                 for img in images:
-                    st.image(os.path.join(folder, img), use_container_width=True)
+                    st.image(os.path.join(folder, img), width=None)
 
 
 # =================================================
@@ -789,7 +795,7 @@ if view == "Metal Charts":
 # =================================================
 if view == "Tariff Timeline":
     st.markdown("#### Tariff Timeline")
-    st.dataframe(df_tariff, use_container_width=True)
+    st.dataframe(df_tariff)
 
 
 # =================================================
@@ -977,7 +983,7 @@ if view == "Magazine Cover":
             cols = st.columns(3)
             for i, img in enumerate(images):
                 with cols[i % 3]:
-                    st.image(os.path.join(folder, img), use_container_width=True)
+                    st.image(os.path.join(folder, img), width=None)
 
     with tab2:
         folder = "magazine_cover/others"
@@ -988,7 +994,7 @@ if view == "Magazine Cover":
             cols = st.columns(3)
             for i, img in enumerate(images):
                 with cols[i % 3]:
-                    st.image(os.path.join(folder, img), use_container_width=True)
+                    st.image(os.path.join(folder, img), width=None)
 
 
 # =================================================
@@ -1006,7 +1012,7 @@ if view == "Multiasset Chart (One View)":
         cols = st.columns(3)
         for i, img in enumerate(images):
             with cols[i % 3]:
-                st.image(os.path.join(folder, img), use_container_width=True)
+                st.image(os.path.join(folder, img), width=None)
 
     tab1, tab2, tab3 = st.tabs(["Main", "Broad Indices", "Sectoral Indices"])
 
