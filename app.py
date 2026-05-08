@@ -1002,7 +1002,7 @@ if view == "Automobile Sales Volumes":
         plot_auto_chart(auto, "DATE_13", "Eicher Less than 350 cc", "Eicher Less than 350 cc")
         plot_auto_chart(auto, "DATE_13", "Eicher greater than 350 cc", "Eicher greater than 350 cc")
         plot_auto_chart(auto, "DATE_13", "Eicher Total Sales", "Eicher Total Sales")
-        plot_auto_chart(auto, "DATE_13", "Eicher Total Export", "Eicher Total Export"
+        plot_auto_chart(auto, "DATE_13", "Eicher Total Export", "Eicher Total Export")
 
     # Tab 13 — Eicher CV
     with tabs[13]:
