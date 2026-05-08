@@ -848,6 +848,10 @@ if view == "Automobile Sales Volumes":
 
     auto = df_auto_sales.copy()
 
+    # ── DEBUG: show actual column names from the sheet ──
+    with st.expander("🔍 Debug — actual column names in sheet (remove once fixed)"):
+        st.write(list(auto.columns))
+
     def plot_auto_chart(df, date_col, value_col, title):
         if date_col not in df.columns or value_col not in df.columns:
             st.warning(f"Missing column: {value_col}")
@@ -861,156 +865,100 @@ if view == "Automobile Sales Volumes":
             return
         plot_single_line(plot_df.rename(columns={date_col: "Date", value_col: "Value"}), "Date", "Value", title=title)
 
-    # OUTSIDE the function
     company_tabs = st.tabs([
-        "TMPV",
-        "TMCV",
-        "M&M",
-        "HYUNDAI",
-        "FORCE MOTORS",
-        "SML MAHINDRA",
-        "MARUTI",
-        "Atul auto",
-        "Ashok Leyland",
-        "Bajaj",
-        "Hero Motocorp",
-        "OLA Electric",
-        "Eicher Motors PV",
-        "Eicher Motors CV"
+        "Maruti", "Hyundai", "Tata Motors", "M&M", "Kia",
+        "Toyota", "MSIL", "Atul Auto", "Ashok Leyland",
+        "Bajaj Auto", "Hero MotoCorp", "OLA Electric",
+        "Eicher PV", "Eicher CV",
     ])
 
     # Tab 0 — Maruti
     with company_tabs[0]:
-        plot_auto_chart(auto, "DATE_1", "TMPV TOTAL", "TMPV – Total Sales")
-        plot_auto_chart(auto, "DATE_1", "TMPV DOMESTIC SALES", "TMPV – Domestic Sales")
-        plot_auto_chart(auto, "DATE_1", "TMPV INTL SALES", "TMPV – Export Sales")
-        plot_auto_chart(auto, "DATE_1", "TMPV EV SALES", "TMPV – EV Sales")
-        plot_auto_chart(auto, "DATE_1", "TMPV ICE SALES", "TMPV – ICE Sales")
-
+        for col in ["Maruti Total Domestic", "Maruti Export", "Maruti Total D+E"]:
+            plot_auto_chart(auto, "DATE_1", col, col)
 
     # Tab 1 — Hyundai
     with company_tabs[1]:
-        plot_auto_chart(auto, "DATE_2", "TMCV TOTAL SALES", "TMCV – Total Sales")
-        plot_auto_chart(auto, "DATE_2", "TMCV HCV TRUCKS", "TMCV – HCV Trucks")
-        plot_auto_chart(auto, "DATE_2", "TMCV SCV CARGO & PICKUP", "TMCV – SCV Cargo & Pickup")
-        plot_auto_chart(auto, "DATE_2", "TMCV ILMCV TRUCKS", "TMCV – LMCV")
-        plot_auto_chart(auto, "DATE_2", "TMCV PASSENGER CARRIERS", "TMCV – PASSANGER CARRIERS")
-        plot_auto_chart(auto, "DATE_2", "TMCV TOTAL DOMESTIC SALES", "TMCV – TOTAL DOMESTIC SALES")
-        plot_auto_chart(auto, "DATE_2", "TMCV INTL BUSINESS", "TMCV – INTL BUSINESS")
+        for col in ["Hyundai Total Domestic", "Hyundai Export", "Hyundai Total D+E"]:
+            plot_auto_chart(auto, "DATE_2", col, col)
 
     # Tab 2 — Tata Motors
     with company_tabs[2]:
-        plot_auto_chart(auto, "DATE_3", "M&M UTILITY VEHICLES", "M&M – UTILITY VEHICLES")
-        plot_auto_chart(auto, "DATE_3", "M&M CARS+VANS", "M&M – CARS+VANS")
-        plot_auto_chart(auto, "DATE_3", "M&M TOTAL PV", "M&M – TOTAL PV")
-        plot_auto_chart(auto, "DATE_3", "M&M LCV < 2T", "M&M – LCV < 2T")
-        plot_auto_chart(auto, "DATE_3", "M&M LCV 2-3.5T", "M&M – M&M LCV 2-3.5T")
-        plot_auto_chart(auto, "DATE_3", "M&M LCV 3.5 + MHCV", "M&M – LCV 3.5 + MHCV")
-        plot_auto_chart(auto, "DATE_3", "M&M 3 W INC EV", "M&M – 3 W INC EV")
-        plot_auto_chart(auto, "DATE_3", "M&M DOMESTIC CV", "M&M – DOMESTIC CV")
-        plot_auto_chart(auto, "DATE_3", "M&M TOTAL EXPORT", "M&M – TOTAL EXPORT")
-        plot_auto_chart(auto, "DATE_3", "M&M TOTAL SALES", "M&M – TOTAL SALES")
-        plot_auto_chart(auto, "DATE_3", "M&M TRACTOR DOMESTIC", "M&M – TRACTOR DOMESTIC")
-        plot_auto_chart(auto, "DATE_3", "M&M TOTAL EXPORT", "M&M – TRACTOR EXPORT")
-        plot_auto_chart(auto, "DATE_3", "M&M TRACTOR TOTAL", "M&M – TRACTOR TOTAL")
-
-
+        for col in ["Tata PV Domestic", "Tata PV Export", "Tata Total PV D+E",
+                    "Tata CV Domestic", "Tata CV Export", "Tata Total CV D+E",
+                    "Tata Total Domestic", "Tata Total Export", "Tata Total D+E"]:
+            plot_auto_chart(auto, "DATE_3", col, col)
 
     # Tab 3 — M&M
     with company_tabs[3]:
-        plot_auto_chart(auto, "DATE_4", "HYUNDAI TOTAL SALES", "Hyundai – Total Sales")
-        plot_auto_chart(auto, "DATE_4", "HYUNDAI DOMESTIC SALES", "Hyundai – Domestic Sales")
-        plot_auto_chart(auto, "DATE_4", "HYUNDAI EXPORT SALES", "Hyundai – Export Sales")
+        for col in ["MM SUV Domestic", "MM SUV Export", "MM Total SUV D+E",
+                    "MM LCV Domestic", "MM LCV Export", "MM LCV Total D+E",
+                    "MM Total Domestic", "MM Total Export", "MM Total D+E"]:
+            plot_auto_chart(auto, "DATE_4", col, col)
 
     # Tab 4 — Kia
     with company_tabs[4]:
-        plot_auto_chart(auto, "DATE_5", "FORCE TOTAL SALES", "Force Motors – Total Sales")
-        plot_auto_chart(auto, "DATE_5", "FORCE DOMESTIC SALES", "Force – Domestic Sales")
-        plot_auto_chart(auto, "DATE_5", "FORCE EXPORTSALES", "Force – Export Sales")
-
+        for col in ["Kia Domestic", "Kia Export", "Kia Total D+E"]:
+            plot_auto_chart(auto, "DATE_5", col, col)
 
     # Tab 5 — Toyota
     with company_tabs[5]:
-        plot_auto_chart(auto, "DATE_6", "SML MAHINDRA TOTAL SALES", "SML Mahindra – Total Sales")
-        plot_auto_chart(auto, "DATE_6", "SML MAHINDRA CV", "SML Mahindra – CV")
-        plot_auto_chart(auto, "DATE_6", "SML MAHINDRA PV", "SML Mahindra – PV")
-        
+        for col in ["Toyota Domestic", "Toyota Export", "Toyota Total D+E"]:
+            plot_auto_chart(auto, "DATE_6", col, col)
+
     # Tab 6 — MSIL
     with company_tabs[6]:
-        plot_auto_chart(auto, "DATE_7", "MARUTI PV", "Maruti – PV")
-        plot_auto_chart(auto, "DATE_7", "MARUTI LCV", "Maruti – LCV")
-        plot_auto_chart(auto, "DATE_7", "MARUTI OEM", "Maruti – OEM")
-        plot_auto_chart(auto, "DATE_7", "MARUTI EXPORT", "Maruti – Export")
-        plot_auto_chart(auto, "DATE_7", "MARUTI TOTAL SALES", "Maruti – TOTAL SALES")
-
+        for col in ["MSIL Domestic", "MSIL Export", "MSIL Total D+E"]:
+            plot_auto_chart(auto, "DATE_7", col, col)
 
     # Tab 7 — Atul Auto
     with company_tabs[7]:
-        plot_auto_chart(auto, "DATE_8", "ATUL Domestic 3w - IC Engine", "ATUL Domestic 3w - IC Engine")
-        plot_auto_chart(auto, "DATE_8", "ATUL Domestic EV L3", "ATUL Domestic EV L3")
-        plot_auto_chart(auto, "DATE_8", "ATUL Domestic EV L5", "ATUL Domestic EV L5")
-        plot_auto_chart(auto, "DATE_8", "ATUL Total Domestic sales", "ATUL Total Domestic sales")
-        plot_auto_chart(auto, "DATE_8", "ATUL Export 3w - IC Engine", "ATUL Export 3w - IC Engine")
-        plot_auto_chart(auto, "DATE_8", "ATUL Export EV L5", "ATUL Export EV L5")
-        plot_auto_chart(auto, "DATE_8", "ATUL Total 3w - IC Engine", "ATUL Total 3w - IC Engine")
-        plot_auto_chart(auto, "DATE_8", "ATUL Total EV L3", "ATUL Total EV L3")
-        plot_auto_chart(auto, "DATE_8", "ATUL Total EV L5", "ATUL Total EV L5")
-        plot_auto_chart(auto, "DATE_8", "ATUL Total sales D+E", "ATUL Total sales D+E")
+        for col in ["ATUL Domestic 3w - IC Engine", "ATUL Domestic EV L3",
+                    "ATUL Domestic EV L5", "ATUL Total Domestic sales",
+                    "ATUL Export 3w - IC Engine", "ATUL Export EV L5",
+                    "ATUL Total 3w - IC Engine", "ATUL Total EV L3",
+                    "ATUL Total EV L5", "ATUL Total sales D+E"]:
+            plot_auto_chart(auto, "DATE_8", col, col)
 
     # Tab 8 — Ashok Leyland
     with company_tabs[8]:
-        plot_auto_chart(auto, "DATE_9", "AL DOMESTIC M&HCV TRUCKS", "AL DOMESTIC M&HCV TRUCKS")
-        plot_auto_chart(auto, "DATE_9", "AL DOMESTIC M&HCV BUS", "AL DOMESTIC M&HCV BUS")
-        plot_auto_chart(auto, "DATE_9", "AL Total DOMESTIC M&HCV", "AL Total DOMESTIC M&HCV")
-        plot_auto_chart(auto, "DATE_9", "AL DOMESTIC LCV", "AL DOMESTIC LCV")
-        plot_auto_chart(auto, "DATE_9", "AL TOTAL DOMESTIC VEHICLES", "AL TOTAL DOMESTIC VEHICLES")
-        plot_auto_chart(auto, "DATE_9", "AL EXPORT M&HCV TRUCKS", "AL EXPORT M&HCV TRUCKS")
-        plot_auto_chart(auto, "DATE_9", "AL EXPORT M&HCV BUS", "AL EXPORT M&HCV BUS")
-        plot_auto_chart(auto, "DATE_9", "AL TOTAL M&HCV EXPORT", "AL TOTAL M&HCV EXPORT")
-        plot_auto_chart(auto, "DATE_9", "AL EXPORT LCV", "AL EXPORT LCV")
-        plot_auto_chart(auto, "DATE_9", "AL M&HCV TRUCKS D+E", "AL M&HCV TRUCKS D+E")
-        plot_auto_chart(auto, "DATE_9", "AL M&HCV BUS D+E", "AL M&HCV BUS D+E")
-        plot_auto_chart(auto, "DATE_9", "AL TOTAL D+E", "AL TOTAL D+E")
-        plot_auto_chart(auto, "DATE_9", "AL LCV D+E", "AL LCV D+E")
-        plot_auto_chart(auto, "DATE_9", "AL TOTAL VEHICLES D+E", "AL TOTAL VEHICLES D+E")
+        for col in ["AL DOMESTIC M&HCV TRUCKS", "AL DOMESTIC M&HCV BUS",
+                    "AL Total DOMESTIC M&HCV", "AL DOMESTIC LCV",
+                    "AL TOTAL DOMESTIC VEHICLES", "AL EXPORT M&HCV TRUCKS",
+                    "AL EXPORT M&HCV BUS", "AL TOTAL M&HCV EXPORT",
+                    "AL EXPORT LCV", "AL M&HCV TRUCKS D+E",
+                    "AL M&HCV BUS D+E", "AL TOTAL D+E",
+                    "AL LCV D+E", "AL TOTAL VEHICLES D+E"]:
+            plot_auto_chart(auto, "DATE_9", col, col)
 
     # Tab 9 — Bajaj Auto
     with company_tabs[9]:
-        plot_auto_chart(auto, "DATE_10", "Bajaj 2W Domestic", "Bajaj 2W Domestic")
-        plot_auto_chart(auto, "DATE_10", "Bajaj 2W Export", "Bajaj 2W Export")
-        plot_auto_chart(auto, "DATE_10", "Bajaj Total 2W D+E", "Bajaj Total 2W D+E")
-        plot_auto_chart(auto, "DATE_10", "Bajaj CV Domestic", "Bajaj CV Domestic")
-        plot_auto_chart(auto, "DATE_10", "Bajaj CV Export", "Bajaj CV Export")
-        plot_auto_chart(auto, "DATE_10", "Bajaj Total CV D+E", "Bajaj Total CV D+E")
-        plot_auto_chart(auto, "DATE_10", "Bajaj Total Domestic Sales", "Bajaj Total Domestic Sales")
-        plot_auto_chart(auto, "DATE_10", "Bajaj Total Export Sales", "Bajaj Total Export Sales")
-        plot_auto_chart(auto, "DATE_10", "Bajaj Total Sales D+E", "Bajaj Total Sales D+E")
+        for col in ["Bajaj 2W Domestic", "Bajaj 2W Export", "Bajaj Total 2W D+E",
+                    "Bajaj CV Domestic", "Bajaj CV Export", "Bajaj Total CV D+E",
+                    "Bajaj Total Domestic Sales", "Bajaj Total Export Sales", "Bajaj Total Sales D+E"]:
+            plot_auto_chart(auto, "DATE_10", col, col)
 
     # Tab 10 — Hero MotoCorp
     with company_tabs[10]:
-        plot_auto_chart(auto, "DATE_11", "Hero Motorcycles Total", "Hero Motorcycles Total")
-        plot_auto_chart(auto, "DATE_11", "Hero Scooters Total", "Hero Scooters Total")
-        plot_auto_chart(auto, "DATE_11", "Hero Total Sales D+E", "Hero Total Sales D+E")
-        plot_auto_chart(auto, "DATE_11", "Hero Domestic Sales", "Hero Domestic Sales")
-        plot_auto_chart(auto, "DATE_11", "Hero Export Sales", "Hero Export Sales")
-        
+        for col in ["Hero Motorcycles Total", "Hero Scooters Total",
+                    "Hero Total Sales D+E", "Hero Domestic Sales", "Hero Export Sales"]:
+            plot_auto_chart(auto, "DATE_11", col, col)
+
     # Tab 11 — OLA Electric
     with company_tabs[11]:
         plot_auto_chart(auto, "DATE_12", "OLA Total Sales", "OLA Total Sales")
-        
+
     # Tab 12 — Eicher PV
     with company_tabs[12]:
-        plot_auto_chart(auto, "DATE_13", "Eicher Less than 350 cc", "Eicher Less than 350 cc")
-        plot_auto_chart(auto, "DATE_13", "Eicher greater than 350 cc", "Eicher greater than 350 cc")
-        plot_auto_chart(auto, "DATE_13", "Eicher Total Sales", "Eicher Total Sales")
-        plot_auto_chart(auto, "DATE_13", "Eicher Total Export", "Eicher Total Export")
+        for col in ["Eicher Less than 350 cc", "Eicher greater than 350 cc",
+                    "Eicher Total Sales", "Eicher Total Export"]:
+            plot_auto_chart(auto, "DATE_13", col, col)
 
     # Tab 13 — Eicher CV
     with company_tabs[13]:
-        plot_auto_chart(auto, "DATE_14", "Eicher CV Domestic sales", "Eicher CV Domestic sales")
-        plot_auto_chart(auto, "DATE_14", "Eicher CV Export Sales", "Eicher CV Export Sales")
-        plot_auto_chart(auto, "DATE_14", "Eicher CV Volvo Sales", "Eicher CV Volvo Sales")
-        plot_auto_chart(auto, "DATE_14", "Eicher CV Total Sales D+E", "Eicher CV Total Sales D+E")
+        for col in ["Eicher CV Domestic sales", "Eicher CV Export Sales",
+                    "Eicher CV Volvo Sales", "Eicher CV Total Sales D+E"]:
+            plot_auto_chart(auto, "DATE_14", col, col)
 
 
 # =================================================
