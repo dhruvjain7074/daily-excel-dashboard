@@ -859,7 +859,7 @@ if view == "Automobile Sales Volumes":
         if plot_df.empty:
             st.info(f"No data for {title}")
             return
-        plot_single_line(plot_df.rename(columns={date_col: "Date", value_col: "Value"}), "Date", "Value", title=title)
+    plot_single_line(plot_df.rename(columns={date_col: "Date", value_col: "Value"}), "Date", "Value", title=title)
 
     # OUTSIDE the function
     company_tabs = st.tabs([
