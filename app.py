@@ -553,7 +553,7 @@ if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data"]:
         [m["date"], m["high"], m["low"], m["hl"], m["hr"], m["lr"]]
     ].dropna()
 
-    data[m["date"]] = pd.to_datetime(data[m["date"]], errors="coerce", dayfirst=True)
+    data[m["date"]] = pd.to_datetime(data[m["date"]], format="%d/%m/%Y", errors="coerce")
     data = data.dropna(subset=[m["date"]])
 
     st.markdown(f"**{view}** — Date range")
@@ -607,7 +607,7 @@ if view == "RBI Net Liquidity Injected":
     st.markdown("#### RBI Net Liquidity Injected")
 
     rbi_1 = df_rbi[["DATE-1", "NET LIQ INC TODAY"]].copy()
-    rbi_1["DATE-1"] = pd.to_datetime(rbi_1["DATE-1"], errors="coerce", dayfirst=True)
+    rbi_1["DATE-1"] = pd.to_datetime(rbi_1["DATE-1"], format="%d/%m/%Y", errors="coerce")
     rbi_1["NET LIQ INC TODAY"] = pd.to_numeric(
         rbi_1["NET LIQ INC TODAY"].astype(str).str.replace(",", "", regex=False),
         errors="coerce"
@@ -620,7 +620,7 @@ if view == "RBI Net Liquidity Injected":
     )
 
     rbi_2 = df_rbi[["DATE_2", "AMOUNT"]].copy()
-    rbi_2["DATE_2"] = pd.to_datetime(rbi_2["DATE_2"], errors="coerce", dayfirst=True)
+    rbi_2["DATE_2"] = pd.to_datetime(rbi_2["DATE_2"], format="%d/%m/%Y", errors="coerce")
     rbi_2["AMOUNT"] = pd.to_numeric(
         rbi_2["AMOUNT"].astype(str).str.replace(",", "", regex=False),
         errors="coerce"
@@ -642,7 +642,7 @@ if view == "Index Futures OI":
 
     oi = df_index_oi.copy()
     for dc in ["Date_1", "Date_2", "Date_3", "DATE_4"]:
-        oi[dc] = pd.to_datetime(oi[dc], errors="coerce", dayfirst=True)
+        oi[dc] = pd.to_datetime(oi[dc], format="%d/%m/%Y", errors="coerce")
 
     min_date = min(oi[c].dropna().min() for c in ["Date_1", "Date_2", "Date_3", "DATE_4"]).date()
     max_date = max(oi[c].dropna().max() for c in ["Date_1", "Date_2", "Date_3", "DATE_4"]).date()
@@ -685,7 +685,8 @@ if view == "Index (PE / PB / DIV YLD)":
     df = df.loc[:, df.columns != ""]
 
     for c in ["Date_1", "Date_2", "Date_3"]:
-        df[c] = pd.to_datetime(df[c], errors="coerce", dayfirst=True)
+        # Force dd/mm/yyyy — dayfirst=True alone is unreliable when day ≤ 12
+        df[c] = pd.to_datetime(df[c], format="%d/%m/%Y", errors="coerce")
     for c in ["P/E_1", "P/B_1", "Div Yield_1", "P/E_2", "P/B_2", "Div Yield_2", "P/E_3", "P/B_3", "Div Yield_3"]:
         df[c] = pd.to_numeric(df[c], errors="coerce")
 
@@ -795,7 +796,7 @@ if view == "Global Interest Rates":
 
     for c in date_cols:
         if c in rates.columns:
-            rates[c] = pd.to_datetime(rates[c], errors="coerce", dayfirst=True)
+            rates[c] = pd.to_datetime(rates[c], format="%d/%m/%Y", errors="coerce")
     for c in int_cols:
         if c in rates.columns:
             rates[c] = pd.to_numeric(rates[c], errors="coerce")
@@ -821,7 +822,7 @@ if view == "India Macroeconomic Indicators":
 
     def macro_plot(date_col, val_col, title):
         df_ = macro[[date_col, val_col]].copy()
-        df_[date_col] = pd.to_datetime(df_[date_col], errors="coerce", dayfirst=True)
+        df_[date_col] = pd.to_datetime(df_[date_col], format="%d/%m/%Y", errors="coerce")
         df_[val_col]  = pd.to_numeric(df_[val_col].astype(str).str.replace(",", "", regex=False).str.strip(), errors="coerce")
         df_ = df_.dropna(subset=[date_col])
         plot_single_line(df_.rename(columns={date_col: "Date", val_col: "Value"}), "Date", "Value", title=title)
@@ -845,7 +846,7 @@ if view == "Automobile Sales Volumes":
             st.warning(f"Missing column: {value_col}")
             return
         plot_df = df[[date_col, value_col]].copy()
-        plot_df[date_col]  = pd.to_datetime(plot_df[date_col], errors="coerce", dayfirst=True)
+        plot_df[date_col]  = pd.to_datetime(plot_df[date_col], format="%d/%m/%Y", errors="coerce")
         plot_df[value_col] = pd.to_numeric(plot_df[value_col], errors="coerce")
         plot_df = plot_df.dropna()
         if plot_df.empty:
@@ -1022,7 +1023,7 @@ if view == "Net MTF Outstanding":
     VALUE_COL = mtf.columns[1]
 
     df_plot = mtf[[DATE_COL, VALUE_COL]].copy()
-    df_plot[DATE_COL]  = pd.to_datetime(df_plot[DATE_COL], errors="coerce", dayfirst=True)
+    df_plot[DATE_COL]  = pd.to_datetime(df_plot[DATE_COL], format="%d/%m/%Y", errors="coerce")
     df_plot[VALUE_COL] = pd.to_numeric(
         df_plot[VALUE_COL].astype(str).str.replace(",", "", regex=False).str.strip(),
         errors="coerce"
