@@ -890,14 +890,12 @@ if view == "Automobile Sales Volumes":
 
     # Tab 2 — Tata Motors
     with company_tabs[0]:
-        for col in ["Tata PV Domestic", "Tata PV Export", "Tata Total PV D+E",
-                    "Tata CV Domestic", "Tata CV Export", "Tata Total CV D+E",
-                    "TMPV TOTAL", "Tata Total Export", "Tata Total D+E"]:
-            plot_auto_chart(auto, "DATE_1", "TMPV TOTAL", "TMPV – Total Sales")
-            plot_auto_chart(auto, "DATE_1", "TMPV DOMESTIC SALES", "TMPV – Domestic Sales")
-            plot_auto_chart(auto, "DATE_1", "TMPV INTL SALES", "TMPV – Export Sales")
-            plot_auto_chart(auto, "DATE_1", "TMPV EV SALES", "TMPV – EV Sales")
-            plot_auto_chart(auto, "DATE_1", "TMPV ICE SALES", "TMPV – ICE Sales")
+        plot_auto_chart(auto, "DATE_1", "TMPV TOTAL", "TMPV – Total Sales")
+        plot_auto_chart(auto, "DATE_1", "TMPV DOMESTIC SALES", "TMPV – Domestic Sales")
+        plot_auto_chart(auto, "DATE_1", "TMPV INTL SALES", "TMPV – Export Sales")
+        plot_auto_chart(auto, "DATE_1", "TMPV EV SALES", "TMPV – EV Sales")
+        plot_auto_chart(auto, "DATE_1", "TMPV ICE SALES", "TMPV – ICE Sales")
+
 
     # Tab 3 — M&M
     with company_tabs[3]:
