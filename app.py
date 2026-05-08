@@ -862,14 +862,24 @@ if view == "Automobile Sales Volumes":
         plot_single_line(plot_df.rename(columns={date_col: "Date", value_col: "Value"}), "Date", "Value", title=title)
 
     company_tabs = st.tabs([
-        "Maruti", "Hyundai", "Tata Motors", "M&M", "Kia",
-        "Toyota", "MSIL", "Atul Auto", "Ashok Leyland",
-        "Bajaj Auto", "Hero MotoCorp", "OLA Electric",
-        "Eicher PV", "Eicher CV",
+        "TMPV",
+        "TMCV",
+        "M&M",
+        "HYUNDAI",
+        "FORCE MOTORS",
+        "SML MAHINDRA",
+        "MARUTI",
+        "Atul auto",
+        "Ashok Leyland",
+        "Bajaj",
+        "Hero Motocorp",
+        "OLA Electric",
+        "Eicher Motors PV",
+        "Eicher Motors CV"
     ])
 
     # Tab 0 — Maruti
-    with company_tabs[0]:
+    with company_tabs[14]:
         for col in ["Maruti Total Domestic", "Maruti Export", "Maruti Total D+E"]:
             plot_auto_chart(auto, "DATE_1", col, col)
 
@@ -879,7 +889,7 @@ if view == "Automobile Sales Volumes":
             plot_auto_chart(auto, "DATE_2", col, col)
 
     # Tab 2 — Tata Motors
-    with company_tabs[2]:
+    with company_tabs[0]:
         for col in ["Tata PV Domestic", "Tata PV Export", "Tata Total PV D+E",
                     "Tata CV Domestic", "Tata CV Export", "Tata Total CV D+E",
                     "TMPV TOTAL", "Tata Total Export", "Tata Total D+E"]:
