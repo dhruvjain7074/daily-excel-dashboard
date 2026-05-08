@@ -861,7 +861,7 @@ if view == "Automobile Sales Volumes":
             return
         plot_single_line(plot_df.rename(columns={date_col: "Date", value_col: "Value"}), "Date", "Value", title=title)
 
-    company_tabs = st.tabs([
+        company_tabs = st.tabs([
         "TMPV",
         "TMCV",
         "M&M",
@@ -876,7 +876,7 @@ if view == "Automobile Sales Volumes":
         "OLA Electric",
         "Eicher Motors PV",
         "Eicher Motors CV"
-    ])
+        ])
 
     # Tab 0 — Maruti
     with company_tabs[14]:
