@@ -360,17 +360,19 @@ PLOT_LAYOUT = dict(
     template="plotly_white",
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
+    autosize=True,
     font=dict(family="DM Sans, sans-serif", size=12, color="#1a1a18"),
     title_font=dict(family="DM Sans, sans-serif", size=13, color="#6b6b64"),
     title_x=0.5,
     hovermode="x unified",
-    margin=dict(l=48, r=24, t=52, b=40),
+    margin=dict(l=0, r=0, t=52, b=40),   # zero side margins — no whitespace
     xaxis=dict(
         showgrid=False,
         zeroline=False,
         showline=False,
         tickfont=dict(family="DM Mono, monospace", size=10, color="#a0a09a"),
         tickcolor="#e8e8e5",
+        automargin=True,
     ),
     yaxis=dict(
         gridcolor="#f0f0ed",
@@ -380,6 +382,7 @@ PLOT_LAYOUT = dict(
         tickfont=dict(family="DM Mono, monospace", size=10, color="#a0a09a"),
         tickformat=",",
         showexponent="none",
+        automargin=True,
     ),
     legend=dict(
         orientation="h",
@@ -396,6 +399,9 @@ PLOT_LAYOUT = dict(
         font=dict(family="DM Mono, monospace", size=11),
     ),
 )
+
+# Responsive config — forces Plotly to reflow when tab becomes visible
+PLOTLY_CONFIG = {"responsive": True, "displayModeBar": False}
 
 LINE_COLOR = "#1a56db"   # primary line
 GREEN = "#16a34a"
@@ -415,7 +421,7 @@ def plot_single_line(df, x, y, height=520, y_label=None, title=None, color=None,
     fig.update_layout(**layout)
     fig.update_yaxes(tickformat=",", showexponent="none")
 
-    st.plotly_chart(fig, use_container_width=True, key=key)
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG, key=key)
 
 
 # =================================================
@@ -581,7 +587,7 @@ if view in ["52 Week Data", "EMA 20 Data", "EMA 200 Data"]:
         hovertemplate="<b>%{x|%d %b %Y}</b><br>Low: %{y:,.0f}<extra></extra>",
     )
     fig1.update_layout(**{**PLOT_LAYOUT, "height": 520})
-    st.plotly_chart(fig1, use_container_width=True)
+    st.plotly_chart(fig1, use_container_width=True, config=PLOTLY_CONFIG)
 
     plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
                      "Date", "HIGH/LOW RATIO", title="High / Low Ratio")
@@ -665,7 +671,7 @@ if view == "Index Futures OI":
     fig_cf.update_traces(line=dict(width=1.8))
     fig_cf.update_layout(**{**PLOT_LAYOUT, "height": 520})
     fig_cf.update_yaxes(tickformat=",", showexponent="none")
-    st.plotly_chart(fig_cf, use_container_width=True)
+    st.plotly_chart(fig_cf, use_container_width=True, config=PLOTLY_CONFIG)
 
 
 # =================================================
@@ -683,25 +689,30 @@ if view == "Index (PE / PB / DIV YLD)":
     for c in ["P/E_1", "P/B_1", "Div Yield_1", "P/E_2", "P/B_2", "Div Yield_2", "P/E_3", "P/B_3", "Div Yield_3"]:
         df[c] = pd.to_numeric(df[c], errors="coerce")
 
+    # Pre-build all datasets before tabs to avoid lazy-render bug
+    d1 = df[["Date_1", "P/E_1", "P/B_1", "Div Yield_1"]].dropna().rename(
+        columns={"Date_1": "Date", "P/E_1": "P/E", "P/B_1": "P/B", "Div Yield_1": "Dividend Yield"})
+    d2 = df[["Date_2", "P/E_2", "P/B_2", "Div Yield_2"]].dropna().rename(
+        columns={"Date_2": "Date", "P/E_2": "P/E", "P/B_2": "P/B", "Div Yield_2": "Dividend Yield"})
+    d3 = df[["Date_3", "P/E_3", "P/B_3", "Div Yield_3"]].dropna().rename(
+        columns={"Date_3": "Date", "P/E_3": "P/E", "P/B_3": "P/B", "Div Yield_3": "Dividend Yield"})
+
     tab1, tab2, tab3 = st.tabs(["Nifty 50", "Nifty Midcap 100", "Nifty Smallcap 250"])
 
     with tab1:
-        d = df[["Date_1", "P/E_1", "P/B_1", "Div Yield_1"]].dropna().rename(columns={"Date_1": "Date", "P/E_1": "P/E", "P/B_1": "P/B", "Div Yield_1": "Dividend Yield"})
-        plot_single_line(d, "Date", "P/E",            title="Nifty 50 — P/E",            key="n50_pe")
-        plot_single_line(d, "Date", "P/B",            title="Nifty 50 — P/B",            key="n50_pb")
-        plot_single_line(d, "Date", "Dividend Yield", title="Nifty 50 — Dividend Yield", key="n50_div")
+        plot_single_line(d1, "Date", "P/E",            title="Nifty 50 — P/E",            key="idx_n50_pe")
+        plot_single_line(d1, "Date", "P/B",            title="Nifty 50 — P/B",            key="idx_n50_pb")
+        plot_single_line(d1, "Date", "Dividend Yield", title="Nifty 50 — Dividend Yield", key="idx_n50_div")
 
     with tab2:
-        d = df[["Date_2", "P/E_2", "P/B_2", "Div Yield_2"]].dropna().rename(columns={"Date_2": "Date", "P/E_2": "P/E", "P/B_2": "P/B", "Div Yield_2": "Dividend Yield"})
-        plot_single_line(d, "Date", "P/E",            title="Midcap 100 — P/E",            key="mid_pe")
-        plot_single_line(d, "Date", "P/B",            title="Midcap 100 — P/B",            key="mid_pb")
-        plot_single_line(d, "Date", "Dividend Yield", title="Midcap 100 — Dividend Yield", key="mid_div")
+        plot_single_line(d2, "Date", "P/E",            title="Midcap 100 — P/E",            key="idx_mid_pe")
+        plot_single_line(d2, "Date", "P/B",            title="Midcap 100 — P/B",            key="idx_mid_pb")
+        plot_single_line(d2, "Date", "Dividend Yield", title="Midcap 100 — Dividend Yield", key="idx_mid_div")
 
     with tab3:
-        d = df[["Date_3", "P/E_3", "P/B_3", "Div Yield_3"]].dropna().rename(columns={"Date_3": "Date", "P/E_3": "P/E", "P/B_3": "P/B", "Div Yield_3": "Dividend Yield"})
-        plot_single_line(d, "Date", "P/E",            title="Smallcap 250 — P/E",            key="sc_pe")
-        plot_single_line(d, "Date", "P/B",            title="Smallcap 250 — P/B",            key="sc_pb")
-        plot_single_line(d, "Date", "Dividend Yield", title="Smallcap 250 — Dividend Yield", key="sc_div")
+        plot_single_line(d3, "Date", "P/E",            title="Smallcap 250 — P/E",            key="idx_sc_pe")
+        plot_single_line(d3, "Date", "P/B",            title="Smallcap 250 — P/B",            key="idx_sc_pb")
+        plot_single_line(d3, "Date", "Dividend Yield", title="Smallcap 250 — Dividend Yield", key="idx_sc_div")
 
 
 # =================================================
