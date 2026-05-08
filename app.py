@@ -848,117 +848,106 @@ if view == "Automobile Sales Volumes":
 
     auto = df_auto_sales.copy()
 
-    # ── DEBUG: show actual column names from the sheet ──
-    with st.expander("🔍 Debug — actual column names in sheet (remove once fixed)"):
-        st.write(list(auto.columns))
-
     def plot_auto_chart(df, date_col, value_col, title):
         if date_col not in df.columns or value_col not in df.columns:
             st.warning(f"Missing column: {value_col}")
             return
         plot_df = df[[date_col, value_col]].copy()
         plot_df[date_col]  = pd.to_datetime(plot_df[date_col], format="%d/%m/%Y", errors="coerce")
-        plot_df[value_col] = pd.to_numeric(plot_df[value_col], errors="coerce")
+        plot_df[value_col] = pd.to_numeric(
+            plot_df[value_col].astype(str).str.replace(",", "", regex=False).str.strip(),
+            errors="coerce"
+        )
         plot_df = plot_df.dropna()
         if plot_df.empty:
             st.info(f"No data for {title}")
             return
-        plot_single_line(plot_df.rename(columns={date_col: "Date", value_col: "Value"}), "Date", "Value", title=title)
+        plot_single_line(
+            plot_df.rename(columns={date_col: "Date", value_col: "Value"}),
+            "Date", "Value", title=title,
+            key=f"auto_{date_col}_{value_col.replace(' ','_').replace('/','_')}"
+        )
 
-    company_tabs = st.tabs([
-        "Maruti", "Hyundai", "Tata Motors", "M&M", "Kia",
-        "Toyota", "MSIL", "Atul Auto", "Ashok Leyland",
-        "Bajaj Auto", "Hero MotoCorp", "OLA Electric",
-        "Eicher PV", "Eicher CV",
-    ])
+    # Company → (DATE_col, [value_cols])  — matched exactly to sheet columns
+    AUTO_MAP = {
+        "Tata Motors PV": ("DATE_1", [
+            "TMPV TOTAL", "TMPV DOMESTIC SALES", "TMPV INTL SALES",
+            "TMPV EV SALES", "TMPV ICE SALES",
+        ]),
+        "Tata Motors CV": ("DATE_2", [
+            "TMCV HCV TRUCKS", "TMCV ILMCV TRUCKS", "TMCV PASSENGER CARRIERS",
+            "TMCV SCV CARGO & PICKUP", "TMCV TOTAL DOMESTIC SALES",
+            "TMCV INTL BUSINESS", "TMCV TOTAL SALES",
+        ]),
+        "M&M": ("DATE_3", [
+            "M&M UTILITY VEHICLES", "M&M CARS+VANS", "M&M TOTAL PV",
+            "M&M LCV < 2T", "M&M LCV 2-3.5T", "M&M LCV 3.5 + MHCV",
+            "M&M 3 W INC EV", "M&M DOMESTIC CV",
+            "M&M TOTAL EXPORT", "M&M TOTAL SALES",
+            "M&M TRACTOR DOMESTIC", "M&M TRACTOR EXPORT", "M&M TRACTOR TOTAL",
+        ]),
+        "Hyundai": ("DATE_4", [
+            "HYUNDAI DOMESTIC SALES", "HYUNDAI EXPORT SALES", "HYUNDAI TOTAL SALES",
+        ]),
+        "Force Motors": ("DATE_5", [
+            "FORCE DOMESTIC SALES", "FORCE EXPORTSALES", "FORCE TOTAL SALES",
+        ]),
+        "SML Mahindra": ("DATE_6", [
+            "SML MAHINDRA CV", "SML MAHINDRA PV", "SML MAHINDRA TOTAL SALES",
+        ]),
+        "Maruti": ("DATE_7", [
+            "MARUTI PV", "MARUTI LCV", "MARUTI OEM",
+            "MARUTI EXPORT", "MARUTI TOTAL SALES",
+        ]),
+        "Atul Auto": ("DATE_8", [
+            "ATUL Domestic 3w - IC Engine", "ATUL Domestic EV L3", "ATUL Domestic EV L5",
+            "ATUL Total Domestic sales", "ATUL Export 3w - IC Engine", "ATUL Export EV L5",
+            "ATUL Total 3w - IC Engine", "ATUL Total EV L3",
+            "ATUL Total EV L5", "ATUL Total sales D+E",
+        ]),
+        "Ashok Leyland": ("DATE_9", [
+            "AL DOMESTIC M&HCV TRUCKS", "AL DOMESTIC M&HCV BUS",
+            "AL Total DOMESTIC M&HCV", "AL DOMESTIC LCV",
+            "AL TOTAL DOMESTIC VEHICLES", "AL M&HCV TRUCKS D+E",
+            "AL M&HCV BUS D+E", "AL TOTAL D+E", "AL LCV D+E",
+            "AL TOTAL VEHICLES D+E", "AL EXPORT M&HCV TRUCKS",
+            "AL EXPORT M&HCV BUS", "AL TOTAL M&HCV EXPORT",
+            "AL EXPORT LCV", "AL total vehicles",
+        ]),
+        "Bajaj Auto": ("DATE_10", [
+            "Bajaj 2W Domestic", "Bajaj 2W Export", "Bajaj Total 2W D+E",
+            "Bajaj CV Domestic", "Bajaj CV Export", "Bajaj Total CV D+E",
+            "Bajaj Total Domestic Sales", "Bajaj Total Export Sales", "Bajaj Total Sales D+E",
+        ]),
+        "Hero MotoCorp": ("DATE_11", [
+            "Hero Motorcycles Total", "Hero Scooters Total",
+            "Hero Total Sales D+E", "Hero Domestic Sales", "Hero Export Sales",
+        ]),
+        "OLA Electric": ("DATE_12", [
+            "OLA Total Sales",
+        ]),
+        "Eicher PV": ("DATE_13", [
+            "Eicher Less than 350 cc", "Eicher greater than 350 cc",
+            "Eicher Total Sales", "Eicher Total Export",
+        ]),
+        "Eicher CV": ("DATE_14", [
+            "Eicher CV Domestic sales", "Eicher CV Export Sales",
+            "Eicher CV Volvo Sales", "Eicher CV Total Sales D+E",
+        ]),
+    }
 
-    # Tab 0 — Maruti
-    with company_tabs[0]:
-        for col in ["Maruti Total Domestic", "Maruti Export", "Maruti Total D+E"]:
-            plot_auto_chart(auto, "DATE_1", col, col)
+    # Radio selector — avoids Plotly hidden-tab width=0 bug
+    company_choice = st.radio(
+        "Company",
+        list(AUTO_MAP.keys()),
+        horizontal=True,
+        key="auto_radio",
+        label_visibility="collapsed",
+    )
 
-    # Tab 1 — Hyundai
-    with company_tabs[1]:
-        for col in ["Hyundai Total Domestic", "Hyundai Export", "Hyundai Total D+E"]:
-            plot_auto_chart(auto, "DATE_2", col, col)
-
-    # Tab 2 — Tata Motors
-    with company_tabs[2]:
-        for col in ["Tata PV Domestic", "Tata PV Export", "Tata Total PV D+E",
-                    "Tata CV Domestic", "Tata CV Export", "Tata Total CV D+E",
-                    "Tata Total Domestic", "Tata Total Export", "Tata Total D+E"]:
-            plot_auto_chart(auto, "DATE_3", col, col)
-
-    # Tab 3 — M&M
-    with company_tabs[3]:
-        for col in ["MM SUV Domestic", "MM SUV Export", "MM Total SUV D+E",
-                    "MM LCV Domestic", "MM LCV Export", "MM LCV Total D+E",
-                    "MM Total Domestic", "MM Total Export", "MM Total D+E"]:
-            plot_auto_chart(auto, "DATE_4", col, col)
-
-    # Tab 4 — Kia
-    with company_tabs[4]:
-        for col in ["Kia Domestic", "Kia Export", "Kia Total D+E"]:
-            plot_auto_chart(auto, "DATE_5", col, col)
-
-    # Tab 5 — Toyota
-    with company_tabs[5]:
-        for col in ["Toyota Domestic", "Toyota Export", "Toyota Total D+E"]:
-            plot_auto_chart(auto, "DATE_6", col, col)
-
-    # Tab 6 — MSIL
-    with company_tabs[6]:
-        for col in ["MSIL Domestic", "MSIL Export", "MSIL Total D+E"]:
-            plot_auto_chart(auto, "DATE_7", col, col)
-
-    # Tab 7 — Atul Auto
-    with company_tabs[7]:
-        for col in ["ATUL Domestic 3w - IC Engine", "ATUL Domestic EV L3",
-                    "ATUL Domestic EV L5", "ATUL Total Domestic sales",
-                    "ATUL Export 3w - IC Engine", "ATUL Export EV L5",
-                    "ATUL Total 3w - IC Engine", "ATUL Total EV L3",
-                    "ATUL Total EV L5", "ATUL Total sales D+E"]:
-            plot_auto_chart(auto, "DATE_8", col, col)
-
-    # Tab 8 — Ashok Leyland
-    with company_tabs[8]:
-        for col in ["AL DOMESTIC M&HCV TRUCKS", "AL DOMESTIC M&HCV BUS",
-                    "AL Total DOMESTIC M&HCV", "AL DOMESTIC LCV",
-                    "AL TOTAL DOMESTIC VEHICLES", "AL EXPORT M&HCV TRUCKS",
-                    "AL EXPORT M&HCV BUS", "AL TOTAL M&HCV EXPORT",
-                    "AL EXPORT LCV", "AL M&HCV TRUCKS D+E",
-                    "AL M&HCV BUS D+E", "AL TOTAL D+E",
-                    "AL LCV D+E", "AL TOTAL VEHICLES D+E"]:
-            plot_auto_chart(auto, "DATE_9", col, col)
-
-    # Tab 9 — Bajaj Auto
-    with company_tabs[9]:
-        for col in ["Bajaj 2W Domestic", "Bajaj 2W Export", "Bajaj Total 2W D+E",
-                    "Bajaj CV Domestic", "Bajaj CV Export", "Bajaj Total CV D+E",
-                    "Bajaj Total Domestic Sales", "Bajaj Total Export Sales", "Bajaj Total Sales D+E"]:
-            plot_auto_chart(auto, "DATE_10", col, col)
-
-    # Tab 10 — Hero MotoCorp
-    with company_tabs[10]:
-        for col in ["Hero Motorcycles Total", "Hero Scooters Total",
-                    "Hero Total Sales D+E", "Hero Domestic Sales", "Hero Export Sales"]:
-            plot_auto_chart(auto, "DATE_11", col, col)
-
-    # Tab 11 — OLA Electric
-    with company_tabs[11]:
-        plot_auto_chart(auto, "DATE_12", "OLA Total Sales", "OLA Total Sales")
-
-    # Tab 12 — Eicher PV
-    with company_tabs[12]:
-        for col in ["Eicher Less than 350 cc", "Eicher greater than 350 cc",
-                    "Eicher Total Sales", "Eicher Total Export"]:
-            plot_auto_chart(auto, "DATE_13", col, col)
-
-    # Tab 13 — Eicher CV
-    with company_tabs[13]:
-        for col in ["Eicher CV Domestic sales", "Eicher CV Export Sales",
-                    "Eicher CV Volvo Sales", "Eicher CV Total Sales D+E"]:
-            plot_auto_chart(auto, "DATE_14", col, col)
+    date_col, value_cols = AUTO_MAP[company_choice]
+    for col in value_cols:
+        plot_auto_chart(auto, date_col, col, col)
 
 
 # =================================================
