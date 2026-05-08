@@ -354,35 +354,6 @@ st.markdown("""
 
 
 
-# ── TAB RESIZE FIX ──
-# When a Streamlit tab is clicked, Plotly charts inside it need a resize
-# event to render correctly. This JS observes tab button clicks and fires
-# window.dispatchEvent(new Event('resize')) after a short delay so Plotly
-# reflows to the correct container width.
-st.markdown("""
-<script>
-(function() {
-    function fireResize() {
-        setTimeout(function() {
-            window.dispatchEvent(new Event('resize'));
-        }, 150);
-    }
-    // Wait for Streamlit to finish rendering tabs, then attach listeners
-    function attachTabListeners() {
-        var tabs = window.parent.document.querySelectorAll('[data-baseweb="tab"]');
-        if (tabs.length === 0) {
-            setTimeout(attachTabListeners, 300);
-            return;
-        }
-        tabs.forEach(function(tab) {
-            tab.addEventListener('click', fireResize);
-        });
-    }
-    attachTabListeners();
-})();
-</script>
-""", unsafe_allow_html=True)
-
 # =================================================
 # PLOT FUNCTION — MINIMAL PLOTLY THEME
 # =================================================
@@ -567,71 +538,69 @@ mapping = {
 
 
 # =================================================
-# BREADTH DATA — 52 WEEK / EMA 20 / EMA 200 (TABBED)
+# BREADTH DATA — 52 WEEK / EMA 20 / EMA 200
 # =================================================
 if view == "Breadth Data":
 
     st.markdown("#### Breadth Data")
 
-    # Pre-build all three datasets before entering tabs
-    def build_breadth(m_key):
-        m = mapping[m_key]
-        data = df_main[
-            [m["date"], m["high"], m["low"], m["hl"], m["hr"], m["lr"]]
-        ].dropna()
-        data[m["date"]] = pd.to_datetime(data[m["date"]], format="%d/%m/%Y", errors="coerce")
-        data = data.dropna(subset=[m["date"]])
-        return data, m
+    # Radio instead of tabs — only renders one dataset at a time,
+    # which is the only reliable way to avoid Plotly's hidden-tab width=0 bug
+    breadth_choice = st.radio(
+        "Dataset",
+        ["52 Week", "EMA 20", "EMA 200"],
+        horizontal=True,
+        key="breadth_radio",
+        label_visibility="collapsed",
+    )
 
-    d52, m52   = build_breadth("52 Week Data")
-    d20, m20   = build_breadth("EMA 20 Data")
-    d200, m200 = build_breadth("EMA 200 Data")
+    breadth_key_map = {"52 Week": "52 Week Data", "EMA 20": "EMA 20 Data", "EMA 200": "EMA 200 Data"}
+    m = mapping[breadth_key_map[breadth_choice]]
 
-    tab1, tab2, tab3 = st.tabs(["52 Week", "EMA 20", "EMA 200"])
+    data = df_main[
+        [m["date"], m["high"], m["low"], m["hl"], m["hr"], m["lr"]]
+    ].dropna()
+    data[m["date"]] = pd.to_datetime(data[m["date"]], format="%d/%m/%Y", errors="coerce")
+    data = data.dropna(subset=[m["date"]])
 
-    def render_breadth_tab(data, m, prefix):
-        all_min = data[m["date"]].min().date()
-        all_max = data[m["date"]].max().date()
-        start_date, end_date = st.date_input(
-            "Date range",
-            [all_min, all_max],
-            key=f"dr_{prefix}",
-            label_visibility="collapsed",
-        )
-        filtered = data[
-            (data[m["date"]] >= pd.to_datetime(start_date)) &
-            (data[m["date"]] <= pd.to_datetime(end_date))
-        ]
+    all_min = data[m["date"]].min().date()
+    all_max = data[m["date"]].max().date()
+    start_date, end_date = st.date_input(
+        "Date range",
+        [all_min, all_max],
+        key="breadth_dr",
+        label_visibility="collapsed",
+    )
+    filtered = data[
+        (data[m["date"]] >= pd.to_datetime(start_date)) &
+        (data[m["date"]] <= pd.to_datetime(end_date))
+    ]
 
-        plot_df1 = filtered[[m["date"], m["high"], m["low"]]].rename(
-            columns={m["date"]: "Date", m["high"]: "HIGH", m["low"]: "LOW"}
-        )
-        fig1 = px.line(
-            plot_df1, x="Date", y=["HIGH", "LOW"],
-            color_discrete_map={"HIGH": GREEN, "LOW": RED},
-            title="High & Low Count",
-        )
-        fig1.update_traces(line=dict(width=1.8))
-        fig1.update_traces(selector=dict(name="HIGH"),
-            hovertemplate="<b>%{x|%d %b %Y}</b><br>High: %{y:,.0f}<extra></extra>")
-        fig1.update_traces(selector=dict(name="LOW"),
-            hovertemplate="<b>%{x|%d %b %Y}</b><br>Low: %{y:,.0f}<extra></extra>")
-        fig1.update_layout(**{**PLOT_LAYOUT, "height": 520})
-        st.plotly_chart(fig1, use_container_width=True, config={"displayModeBar": False}, key=f"{prefix}_hl")
+    # prefix makes every chart key unique per dataset selection
+    prefix = breadth_choice.replace(" ", "_").lower()
 
-        plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
-                         "Date", "HIGH/LOW RATIO", title="High / Low Ratio", key=f"{prefix}_hlr")
-        plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
-                         "Date", "HIGH / EMA 200", title="High / EMA 200", color=GREEN, key=f"{prefix}_hr")
-        plot_single_line(filtered.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
-                         "Date", "LOW / EMA 200", title="Low / EMA 200", color=RED, key=f"{prefix}_lr")
+    plot_df1 = filtered[[m["date"], m["high"], m["low"]]].rename(
+        columns={m["date"]: "Date", m["high"]: "HIGH", m["low"]: "LOW"}
+    )
+    fig1 = px.line(
+        plot_df1, x="Date", y=["HIGH", "LOW"],
+        color_discrete_map={"HIGH": GREEN, "LOW": RED},
+        title="High & Low Count",
+    )
+    fig1.update_traces(line=dict(width=1.8))
+    fig1.update_traces(selector=dict(name="HIGH"),
+        hovertemplate="<b>%{x|%d %b %Y}</b><br>High: %{y:,.0f}<extra></extra>")
+    fig1.update_traces(selector=dict(name="LOW"),
+        hovertemplate="<b>%{x|%d %b %Y}</b><br>Low: %{y:,.0f}<extra></extra>")
+    fig1.update_layout(**{**PLOT_LAYOUT, "height": 520})
+    st.plotly_chart(fig1, use_container_width=True, config={"displayModeBar": False}, key=f"{prefix}_hl")
 
-    with tab1:
-        render_breadth_tab(d52, m52, "w52")
-    with tab2:
-        render_breadth_tab(d20, m20, "e20")
-    with tab3:
-        render_breadth_tab(d200, m200, "e200")
+    plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
+                     "Date", "HIGH/LOW RATIO", title="High / Low Ratio", key=f"{prefix}_hlr")
+    plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
+                     "Date", "HIGH / EMA 200", title="High / EMA 200", color=GREEN, key=f"{prefix}_hr")
+    plot_single_line(filtered.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
+                     "Date", "LOW / EMA 200", title="Low / EMA 200", color=RED, key=f"{prefix}_lr")
 
 
 # =================================================
@@ -720,35 +689,38 @@ if view == "Index (PE / PB / DIV YLD)":
     df = df.loc[:, df.columns != ""]
 
     for c in ["Date_1", "Date_2", "Date_3"]:
-        # Force dd/mm/yyyy — dayfirst=True alone is unreliable when day ≤ 12
         df[c] = pd.to_datetime(df[c], format="%d/%m/%Y", errors="coerce")
     for c in ["P/E_1", "P/B_1", "Div Yield_1", "P/E_2", "P/B_2", "Div Yield_2", "P/E_3", "P/B_3", "Div Yield_3"]:
         df[c] = pd.to_numeric(df[c], errors="coerce")
 
-    # Pre-build all datasets before tabs to avoid lazy-render bug
-    d1 = df[["Date_1", "P/E_1", "P/B_1", "Div Yield_1"]].dropna().rename(
-        columns={"Date_1": "Date", "P/E_1": "P/E", "P/B_1": "P/B", "Div Yield_1": "Dividend Yield"})
-    d2 = df[["Date_2", "P/E_2", "P/B_2", "Div Yield_2"]].dropna().rename(
-        columns={"Date_2": "Date", "P/E_2": "P/E", "P/B_2": "P/B", "Div Yield_2": "Dividend Yield"})
-    d3 = df[["Date_3", "P/E_3", "P/B_3", "Div Yield_3"]].dropna().rename(
-        columns={"Date_3": "Date", "P/E_3": "P/E", "P/B_3": "P/B", "Div Yield_3": "Dividend Yield"})
+    # Radio instead of tabs — renders only one index at a time, no hidden-tab width=0 bug
+    idx_choice = st.radio(
+        "Index",
+        ["Nifty 50", "Nifty Midcap 100", "Nifty Smallcap 250"],
+        horizontal=True,
+        key="idx_radio",
+        label_visibility="collapsed",
+    )
 
-    tab1, tab2, tab3 = st.tabs(["Nifty 50", "Nifty Midcap 100", "Nifty Smallcap 250"])
+    if idx_choice == "Nifty 50":
+        d = df[["Date_1", "P/E_1", "P/B_1", "Div Yield_1"]].dropna().rename(
+            columns={"Date_1": "Date", "P/E_1": "P/E", "P/B_1": "P/B", "Div Yield_1": "Dividend Yield"})
+        pfx = "n50"
+        label = "Nifty 50"
+    elif idx_choice == "Nifty Midcap 100":
+        d = df[["Date_2", "P/E_2", "P/B_2", "Div Yield_2"]].dropna().rename(
+            columns={"Date_2": "Date", "P/E_2": "P/E", "P/B_2": "P/B", "Div Yield_2": "Dividend Yield"})
+        pfx = "mid"
+        label = "Midcap 100"
+    else:
+        d = df[["Date_3", "P/E_3", "P/B_3", "Div Yield_3"]].dropna().rename(
+            columns={"Date_3": "Date", "P/E_3": "P/E", "P/B_3": "P/B", "Div Yield_3": "Dividend Yield"})
+        pfx = "sc"
+        label = "Smallcap 250"
 
-    with tab1:
-        plot_single_line(d1, "Date", "P/E",            title="Nifty 50 — P/E",            key="idx_n50_pe")
-        plot_single_line(d1, "Date", "P/B",            title="Nifty 50 — P/B",            key="idx_n50_pb")
-        plot_single_line(d1, "Date", "Dividend Yield", title="Nifty 50 — Dividend Yield", key="idx_n50_div")
-
-    with tab2:
-        plot_single_line(d2, "Date", "P/E",            title="Midcap 100 — P/E",            key="idx_mid_pe")
-        plot_single_line(d2, "Date", "P/B",            title="Midcap 100 — P/B",            key="idx_mid_pb")
-        plot_single_line(d2, "Date", "Dividend Yield", title="Midcap 100 — Dividend Yield", key="idx_mid_div")
-
-    with tab3:
-        plot_single_line(d3, "Date", "P/E",            title="Smallcap 250 — P/E",            key="idx_sc_pe")
-        plot_single_line(d3, "Date", "P/B",            title="Smallcap 250 — P/B",            key="idx_sc_pb")
-        plot_single_line(d3, "Date", "Dividend Yield", title="Smallcap 250 — Dividend Yield", key="idx_sc_div")
+    plot_single_line(d, "Date", "P/E",            title=f"{label} — P/E",            key=f"idx_{pfx}_pe")
+    plot_single_line(d, "Date", "P/B",            title=f"{label} — P/B",            key=f"idx_{pfx}_pb")
+    plot_single_line(d, "Date", "Dividend Yield", title=f"{label} — Dividend Yield", key=f"idx_{pfx}_div")
 
 
 # =================================================
