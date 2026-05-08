@@ -353,6 +353,36 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+
+# ── TAB RESIZE FIX ──
+# When a Streamlit tab is clicked, Plotly charts inside it need a resize
+# event to render correctly. This JS observes tab button clicks and fires
+# window.dispatchEvent(new Event('resize')) after a short delay so Plotly
+# reflows to the correct container width.
+st.markdown("""
+<script>
+(function() {
+    function fireResize() {
+        setTimeout(function() {
+            window.dispatchEvent(new Event('resize'));
+        }, 150);
+    }
+    // Wait for Streamlit to finish rendering tabs, then attach listeners
+    function attachTabListeners() {
+        var tabs = window.parent.document.querySelectorAll('[data-baseweb="tab"]');
+        if (tabs.length === 0) {
+            setTimeout(attachTabListeners, 300);
+            return;
+        }
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', fireResize);
+        });
+    }
+    attachTabListeners();
+})();
+</script>
+""", unsafe_allow_html=True)
+
 # =================================================
 # PLOT FUNCTION — MINIMAL PLOTLY THEME
 # =================================================
@@ -400,21 +430,11 @@ PLOT_LAYOUT = dict(
     ),
 )
 
-import streamlit.components.v1 as components
-
-PLOTLY_CONFIG = {"responsive": False, "displayModeBar": False}
-
 LINE_COLOR = "#1a56db"
 GREEN = "#16a34a"
 RED   = "#dc2626"
 
 CHART_HEIGHT = 520
-
-
-def _render(fig, height=CHART_HEIGHT):
-    html = fig.to_html(full_html=False, include_plotlyjs="cdn", config=PLOTLY_CONFIG)
-    wrapped = f"""<div style="width:100%;overflow:hidden;">{html}</div>"""
-    components.html(wrapped, height=height + 24, scrolling=False)
 
 
 def plot_single_line(df, x, y, height=CHART_HEIGHT, y_label=None, title=None, color=None, key=None):
@@ -424,10 +444,10 @@ def plot_single_line(df, x, y, height=CHART_HEIGHT, y_label=None, title=None, co
         line=dict(width=1.8, color=line_color),
         hovertemplate="<b>%{x|%d %b %Y}</b><br>%{y:,.2f}<extra></extra>",
     )
-    layout = dict(**PLOT_LAYOUT, height=height, width=None, yaxis_title=y_label, title=title)
+    layout = dict(**PLOT_LAYOUT, height=height, yaxis_title=y_label, title=title)
     fig.update_layout(**layout)
     fig.update_yaxes(tickformat=",", showexponent="none")
-    _render(fig, height)
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False}, key=key)
 
 
 # =================================================
@@ -597,7 +617,7 @@ if view == "Breadth Data":
         fig1.update_traces(selector=dict(name="LOW"),
             hovertemplate="<b>%{x|%d %b %Y}</b><br>Low: %{y:,.0f}<extra></extra>")
         fig1.update_layout(**{**PLOT_LAYOUT, "height": 520})
-        _render(fig1)
+        st.plotly_chart(fig1, use_container_width=True, config={"displayModeBar": False}, key=f"{prefix}_hl")
 
         plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
                          "Date", "HIGH/LOW RATIO", title="High / Low Ratio", key=f"{prefix}_hlr")
@@ -686,7 +706,7 @@ if view == "Index Futures OI":
     fig_cf.update_traces(line=dict(width=1.8))
     fig_cf.update_layout(**{**PLOT_LAYOUT, "height": 520})
     fig_cf.update_yaxes(tickformat=",", showexponent="none")
-    _render(fig_cf)
+    st.plotly_chart(fig_cf, use_container_width=True, config={"displayModeBar": False}, key="oi_client_fii")
 
 
 # =================================================
