@@ -936,6 +936,13 @@ if view == "Automobile Sales Volumes":
         ]),
     }
 
+    # ── DEBUG ──
+    with st.expander("🔍 Debug — raw data sample"):
+        st.write("Shape:", auto.shape)
+        st.write("First 5 rows of DATE_1, TMPV TOTAL:")
+        st.write(auto[["DATE_1", "TMPV TOTAL"]].head(10))
+        st.write("DATE_1 unique sample:", auto["DATE_1"].dropna().unique()[:10])
+
     # Radio selector — avoids Plotly hidden-tab width=0 bug
     company_choice = st.radio(
         "Company",
