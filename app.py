@@ -882,7 +882,7 @@ if view == "Automobile Sales Volumes":
     with company_tabs[2]:
         for col in ["Tata PV Domestic", "Tata PV Export", "Tata Total PV D+E",
                     "Tata CV Domestic", "Tata CV Export", "Tata Total CV D+E",
-                    "Tata Total Domestic", "Tata Total Export", "Tata Total D+E"]:
+                    "TMPV TOTAL", "Tata Total Export", "Tata Total D+E"]:
             plot_auto_chart(auto, "DATE_3", col, col)
 
     # Tab 3 — M&M
