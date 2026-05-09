@@ -1040,12 +1040,27 @@ if view == "Auto Dashboard":
             html_template, flags=re.DOTALL, count=1
         )
 
-        # Update "Last updated" to today
+        # Detect the latest month across all RAW series
         from datetime import datetime
-        month_label = datetime.now().strftime("%b %Y")
+        all_dates = []
+        for s in RAW.values():
+            if s["dates"]:
+                all_dates.extend(s["dates"])
+        if all_dates:
+            latest_month = sorted(all_dates)[-1]          # "YYYY-MM"
+            latest_label = datetime.strptime(latest_month, "%Y-%m").strftime("%b %Y")
+        else:
+            latest_label = datetime.now().strftime("%b %Y")
+
+        # Replace every hardcoded "Feb 2026" reference in the HTML with the real latest month
+        html_template = html_template.replace("Feb 2026", latest_label)
+        html_template = html_template.replace("february 2026", latest_label.lower())
+        html_template = html_template.replace("February 2026", latest_label)
+
+        # Also patch the topMeta JS line so it stays dynamic
         html_template = html_template.replace(
-            'Last updated: Feb 2026',
-            f'Last updated: {month_label}'
+            "document.getElementById('topMeta').textContent=`${segLabel} · ${selPeriod>=9999?'All Time':selPeriod+' months'} · ${count} companies · Feb 2026`",
+            f"document.getElementById('topMeta').textContent=`${{segLabel}} · ${{selPeriod>=9999?'All Time':selPeriod+' months'}} · ${{count}} companies · {latest_label}`"
         )
 
         _components.html(html_template, height=1100, scrolling=True)
