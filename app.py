@@ -875,7 +875,7 @@ if view == "Auto Dashboard":
         "SML Mahindra":   to_series(auto, "DATE_6", "SML MAHINDRA TOTAL SALES"),
         "Maruti":         to_series(auto, "DATE_7", "MARUTI TOTAL SALES"),
         "Atul Auto":      to_series(auto, "DATE_8", "ATUL Total sales D+E"),
-        "Ashok Leyland":  to_series(auto, "DATE_9", "AL TOTAL VEHICLES D+E"),
+        "Ashok Leyland":  to_series(auto, "DATE_9", "AL total vehicles"),
         "Bajaj":          to_series(auto, "DATE_10", "Bajaj Total Sales D+E"),
         "Hero":           to_series(auto, "DATE_11", "Hero Total Sales D+E"),
         "OLA":            to_series(auto, "DATE_12", "OLA Total Sales"),
@@ -945,7 +945,7 @@ if view == "Auto Dashboard":
             "Export":   to_series(auto, "DATE_8", "ATUL Export 3w - IC Engine"),
         },
         "Ashok Leyland": {
-            "Total":          to_series(auto, "DATE_9", "AL TOTAL VEHICLES D+E"),
+            "Total":          to_series(auto, "DATE_9", "AL total vehicles"),
             "Domestic":       to_series(auto, "DATE_9", "AL TOTAL DOMESTIC VEHICLES"),
             "M&HCV Trucks":   to_series(auto, "DATE_9", "AL DOMESTIC M&HCV TRUCKS"),
             "M&HCV Bus":      to_series(auto, "DATE_9", "AL DOMESTIC M&HCV BUS"),
@@ -972,6 +972,12 @@ if view == "Auto Dashboard":
             "Total": to_series(auto, "DATE_12", "OLA Total Sales"),
         },
         "Eicher 2W": {
+            "Total":   to_series(auto, "DATE_13", "Eicher Total Sales"),
+            "<350cc":  to_series(auto, "DATE_13", "Eicher Less than 350 cc"),
+            ">350cc":  to_series(auto, "DATE_13", "Eicher greater than 350 cc"),
+            "Export":  to_series(auto, "DATE_13", "Eicher Total Export"),
+        },
+        "Eicher PV": {
             "Total":   to_series(auto, "DATE_13", "Eicher Total Sales"),
             "<350cc":  to_series(auto, "DATE_13", "Eicher Less than 350 cc"),
             ">350cc":  to_series(auto, "DATE_13", "Eicher greater than 350 cc"),
@@ -1038,6 +1044,37 @@ if view == "Auto Dashboard":
             r'const TR_RAW = \{.*?\};',
             f'const TR_RAW = {tr_json};',
             html_template, flags=re.DOTALL, count=1
+        )
+
+        # Patch SEGMENTS and SEG_FILTER in JS to match our actual company names
+        js_patch = """
+const SEGMENTS = {
+  'Maruti':'PV','Hyundai':'PV','Tata Motors PV':'PV','Mahindra':'PV',
+  'Tata Motors CV':'CV','Ashok Leyland':'CV','Eicher CV':'CV','Force Motors':'CV','SML Mahindra':'CV',
+  'Bajaj':'2W','Hero':'2W','Eicher 2W':'2W','OLA':'2W',
+  'Atul Auto':'3W',
+};
+const SEG_FILTER = {
+  'all': null,
+  '2W': ['Bajaj','Hero','Eicher 2W','OLA'],
+  '3W': ['Atul Auto'],
+  'PV': ['Maruti','Hyundai','Tata Motors PV','Mahindra'],
+  'CV': ['Tata Motors CV','Ashok Leyland','Eicher CV','Force Motors','SML Mahindra'],
+  'EV': ['Tata EV','Mahindra 3W EV','OLA Electric','Atul EV'],
+  'TR': ['M\u0026M Tractor'],
+};
+"""
+        # Replace the SEGMENTS and SEG_FILTER blocks in the HTML
+        import re as _re
+        html_template = _re.sub(
+            r'const SEGMENTS = \{.*?\};',
+            js_patch.split("const SEG_FILTER")[0].strip(),
+            html_template, flags=_re.DOTALL, count=1
+        )
+        html_template = _re.sub(
+            r'const SEG_FILTER = \{.*?\};',
+            "const SEG_FILTER = " + js_patch.split("const SEG_FILTER = ")[1].strip(),
+            html_template, flags=_re.DOTALL, count=1
         )
 
         # Detect the latest month across all RAW series
