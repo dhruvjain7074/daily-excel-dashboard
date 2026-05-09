@@ -1082,27 +1082,72 @@ const SEG_FILTER = {
             html_template, flags=_re.DOTALL, count=1
         )
 
-        # Detect the latest month across all RAW series
+        # Compute dynamic labels from actual data
         from datetime import datetime
+        from dateutil.relativedelta import relativedelta
+
         all_dates = []
         for s in RAW.values():
             if s["dates"]:
                 all_dates.extend(s["dates"])
-        if all_dates:
-            latest_month = sorted(all_dates)[-1]          # "YYYY-MM"
-            latest_label = datetime.strptime(latest_month, "%Y-%m").strftime("%b %Y")
-        else:
-            latest_label = datetime.now().strftime("%b %Y")
 
-        # Replace every hardcoded "Feb 2026" reference in the HTML with the real latest month
+        if all_dates:
+            latest_month  = sorted(all_dates)[-1]   # "YYYY-MM"
+            latest_dt     = datetime.strptime(latest_month, "%Y-%m")
+            prev_month_dt = latest_dt - relativedelta(months=1)
+            yoy_month_dt  = latest_dt - relativedelta(years=1)
+            ttm_start_dt  = latest_dt - relativedelta(months=11)
+
+            latest_label   = latest_dt.strftime("%b %Y")       # e.g. Apr 2026
+            prev_label     = prev_month_dt.strftime("%b %Y")   # e.g. Mar 2026
+            yoy_label      = yoy_month_dt.strftime("%b %Y")    # e.g. Apr 2025
+            ttm_start_label= ttm_start_dt.strftime("%b %Y")    # e.g. May 2025
+        else:
+            latest_label    = datetime.now().strftime("%b %Y")
+            prev_label      = latest_label
+            yoy_label       = latest_label
+            ttm_start_label = latest_label
+
+        # Replace hardcoded month labels throughout the HTML
+        # Latest month (was "Feb 2026")
         html_template = html_template.replace("Feb 2026", latest_label)
         html_template = html_template.replace("february 2026", latest_label.lower())
         html_template = html_template.replace("February 2026", latest_label)
 
-        # Also patch the topMeta JS line so it stays dynamic
+        # Previous month column header (was "Jan 2026")
+        html_template = html_template.replace("Jan 2026", prev_label)
+
+        # YoY comparison label (was "Feb 2025")
+        html_template = html_template.replace("Feb 2025", yoy_label)
+
+        # TTM range label (was "Mar 2025–Feb 2026")
+        html_template = html_template.replace(
+            "Mar 2025–Feb 2026",
+            f"{ttm_start_label}–{latest_label}"
+        )
+        html_template = html_template.replace(
+            "Mar 2025–Feb 2026",
+            f"{ttm_start_label}–{latest_label}"
+        )
+
+        # Patch the topMeta JS line
         html_template = html_template.replace(
             "document.getElementById('topMeta').textContent=`${segLabel} · ${selPeriod>=9999?'All Time':selPeriod+' months'} · ${count} companies · Feb 2026`",
             f"document.getElementById('topMeta').textContent=`${{segLabel}} · ${{selPeriod>=9999?'All Time':selPeriod+' months'}} · ${{count}} companies · {latest_label}`"
+        )
+
+        # Patch the YoY chart subtitle dynamically via JS injection
+        html_template = html_template.replace(
+            '<div class="card-sub">Feb 2026 vs Feb 2025</div>',
+            f'<div class="card-sub">{latest_label} vs {yoy_label}</div>'
+        )
+        html_template = html_template.replace(
+            f'<div class="card-sub">{latest_label} vs Feb 2025</div>',
+            f'<div class="card-sub">{latest_label} vs {yoy_label}</div>'
+        )
+        html_template = html_template.replace(
+            '<div class="card-sub">12-month cumulative Mar 2025–Feb 2026</div>',
+            f'<div class="card-sub">12-month cumulative {ttm_start_label}–{latest_label}</div>'
         )
 
         _components.html(html_template, height=1100, scrolling=True)
