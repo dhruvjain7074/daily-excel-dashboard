@@ -883,6 +883,19 @@ if view == "Auto Dashboard":
         "Eicher CV":      to_series(auto, "DATE_14", "Eicher CV Total Sales D+E"),
     }
 
+    # ── DEBUG: show which series have data ──
+    with st.expander("🔍 Debug — RAW data check"):
+        st.write("Sheet columns:", list(auto.columns))
+        st.write("---")
+        for name, series in RAW.items():
+            n = len(series["dates"])
+            last = series["dates"][-1] if n else "EMPTY"
+            st.write(f"**{name}**: {n} rows, latest = {last}")
+        st.write("---")
+        st.write("DATE_8 sample (Atul):", auto[["DATE_8","ATUL Total sales D+E"]].dropna().tail(3).to_dict())
+        st.write("DATE_9 sample (AL):", auto[["DATE_9","AL total vehicles"]].dropna().tail(3).to_dict() if "AL total vehicles" in auto.columns else "COL MISSING")
+        st.write("DATE_10 sample (Bajaj):", auto[["DATE_10","Bajaj Total Sales D+E"]].dropna().tail(3).to_dict() if "Bajaj Total Sales D+E" in auto.columns else "COL MISSING")
+
     # ── DETAIL — sub-series for drill-down modals ──
     DETAIL = {
         "Tata Motors PV": {
