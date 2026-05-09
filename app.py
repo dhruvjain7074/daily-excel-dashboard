@@ -853,7 +853,12 @@ if view == "Auto Dashboard":
         if date_col not in df.columns or val_col not in df.columns:
             return {"dates": [], "values": []}
         tmp = df[[date_col, val_col]].copy()
-        tmp[date_col] = pd.to_datetime(tmp[date_col], format="%d-%b-%Y", errors="coerce")
+        # Try 4-digit year first (01-Jan-2014), then 2-digit (01-Jan-26)
+        parsed = pd.to_datetime(tmp[date_col], format="%d-%b-%Y", errors="coerce")
+        mask = parsed.isna()
+        if mask.any():
+            parsed[mask] = pd.to_datetime(tmp[date_col][mask], format="%d-%b-%y", errors="coerce")
+        tmp[date_col] = parsed
         tmp[val_col]  = pd.to_numeric(
             tmp[val_col].astype(str).str.replace(",", "", regex=False).str.strip(),
             errors="coerce"
@@ -882,19 +887,6 @@ if view == "Auto Dashboard":
         "Eicher 2W":      to_series(auto, "DATE_13", "Eicher Total Sales"),
         "Eicher CV":      to_series(auto, "DATE_14", "Eicher CV Total Sales D+E"),
     }
-
-    # ── DEBUG: show which series have data ──
-    with st.expander("🔍 Debug — RAW data check"):
-        st.write("Sheet columns:", list(auto.columns))
-        st.write("---")
-        for name, series in RAW.items():
-            n = len(series["dates"])
-            last = series["dates"][-1] if n else "EMPTY"
-            st.write(f"**{name}**: {n} rows, latest = {last}")
-        st.write("---")
-        st.write("DATE_8 sample (Atul):", auto[["DATE_8","ATUL Total sales D+E"]].dropna().tail(3).to_dict())
-        st.write("DATE_9 sample (AL):", auto[["DATE_9","AL total vehicles"]].dropna().tail(3).to_dict() if "AL total vehicles" in auto.columns else "COL MISSING")
-        st.write("DATE_10 sample (Bajaj):", auto[["DATE_10","Bajaj Total Sales D+E"]].dropna().tail(3).to_dict() if "Bajaj Total Sales D+E" in auto.columns else "COL MISSING")
 
     # ── DETAIL — sub-series for drill-down modals ──
     DETAIL = {
