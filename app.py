@@ -516,7 +516,7 @@ VIEWS = [
     "Tariff Timeline",
     "Global Interest Rates",
     "India Macroeconomic Indicators",
-    "Automobile Sales Volumes",
+    "Auto Dashboard",
     "Magazine Cover",
     "Multiasset Chart (One View)",
     "Net MTF Outstanding",
@@ -840,114 +840,218 @@ if view == "India Macroeconomic Indicators":
 
 
 # =================================================
-# AUTOMOBILE SALES VOLUMES
+# AUTO DASHBOARD
 # =================================================
-if view == "Automobile Sales Volumes":
-
-    st.markdown("#### Automobile Sales Volumes")
+if view == "Auto Dashboard":
+    import json
+    import streamlit.components.v1 as _components
 
     auto = df_auto_sales.copy()
 
-    def plot_auto_chart(df, date_col, value_col, title):
-        if date_col not in df.columns or value_col not in df.columns:
-            st.warning(f"Missing column: {value_col}")
-            return
-        plot_df = df[[date_col, value_col]].copy()
-        plot_df[date_col]  = pd.to_datetime(plot_df[date_col], format="%d-%b-%Y", errors="coerce")
-        plot_df[value_col] = pd.to_numeric(
-            plot_df[value_col].astype(str).str.replace(",", "", regex=False).str.strip(),
+    # ── helper: parse a column into {dates: ["YYYY-MM",...], values: [...]} ──
+    def to_series(df, date_col, val_col):
+        if date_col not in df.columns or val_col not in df.columns:
+            return {"dates": [], "values": []}
+        tmp = df[[date_col, val_col]].copy()
+        tmp[date_col] = pd.to_datetime(tmp[date_col], format="%d-%b-%Y", errors="coerce")
+        tmp[val_col]  = pd.to_numeric(
+            tmp[val_col].astype(str).str.replace(",", "", regex=False).str.strip(),
             errors="coerce"
         )
-        plot_df = plot_df.dropna()
-        if plot_df.empty:
-            st.info(f"No data for {title}")
-            return
-        plot_single_line(
-            plot_df.rename(columns={date_col: "Date", value_col: "Value"}),
-            "Date", "Value", title=title,
-            key=f"auto_{date_col}_{value_col.replace(' ','_').replace('/','_')}"
-        )
+        tmp = tmp.dropna()
+        tmp = tmp.sort_values(date_col)
+        return {
+            "dates":  tmp[date_col].dt.strftime("%Y-%m").tolist(),
+            "values": tmp[val_col].astype(int).tolist(),
+        }
 
-    # Company → (DATE_col, [value_cols])  — matched exactly to sheet columns
-    AUTO_MAP = {
-        "Tata Motors PV": ("DATE_1", [
-            "TMPV TOTAL", "TMPV DOMESTIC SALES", "TMPV INTL SALES",
-            "TMPV EV SALES", "TMPV ICE SALES",
-        ]),
-        "Tata Motors CV": ("DATE_2", [
-            "TMCV HCV TRUCKS", "TMCV ILMCV TRUCKS", "TMCV PASSENGER CARRIERS",
-            "TMCV SCV CARGO & PICKUP", "TMCV TOTAL DOMESTIC SALES",
-            "TMCV INTL BUSINESS", "TMCV TOTAL SALES",
-        ]),
-        "M&M": ("DATE_3", [
-            "M&M UTILITY VEHICLES", "M&M CARS+VANS", "M&M TOTAL PV",
-            "M&M LCV < 2T", "M&M LCV 2-3.5T", "M&M LCV 3.5 + MHCV",
-            "M&M 3 W INC EV", "M&M DOMESTIC CV",
-            "M&M TOTAL EXPORT", "M&M TOTAL SALES",
-            "M&M TRACTOR DOMESTIC", "M&M TRACTOR EXPORT", "M&M TRACTOR TOTAL",
-        ]),
-        "Hyundai": ("DATE_4", [
-            "HYUNDAI DOMESTIC SALES", "HYUNDAI EXPORT SALES", "HYUNDAI TOTAL SALES",
-        ]),
-        "Force Motors": ("DATE_5", [
-            "FORCE DOMESTIC SALES", "FORCE EXPORTSALES", "FORCE TOTAL SALES",
-        ]),
-        "SML Mahindra": ("DATE_6", [
-            "SML MAHINDRA CV", "SML MAHINDRA PV", "SML MAHINDRA TOTAL SALES",
-        ]),
-        "Maruti": ("DATE_7", [
-            "MARUTI PV", "MARUTI LCV", "MARUTI OEM",
-            "MARUTI EXPORT", "MARUTI TOTAL SALES",
-        ]),
-        "Atul Auto": ("DATE_8", [
-            "ATUL Domestic 3w - IC Engine", "ATUL Domestic EV L3", "ATUL Domestic EV L5",
-            "ATUL Total Domestic sales", "ATUL Export 3w - IC Engine", "ATUL Export EV L5",
-            "ATUL Total 3w - IC Engine", "ATUL Total EV L3",
-            "ATUL Total EV L5", "ATUL Total sales D+E",
-        ]),
-        "Ashok Leyland": ("DATE_9", [
-            "AL DOMESTIC M&HCV TRUCKS", "AL DOMESTIC M&HCV BUS",
-            "AL Total DOMESTIC M&HCV", "AL DOMESTIC LCV",
-            "AL TOTAL DOMESTIC VEHICLES", "AL M&HCV TRUCKS D+E",
-            "AL M&HCV BUS D+E", "AL TOTAL D+E", "AL LCV D+E",
-            "AL TOTAL VEHICLES D+E", "AL EXPORT M&HCV TRUCKS",
-            "AL EXPORT M&HCV BUS", "AL TOTAL M&HCV EXPORT",
-            "AL EXPORT LCV", "AL total vehicles",
-        ]),
-        "Bajaj Auto": ("DATE_10", [
-            "Bajaj 2W Domestic", "Bajaj 2W Export", "Bajaj Total 2W D+E",
-            "Bajaj CV Domestic", "Bajaj CV Export", "Bajaj Total CV D+E",
-            "Bajaj Total Domestic Sales", "Bajaj Total Export Sales", "Bajaj Total Sales D+E",
-        ]),
-        "Hero MotoCorp": ("DATE_11", [
-            "Hero Motorcycles Total", "Hero Scooters Total",
-            "Hero Total Sales D+E", "Hero Domestic Sales", "Hero Export Sales",
-        ]),
-        "OLA Electric": ("DATE_12", [
-            "OLA Total Sales",
-        ]),
-        "Eicher PV": ("DATE_13", [
-            "Eicher Less than 350 cc", "Eicher greater than 350 cc",
-            "Eicher Total Sales", "Eicher Total Export",
-        ]),
-        "Eicher CV": ("DATE_14", [
-            "Eicher CV Domestic sales", "Eicher CV Export Sales",
-            "Eicher CV Volvo Sales", "Eicher CV Total Sales D+E",
-        ]),
+    # ── Build RAW — one "Total" series per company used by the dashboard ──
+    RAW = {
+        "Tata Motors PV": to_series(auto, "DATE_1", "TMPV TOTAL"),
+        "Tata Motors CV": to_series(auto, "DATE_2", "TMCV TOTAL SALES"),
+        "Mahindra":       to_series(auto, "DATE_3", "M&M TOTAL SALES"),
+        "Hyundai":        to_series(auto, "DATE_4", "HYUNDAI TOTAL SALES"),
+        "Force Motors":   to_series(auto, "DATE_5", "FORCE TOTAL SALES"),
+        "SML Mahindra":   to_series(auto, "DATE_6", "SML MAHINDRA TOTAL SALES"),
+        "Maruti":         to_series(auto, "DATE_7", "MARUTI TOTAL SALES"),
+        "Atul Auto":      to_series(auto, "DATE_8", "ATUL Total sales D+E"),
+        "Ashok Leyland":  to_series(auto, "DATE_9", "AL TOTAL VEHICLES D+E"),
+        "Bajaj":          to_series(auto, "DATE_10", "Bajaj Total Sales D+E"),
+        "Hero":           to_series(auto, "DATE_11", "Hero Total Sales D+E"),
+        "OLA":            to_series(auto, "DATE_12", "OLA Total Sales"),
+        "Eicher 2W":      to_series(auto, "DATE_13", "Eicher Total Sales"),
+        "Eicher CV":      to_series(auto, "DATE_14", "Eicher CV Total Sales D+E"),
     }
 
-    # Radio selector — avoids Plotly hidden-tab width=0 bug
-    company_choice = st.radio(
-        "Company",
-        list(AUTO_MAP.keys()),
-        horizontal=True,
-        key="auto_radio",
-        label_visibility="collapsed",
-    )
+    # ── DETAIL — sub-series for drill-down modals ──
+    DETAIL = {
+        "Tata Motors PV": {
+            "Total":    to_series(auto, "DATE_1", "TMPV TOTAL"),
+            "Domestic": to_series(auto, "DATE_1", "TMPV DOMESTIC SALES"),
+            "Export":   to_series(auto, "DATE_1", "TMPV INTL SALES"),
+            "EV Sales": to_series(auto, "DATE_1", "TMPV EV SALES"),
+            "ICE Sales":to_series(auto, "DATE_1", "TMPV ICE SALES"),
+        },
+        "Tata Motors CV": {
+            "Total":              to_series(auto, "DATE_2", "TMCV TOTAL SALES"),
+            "Domestic":           to_series(auto, "DATE_2", "TMCV TOTAL DOMESTIC SALES"),
+            "Intl Business":      to_series(auto, "DATE_2", "TMCV INTL BUSINESS"),
+            "HCV Trucks":         to_series(auto, "DATE_2", "TMCV HCV TRUCKS"),
+            "ILMCV Trucks":       to_series(auto, "DATE_2", "TMCV ILMCV TRUCKS"),
+            "Passenger Carriers": to_series(auto, "DATE_2", "TMCV PASSENGER CARRIERS"),
+            "SCV/Pickup":         to_series(auto, "DATE_2", "TMCV SCV CARGO & PICKUP"),
+        },
+        "Mahindra": {
+            "Total":          to_series(auto, "DATE_3", "M&M TOTAL SALES"),
+            "Utility Vehicles": to_series(auto, "DATE_3", "M&M UTILITY VEHICLES"),
+            "Total PV":       to_series(auto, "DATE_3", "M&M TOTAL PV"),
+            "Domestic CV":    to_series(auto, "DATE_3", "M&M DOMESTIC CV"),
+            "Export":         to_series(auto, "DATE_3", "M&M TOTAL EXPORT"),
+            "LCV <2T":        to_series(auto, "DATE_3", "M&M LCV < 2T"),
+            "LCV 2-3.5T":     to_series(auto, "DATE_3", "M&M LCV 2-3.5T"),
+            "3W EV":          to_series(auto, "DATE_3", "M&M 3 W INC EV"),
+            "Tractor Domestic": to_series(auto, "DATE_3", "M&M TRACTOR DOMESTIC"),
+            "Tractor Export": to_series(auto, "DATE_3", "M&M TRACTOR EXPORT"),
+            "Tractor Total":  to_series(auto, "DATE_3", "M&M TRACTOR TOTAL"),
+        },
+        "Hyundai": {
+            "Total":    to_series(auto, "DATE_4", "HYUNDAI TOTAL SALES"),
+            "Domestic": to_series(auto, "DATE_4", "HYUNDAI DOMESTIC SALES"),
+            "Export":   to_series(auto, "DATE_4", "HYUNDAI EXPORT SALES"),
+        },
+        "Force Motors": {
+            "Total":    to_series(auto, "DATE_5", "FORCE TOTAL SALES"),
+            "Domestic": to_series(auto, "DATE_5", "FORCE DOMESTIC SALES"),
+            "Export":   to_series(auto, "DATE_5", "FORCE EXPORTSALES"),
+        },
+        "SML Mahindra": {
+            "Total": to_series(auto, "DATE_6", "SML MAHINDRA TOTAL SALES"),
+            "CV":    to_series(auto, "DATE_6", "SML MAHINDRA CV"),
+            "PV":    to_series(auto, "DATE_6", "SML MAHINDRA PV"),
+        },
+        "Maruti": {
+            "Total":  to_series(auto, "DATE_7", "MARUTI TOTAL SALES"),
+            "PV":     to_series(auto, "DATE_7", "MARUTI PV"),
+            "LCV":    to_series(auto, "DATE_7", "MARUTI LCV"),
+            "OEM":    to_series(auto, "DATE_7", "MARUTI OEM"),
+            "Export": to_series(auto, "DATE_7", "MARUTI EXPORT"),
+        },
+        "Atul Auto": {
+            "Total":    to_series(auto, "DATE_8", "ATUL Total sales D+E"),
+            "Domestic": to_series(auto, "DATE_8", "ATUL Total Domestic sales"),
+            "IC Engine":to_series(auto, "DATE_8", "ATUL Total 3w - IC Engine"),
+            "EV L3":    to_series(auto, "DATE_8", "ATUL Total EV L3"),
+            "EV L5":    to_series(auto, "DATE_8", "ATUL Total EV L5"),
+            "Export":   to_series(auto, "DATE_8", "ATUL Export 3w - IC Engine"),
+        },
+        "Ashok Leyland": {
+            "Total":          to_series(auto, "DATE_9", "AL TOTAL VEHICLES D+E"),
+            "Domestic":       to_series(auto, "DATE_9", "AL TOTAL DOMESTIC VEHICLES"),
+            "M&HCV Trucks":   to_series(auto, "DATE_9", "AL DOMESTIC M&HCV TRUCKS"),
+            "M&HCV Bus":      to_series(auto, "DATE_9", "AL DOMESTIC M&HCV BUS"),
+            "LCV":            to_series(auto, "DATE_9", "AL DOMESTIC LCV"),
+            "Export M&HCV":   to_series(auto, "DATE_9", "AL TOTAL M&HCV EXPORT"),
+        },
+        "Bajaj": {
+            "Total":          to_series(auto, "DATE_10", "Bajaj Total Sales D+E"),
+            "2W Domestic":    to_series(auto, "DATE_10", "Bajaj 2W Domestic"),
+            "2W Export":      to_series(auto, "DATE_10", "Bajaj 2W Export"),
+            "Total 2W":       to_series(auto, "DATE_10", "Bajaj Total 2W D+E"),
+            "CV Domestic":    to_series(auto, "DATE_10", "Bajaj CV Domestic"),
+            "CV Export":      to_series(auto, "DATE_10", "Bajaj CV Export"),
+            "Total CV":       to_series(auto, "DATE_10", "Bajaj Total CV D+E"),
+        },
+        "Hero": {
+            "Total":       to_series(auto, "DATE_11", "Hero Total Sales D+E"),
+            "Domestic":    to_series(auto, "DATE_11", "Hero Domestic Sales"),
+            "Export":      to_series(auto, "DATE_11", "Hero Export Sales"),
+            "Motorcycles": to_series(auto, "DATE_11", "Hero Motorcycles Total"),
+            "Scooters":    to_series(auto, "DATE_11", "Hero Scooters Total"),
+        },
+        "OLA": {
+            "Total": to_series(auto, "DATE_12", "OLA Total Sales"),
+        },
+        "Eicher 2W": {
+            "Total":   to_series(auto, "DATE_13", "Eicher Total Sales"),
+            "<350cc":  to_series(auto, "DATE_13", "Eicher Less than 350 cc"),
+            ">350cc":  to_series(auto, "DATE_13", "Eicher greater than 350 cc"),
+            "Export":  to_series(auto, "DATE_13", "Eicher Total Export"),
+        },
+        "Eicher CV": {
+            "Total":    to_series(auto, "DATE_14", "Eicher CV Total Sales D+E"),
+            "Domestic": to_series(auto, "DATE_14", "Eicher CV Domestic sales"),
+            "Export":   to_series(auto, "DATE_14", "Eicher CV Export Sales"),
+            "Volvo":    to_series(auto, "DATE_14", "Eicher CV Volvo Sales"),
+        },
+    }
 
-    date_col, value_cols = AUTO_MAP[company_choice]
-    for col in value_cols:
-        plot_auto_chart(auto, date_col, col, col)
+    # ── EV_RAW ──
+    EV_RAW = {
+        "Tata EV":       to_series(auto, "DATE_1",  "TMPV EV SALES"),
+        "Mahindra 3W EV":to_series(auto, "DATE_3",  "M&M 3 W INC EV"),
+        "OLA Electric":  to_series(auto, "DATE_12", "OLA Total Sales"),
+        "Atul EV":       to_series(auto, "DATE_8",  "ATUL Total EV L3"),
+        "Tata ICE":      to_series(auto, "DATE_1",  "TMPV ICE SALES"),
+    }
+
+    # ── TR_RAW ──
+    TR_RAW = {
+        "M&M Tractor":          to_series(auto, "DATE_3", "M&M TRACTOR TOTAL"),
+        "M&M Tractor Domestic": to_series(auto, "DATE_3", "M&M TRACTOR DOMESTIC"),
+        "M&M Tractor Export":   to_series(auto, "DATE_3", "M&M TRACTOR EXPORT"),
+    }
+
+    # ── Inject data into the HTML template and render ──
+    raw_json    = json.dumps(RAW,    ensure_ascii=False)
+    detail_json = json.dumps(DETAIL, ensure_ascii=False)
+    ev_json     = json.dumps(EV_RAW, ensure_ascii=False)
+    tr_json     = json.dumps(TR_RAW, ensure_ascii=False)
+
+    # Read the HTML template
+    template_path = "auto_dashboard_preview.html"
+    try:
+        with open(template_path, "r", encoding="utf-8") as f:
+            html_template = f.read()
+
+        # Replace the hardcoded data blocks with live data
+        import re
+        # Replace RAW = {...};
+        html_template = re.sub(
+            r'const RAW = \{.*?\};',
+            f'const RAW = {raw_json};',
+            html_template, flags=re.DOTALL, count=1
+        )
+        # Replace DETAIL = {...};
+        html_template = re.sub(
+            r'const DETAIL = \{.*?\};',
+            f'const DETAIL = {detail_json};',
+            html_template, flags=re.DOTALL, count=1
+        )
+        # Replace EV_RAW = {...};
+        html_template = re.sub(
+            r'const EV_RAW = \{.*?\};',
+            f'const EV_RAW = {ev_json};',
+            html_template, flags=re.DOTALL, count=1
+        )
+        # Replace TR_RAW = {...};
+        html_template = re.sub(
+            r'const TR_RAW = \{.*?\};',
+            f'const TR_RAW = {tr_json};',
+            html_template, flags=re.DOTALL, count=1
+        )
+
+        # Update "Last updated" to today
+        from datetime import datetime
+        month_label = datetime.now().strftime("%b %Y")
+        html_template = html_template.replace(
+            'Last updated: Feb 2026',
+            f'Last updated: {month_label}'
+        )
+
+        _components.html(html_template, height=1100, scrolling=True)
+
+    except FileNotFoundError:
+        st.error(f"Dashboard template not found: {template_path}. Please upload auto_dashboard_preview.html to the app root directory.")
 
 
 # =================================================
