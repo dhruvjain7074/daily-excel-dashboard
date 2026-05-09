@@ -1150,7 +1150,23 @@ const SEG_FILTER = {
             f'<div class="card-sub">12-month cumulative {ttm_start_label}–{latest_label}</div>'
         )
 
-        _components.html(html_template, height=1100, scrolling=True)
+        # Inject CSS to collapse Streamlit's own padding/header when showing the dashboard
+        st.markdown("""
+<style>
+/* Hide the dashboard header and collapse all padding when Auto Dashboard is active */
+.dashboard-header { display: none !important; }
+.block-container {
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-bottom: 0 !important;
+    max-width: 100% !important;
+}
+section[data-testid="stVerticalBlock"] > div:first-child { display: none !important; }
+</style>
+""", unsafe_allow_html=True)
+
+        _components.html(html_template, height=900, scrolling=True)
 
     except FileNotFoundError:
         st.error(f"Dashboard template not found: {template_path}. Please upload auto_dashboard_preview.html to the app root directory.")
