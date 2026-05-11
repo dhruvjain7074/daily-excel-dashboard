@@ -847,6 +847,11 @@ if view == "Global Interest Rates":
         "Japan": ("Date_5", "Int_5"),
     }
 
+    with st.expander("🔍 Debug"):
+        st.write("Columns:", list(rates.columns))
+        st.write("Date_1 sample:", rates["Date_1"].dropna().head(3).tolist() if "Date_1" in rates.columns else "MISSING")
+        st.write("Int_1 sample:", rates["Int_1"].dropna().head(3).tolist() if "Int_1" in rates.columns else "MISSING")
+
     country = st.radio("Country", list(country_map.keys()), horizontal=True,
                        key="rates_radio", label_visibility="collapsed")
     dc, ic = country_map[country]
@@ -1281,6 +1286,9 @@ if view == "Net MTF Outstanding":
 
     mtf = df_mtf.copy()
     mtf = mtf.loc[:, mtf.columns != ""]
+    with st.expander("🔍 Debug"):
+        st.write("Columns:", list(mtf.columns))
+        st.write("First 3 rows:", mtf.head(3).to_dict())
 
     DATE_COL  = mtf.columns[0]
     VALUE_COL = mtf.columns[1]
