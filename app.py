@@ -408,7 +408,13 @@ RED   = "#dc2626"
 CHART_HEIGHT = 520
 
 
-def plot_single_line(df, x, y, height=CHART_HEIGHT, y_label=None, title=None, color=None, key=None):
+def plot_single_line(df, x, y, height=CHART_HEIGHT, y_label=None, title=None,
+                     color=None, key=None, date_range=None):
+    # Apply date range filter if provided
+    if date_range is not None and x in df.columns:
+        start, end = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
+        df = df[(df[x] >= start) & (df[x] <= end)]
+
     fig = px.line(df, x=x, y=y)
     line_color = color if color else LINE_COLOR
     fig.update_traces(
@@ -550,6 +556,18 @@ VIEWS = [
 col1, col2 = st.columns([6, 1])
 with col1:
     view = st.selectbox("View", VIEWS, label_visibility="collapsed")
+
+
+def date_filter_widget(df_dates, key):
+    """Render a date range picker. Returns (start, end)."""
+    d_min = df_dates.min().date() if not df_dates.empty else pd.Timestamp("2010-01-01").date()
+    d_max = df_dates.max().date() if not df_dates.empty else pd.Timestamp.today().date()
+    dr = st.date_input("Date range", [d_min, d_max],
+                       min_value=d_min, max_value=d_max,
+                       key=f"dr_{key}", label_visibility="collapsed")
+    start = pd.to_datetime(dr[0]) if len(dr) == 2 else pd.to_datetime(d_min)
+    end   = pd.to_datetime(dr[1]) if len(dr) == 2 else pd.to_datetime(d_max)
+    return start, end
 with col2:
     if st.button("↺ Refresh", help="Reload data from Google Sheets"):
         del st.session_state.data_loaded
@@ -624,7 +642,7 @@ if view == "Breadth Data":
     fig1.update_traces(selector=dict(name="LOW"),
         hovertemplate="<b>%{x|%d %b %Y}</b><br>Low: %{y:,.0f}<extra></extra>")
     fig1.update_layout(**{**PLOT_LAYOUT, "height": 520})
-    st.plotly_chart(fig1, use_container_width=True, config={"displayModeBar": False}, key=f"{prefix}_hl")
+        st.plotly_chart(fig1, use_container_width=True, config={"displayModeBar": False}, key=f"{prefix}_hl")
 
     plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
                      "Date", "HIGH/LOW RATIO", title="High / Low Ratio", key=f"{prefix}_hlr")
