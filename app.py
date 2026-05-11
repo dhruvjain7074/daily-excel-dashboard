@@ -474,7 +474,32 @@ def load_data():
     return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales, df_india_macro, df_mtf
 
 
-df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales, df_india_macro, df_mtf = load_data()
+# Load all data once per session — stored in session_state so switching
+# views never triggers a re-fetch and never hits the Google Sheets API again.
+if "data_loaded" not in st.session_state:
+    with st.spinner("Loading data from Google Sheets…"):
+        (
+            st.session_state.df_main,
+            st.session_state.df_rbi,
+            st.session_state.df_index_oi,
+            st.session_state.df_index_val,
+            st.session_state.df_tariff,
+            st.session_state.df_global_rates,
+            st.session_state.df_auto_sales,
+            st.session_state.df_india_macro,
+            st.session_state.df_mtf,
+        ) = load_data()
+        st.session_state.data_loaded = True
+
+df_main        = st.session_state.df_main
+df_rbi         = st.session_state.df_rbi
+df_index_oi    = st.session_state.df_index_oi
+df_index_val   = st.session_state.df_index_val
+df_tariff      = st.session_state.df_tariff
+df_global_rates= st.session_state.df_global_rates
+df_auto_sales  = st.session_state.df_auto_sales
+df_india_macro = st.session_state.df_india_macro
+df_mtf         = st.session_state.df_mtf
 
 # ── CLEAN df_main ──
 numeric_cols_main = [
@@ -522,7 +547,13 @@ VIEWS = [
     "Net MTF Outstanding",
 ]
 
-view = st.selectbox("View", VIEWS, label_visibility="collapsed")
+col1, col2 = st.columns([6, 1])
+with col1:
+    view = st.selectbox("View", VIEWS, label_visibility="collapsed")
+with col2:
+    if st.button("↺ Refresh", help="Reload data from Google Sheets"):
+        del st.session_state.data_loaded
+        st.rerun()
 
 st.markdown("<div style='height:1.5rem'></div>", unsafe_allow_html=True)
 
@@ -808,13 +839,23 @@ if view == "Global Interest Rates":
         if c in rates.columns:
             rates[c] = pd.to_numeric(rates[c], errors="coerce")
 
-    tabs = st.tabs(["US", "India", "UK", "China", "Japan"])
-    pairs = [("Date_1","Int_1","US"),("Date_2","Int_2","India"),("Date_3","Int_3","UK"),("Date_4","Int_4","China"),("Date_5","Int_5","Japan")]
+    country_map = {
+        "US":    ("Date_1", "Int_1"),
+        "India": ("Date_2", "Int_2"),
+        "UK":    ("Date_3", "Int_3"),
+        "China": ("Date_4", "Int_4"),
+        "Japan": ("Date_5", "Int_5"),
+    }
 
-    for tab, (dc, ic, label) in zip(tabs, pairs):
-        with tab:
-            df_ = rates[[dc, ic]].dropna().rename(columns={dc: "Date", ic: "Interest Rate"})
-            plot_single_line(df_, "Date", "Interest Rate", title=f"{label} Interest Rate")
+    country = st.radio("Country", list(country_map.keys()), horizontal=True,
+                       key="rates_radio", label_visibility="collapsed")
+    dc, ic = country_map[country]
+    if dc in rates.columns and ic in rates.columns:
+        df_ = rates[[dc, ic]].dropna().rename(columns={dc: "Date", ic: "Interest Rate"})
+        plot_single_line(df_, "Date", "Interest Rate",
+                         title=f"{country} Interest Rate", key=f"rates_{country}")
+    else:
+        st.info("No data available.")
 
 
 # =================================================
