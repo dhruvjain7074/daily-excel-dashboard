@@ -834,7 +834,8 @@ if view == "Global Interest Rates":
 
     for c in date_cols:
         if c in rates.columns:
-            rates[c] = pd.to_datetime(rates[c], format="%d/%m/%Y", errors="coerce")
+            # Format is "1-1-1972" = day-month-year with no zero padding
+            rates[c] = pd.to_datetime(rates[c], format="%d-%m-%Y", errors="coerce")
     for c in int_cols:
         if c in rates.columns:
             rates[c] = pd.to_numeric(rates[c], errors="coerce")
@@ -846,11 +847,6 @@ if view == "Global Interest Rates":
         "China": ("Date_4", "Int_4"),
         "Japan": ("Date_5", "Int_5"),
     }
-
-    with st.expander("🔍 Debug"):
-        st.write("Columns:", list(rates.columns))
-        st.write("Raw Date_1 (before parsing):", df_global_rates["Date_1"].dropna().head(5).tolist())
-        st.write("Raw Date_2:", df_global_rates["Date_2"].dropna().head(5).tolist())
 
     country = st.radio("Country", list(country_map.keys()), horizontal=True,
                        key="rates_radio", label_visibility="collapsed")
