@@ -642,7 +642,7 @@ if view == "Breadth Data":
     fig1.update_traces(selector=dict(name="LOW"),
         hovertemplate="<b>%{x|%d %b %Y}</b><br>Low: %{y:,.0f}<extra></extra>")
     fig1.update_layout(**{**PLOT_LAYOUT, "height": 520})
-        st.plotly_chart(fig1, use_container_width=True, config={"displayModeBar": False}, key=f"{prefix}_hl")
+    st.plotly_chart(fig1, use_container_width=True, config={"displayModeBar": False}, key=f"{prefix}_hl")
 
     plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
                      "Date", "HIGH/LOW RATIO", title="High / Low Ratio", key=f"{prefix}_hlr")
