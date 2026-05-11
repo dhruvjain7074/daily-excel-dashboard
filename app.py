@@ -849,8 +849,8 @@ if view == "Global Interest Rates":
 
     with st.expander("🔍 Debug"):
         st.write("Columns:", list(rates.columns))
-        st.write("Date_1 sample:", rates["Date_1"].dropna().head(3).tolist() if "Date_1" in rates.columns else "MISSING")
-        st.write("Int_1 sample:", rates["Int_1"].dropna().head(3).tolist() if "Int_1" in rates.columns else "MISSING")
+        st.write("Raw Date_1 (before parsing):", df_global_rates["Date_1"].dropna().head(5).tolist())
+        st.write("Raw Date_2:", df_global_rates["Date_2"].dropna().head(5).tolist())
 
     country = st.radio("Country", list(country_map.keys()), horizontal=True,
                        key="rates_radio", label_visibility="collapsed")
@@ -1285,23 +1285,16 @@ if view == "Net MTF Outstanding":
     st.markdown("#### Net MTF Outstanding")
 
     mtf = df_mtf.copy()
-    mtf = mtf.loc[:, mtf.columns != ""]
-    with st.expander("🔍 Debug"):
-        st.write("Columns:", list(mtf.columns))
-        st.write("First 3 rows:", mtf.head(3).to_dict())
 
-    DATE_COL  = mtf.columns[0]
-    VALUE_COL = mtf.columns[1]
-
-    df_plot = mtf[[DATE_COL, VALUE_COL]].copy()
-    df_plot[DATE_COL]  = pd.to_datetime(df_plot[DATE_COL], format="%d/%m/%Y", errors="coerce")
-    df_plot[VALUE_COL] = pd.to_numeric(
-        df_plot[VALUE_COL].astype(str).str.replace(",", "", regex=False).str.strip(),
+    df_plot = mtf[["DATE", "NET MTF OUTSTANDING"]].copy()
+    df_plot["DATE"] = pd.to_datetime(df_plot["DATE"], format="%d-%b-%Y", errors="coerce")
+    df_plot["NET MTF OUTSTANDING"] = pd.to_numeric(
+        df_plot["NET MTF OUTSTANDING"].astype(str).str.replace(",", "", regex=False).str.strip(),
         errors="coerce"
     )
-    df_plot = df_plot.dropna(subset=[DATE_COL])
+    df_plot = df_plot.dropna(subset=["DATE"])
 
     plot_single_line(
-        df_plot.rename(columns={DATE_COL: "Date", VALUE_COL: "Net MTF Outstanding"}),
+        df_plot.rename(columns={"DATE": "Date", "NET MTF OUTSTANDING": "Net MTF Outstanding"}),
         "Date", "Net MTF Outstanding", title="Net MTF Outstanding",
     )
