@@ -612,14 +612,14 @@ if view == "Breadth Data":
     data[m["date"]] = pd.to_datetime(data[m["date"]], format="%d/%m/%Y", errors="coerce")
     data = data.dropna(subset=[m["date"]])
 
+    # prefix makes every chart key unique per dataset selection
+    prefix = breadth_choice.replace(" ", "_").lower()
+
     start_br, end_br = date_filter_widget(data[m["date"]].dropna(), f"br_{prefix}")
     filtered = data[
         (data[m["date"]] >= start_br) &
         (data[m["date"]] <= end_br)
     ]
-
-    # prefix makes every chart key unique per dataset selection
-    prefix = breadth_choice.replace(" ", "_").lower()
 
     plot_df1 = filtered[[m["date"], m["high"], m["low"]]].rename(
         columns={m["date"]: "Date", m["high"]: "HIGH", m["low"]: "LOW"}
