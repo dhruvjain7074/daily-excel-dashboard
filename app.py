@@ -937,7 +937,6 @@ if view == "Auto Dashboard":
         "Eicher 2W":      to_series(auto, "DATE_13", "Eicher Total Sales"),
         "Eicher CV":      to_series(auto, "DATE_14", "Eicher CV Total Sales D+E"),
         "TVS":            to_series(auto, "DATE_15", "TVS TOTAL SALES"),
-        "TVS 3W":         to_series(auto, "DATE_15", "TVS 3W (TOTAL)"),
     }
 
     # ── DETAIL — sub-series for drill-down modals ──
@@ -1046,11 +1045,6 @@ if view == "Auto Dashboard":
             "Export":   to_series(auto, "DATE_14", "Eicher CV Export Sales"),
             "Volvo":    to_series(auto, "DATE_14", "Eicher CV Volvo Sales"),
         },
-        "TVS 3W": {
-            "Total":    to_series(auto, "DATE_15", "TVS 3W (TOTAL)"),
-            "Domestic": to_series(auto, "DATE_15", "TVS 3W DOMESTIC"),
-            "Export":   to_series(auto, "DATE_15", "TVS 3W EXPORT"),
-        },
         "TVS": {
             "Total":          to_series(auto, "DATE_15", "TVS TOTAL SALES"),
             "2W Total":       to_series(auto, "DATE_15", "TVS 2W (TOTAL)"),
@@ -1129,7 +1123,7 @@ const SEGMENTS = {
   'Maruti':'PV','Hyundai':'PV','Tata Motors PV':'PV','Mahindra':'PV','Force Motors':'PV','SML Mahindra':'PV',
   'Tata Motors CV':'CV','Ashok Leyland':'CV','Eicher CV':'CV',
   'Bajaj':'2W','Hero':'2W','Eicher 2W':'2W','OLA':'2W','TVS':'2W',
-  'Atul Auto':'3W','TVS 3W':'3W',
+  'Atul Auto':'3W',
 };
 const SEG_FILTER = {
   'all': null,
@@ -1201,18 +1195,10 @@ const SEG_FILTER = {
             '>2 Wheeler<span class="seg-cnt">4</span>',
             '>2 Wheeler<span class="seg-cnt">5</span>'
         )
-        html_template = html_template.replace(
-            '>3 Wheeler<span class="seg-cnt">1</span>',
-            '>3 Wheeler<span class="seg-cnt">2</span>'
-        )
         # Update total company count (All Segments)
         html_template = html_template.replace(
             '>All Segments<span class="seg-cnt">14</span>',
-            '>All Segments<span class="seg-cnt">16</span>'
-        )
-        html_template = html_template.replace(
-            '>All Segments<span class="seg-cnt">15</span>',
-            '>All Segments<span class="seg-cnt">16</span>'
+            '>All Segments<span class="seg-cnt">15</span>'
         )
 
         # Replace hardcoded month labels throughout the HTML
