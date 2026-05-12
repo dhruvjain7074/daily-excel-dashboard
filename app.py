@@ -1061,6 +1061,12 @@ if view == "Auto Dashboard":
         },
     }
 
+    # ── DEBUG TVS ──
+    with st.expander("🔍 TVS Debug"):
+        st.write("TVS RAW:", RAW.get("TVS", {}))
+        st.write("DATE_15 sample:", auto["DATE_15"].dropna().head(5).tolist() if "DATE_15" in auto.columns else "MISSING")
+        st.write("TVS TOTAL SALES sample:", auto["TVS TOTAL SALES"].dropna().head(5).tolist() if "TVS TOTAL SALES" in auto.columns else "MISSING")
+
     # ── EV_RAW ──
     EV_RAW = {
         "Tata EV":       to_series(auto, "DATE_1",  "TMPV EV SALES"),
