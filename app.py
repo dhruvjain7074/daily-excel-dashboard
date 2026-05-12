@@ -1158,6 +1158,18 @@ const SEG_FILTER = {
             yoy_label       = latest_label
             ttm_start_label = latest_label
 
+        # Fix hardcoded segment counts to match our SEG_FILTER
+        # PV: Maruti, Hyundai, Tata Motors PV, Mahindra, Force Motors, SML Mahindra = 6
+        # CV: Tata Motors CV, Ashok Leyland, Eicher CV = 3
+        html_template = html_template.replace(
+            '>Passenger Vehicle<span class="seg-cnt">3</span>',
+            '>Passenger Vehicle<span class="seg-cnt">6</span>'
+        )
+        html_template = html_template.replace(
+            '>Commercial Vehicle<span class="seg-cnt">5</span>',
+            '>Commercial Vehicle<span class="seg-cnt">3</span>'
+        )
+
         # Replace hardcoded month labels throughout the HTML
         # Latest month (was "Feb 2026")
         html_template = html_template.replace("Feb 2026", latest_label)
