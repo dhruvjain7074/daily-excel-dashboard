@@ -612,17 +612,10 @@ if view == "Breadth Data":
     data[m["date"]] = pd.to_datetime(data[m["date"]], format="%d/%m/%Y", errors="coerce")
     data = data.dropna(subset=[m["date"]])
 
-    all_min = data[m["date"]].min().date()
-    all_max = data[m["date"]].max().date()
-    start_date, end_date = st.date_input(
-        "Date range",
-        [all_min, all_max],
-        key="breadth_dr",
-        label_visibility="collapsed",
-    )
+    start_br, end_br = date_filter_widget(data[m["date"]].dropna(), f"br_{prefix}")
     filtered = data[
-        (data[m["date"]] >= pd.to_datetime(start_date)) &
-        (data[m["date"]] <= pd.to_datetime(end_date))
+        (data[m["date"]] >= start_br) &
+        (data[m["date"]] <= end_br)
     ]
 
     # prefix makes every chart key unique per dataset selection
@@ -665,25 +658,16 @@ if view == "RBI Net Liquidity Injected":
         rbi_1["NET LIQ INC TODAY"].astype(str).str.replace(",", "", regex=False),
         errors="coerce"
     )
-    rbi_1 = rbi_1.dropna().sort_values("DATE-1")
-
-    plot_single_line(
-        rbi_1.rename(columns={"DATE-1": "Date", "NET LIQ INC TODAY": "Net Liquidity"}),
-        x="Date", y="Net Liquidity", title="Net Liquidity Injected",
-    )
+    rbi_1 = rbi_1.dropna().sort_values("DATE-1").rename(columns={"DATE-1": "Date", "NET LIQ INC TODAY": "Net Liquidity"})
 
     rbi_2 = df_rbi[["DATE_2", "AMOUNT"]].copy()
     rbi_2["DATE_2"] = pd.to_datetime(rbi_2["DATE_2"], format="%d/%m/%Y", errors="coerce")
-    rbi_2["AMOUNT"] = pd.to_numeric(
-        rbi_2["AMOUNT"].astype(str).str.replace(",", "", regex=False),
-        errors="coerce"
-    )
-    rbi_2 = rbi_2.dropna().sort_values("DATE_2")
+    rbi_2["AMOUNT"] = pd.to_numeric(rbi_2["AMOUNT"].astype(str).str.replace(",", "", regex=False), errors="coerce")
+    rbi_2 = rbi_2.dropna().sort_values("DATE_2").rename(columns={"DATE_2": "Date", "AMOUNT": "Amount"})
 
-    plot_single_line(
-        rbi_2.rename(columns={"DATE_2": "Date", "AMOUNT": "Amount"}),
-        x="Date", y="Amount", title="Durable Liquidity (Amount)",
-    )
+    start_rbi, end_rbi = date_filter_widget(pd.concat([rbi_1["Date"], rbi_2["Date"]]).dropna(), "rbi")
+    plot_single_line(rbi_1, x="Date", y="Net Liquidity", title="Net Liquidity Injected", date_range=(start_rbi, end_rbi), key="rbi_netliq")
+    plot_single_line(rbi_2, x="Date", y="Amount", title="Durable Liquidity (Amount)", date_range=(start_rbi, end_rbi), key="rbi_amount")
 
 
 # =================================================
@@ -887,16 +871,22 @@ if view == "India Macroeconomic Indicators":
     macro = df_india_macro.copy()
     macro = macro.loc[:, macro.columns != ""]
 
-    def macro_plot(date_col, val_col, title):
+    def macro_prep(date_col, val_col):
         df_ = macro[[date_col, val_col]].copy()
         df_[date_col] = pd.to_datetime(df_[date_col], format="%d/%m/%Y", errors="coerce")
         df_[val_col]  = pd.to_numeric(df_[val_col].astype(str).str.replace(",", "", regex=False).str.strip(), errors="coerce")
-        df_ = df_.dropna(subset=[date_col])
-        plot_single_line(df_.rename(columns={date_col: "Date", val_col: "Value"}), "Date", "Value", title=title)
+        return df_.dropna(subset=[date_col]).rename(columns={date_col: "Date", val_col: "Value"})
 
-    macro_plot("Date_1", "GDP %",         "GDP Growth %")
-    macro_plot("Date_2", "INFLATION %",   "Inflation %")
-    macro_plot("Date_3", "LOAN Growth %", "Loan Growth %")
+    gdp  = macro_prep("Date_1", "GDP %")
+    infl = macro_prep("Date_2", "INFLATION %")
+    loan = macro_prep("Date_3", "LOAN Growth %")
+
+    all_macro = pd.concat([gdp["Date"], infl["Date"], loan["Date"]]).dropna()
+    start_m, end_m = date_filter_widget(all_macro, "macro")
+
+    plot_single_line(gdp,  "Date", "Value", title="GDP Growth %",  date_range=(start_m, end_m), key="macro_gdp")
+    plot_single_line(infl, "Date", "Value", title="Inflation %",   date_range=(start_m, end_m), key="macro_infl")
+    plot_single_line(loan, "Date", "Value", title="Loan Growth %", date_range=(start_m, end_m), key="macro_loan")
 
 
 # =================================================
@@ -1306,9 +1296,8 @@ if view == "Net MTF Outstanding":
         df_plot["NET MTF OUTSTANDING"].astype(str).str.replace(",", "", regex=False).str.strip(),
         errors="coerce"
     )
-    df_plot = df_plot.dropna(subset=["DATE"])
+    df_plot = df_plot.dropna(subset=["DATE"]).rename(columns={"DATE": "Date", "NET MTF OUTSTANDING": "Net MTF Outstanding"})
 
-    plot_single_line(
-        df_plot.rename(columns={"DATE": "Date", "NET MTF OUTSTANDING": "Net MTF Outstanding"}),
-        "Date", "Net MTF Outstanding", title="Net MTF Outstanding",
-    )
+    start_mtf, end_mtf = date_filter_widget(df_plot["Date"].dropna(), "mtf")
+    plot_single_line(df_plot, "Date", "Net MTF Outstanding", title="Net MTF Outstanding",
+                     date_range=(start_mtf, end_mtf))
