@@ -1128,7 +1128,7 @@ const SEGMENTS = {
 const SEG_FILTER = {
   'all': null,
   '2W': ['Bajaj','Hero','Eicher 2W','OLA','TVS'],
-  '3W': ['Atul Auto','TVS 3W'],
+  '3W': ['Atul Auto','TVS'],
   'PV': ['Maruti','Hyundai','Tata Motors PV','Mahindra','Force Motors','SML Mahindra'],
   'CV': ['Tata Motors CV','Ashok Leyland','Eicher CV'],
   'EV': ['Tata EV','Mahindra 3W EV','OLA Electric','Atul EV','TVS EV'],
@@ -1193,6 +1193,10 @@ const SEG_FILTER = {
         # Fix hardcoded segment counts to match our SEG_FILTER
         # PV: Maruti, Hyundai, Tata Motors PV, Mahindra, Force Motors, SML Mahindra = 6
         # CV: Tata Motors CV, Ashok Leyland, Eicher CV = 3
+        html_template = html_template.replace(
+            '>3 Wheeler<span class="seg-cnt">1</span>',
+            '>3 Wheeler<span class="seg-cnt">2</span>'
+        )
         html_template = html_template.replace(
             '>Passenger Vehicle<span class="seg-cnt">3</span>',
             '>Passenger Vehicle<span class="seg-cnt">6</span>'
