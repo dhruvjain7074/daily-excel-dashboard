@@ -924,7 +924,7 @@ if view == "Auto Dashboard":
     RAW = {
         "Tata Motors PV": to_series(auto, "DATE_1", "TMPV TOTAL"),
         "Tata Motors CV": to_series(auto, "DATE_2", "TMCV TOTAL SALES"),
-        "Mahindra":       to_series(auto, "DATE_3", "M&M TOTAL SALES"),
+        "Mahindra":       to_series(auto, "DATE_3", "M&M TOTAL PV"),
         "Hyundai":        to_series(auto, "DATE_4", "HYUNDAI TOTAL SALES"),
         "Force Motors":   to_series(auto, "DATE_5", "FORCE TOTAL SALES"),
         "SML Mahindra":   to_series(auto, "DATE_6", "SML MAHINDRA TOTAL SALES"),
@@ -1104,8 +1104,8 @@ if view == "Auto Dashboard":
         # Patch SEGMENTS and SEG_FILTER in JS to match our actual company names
         js_patch = """
 const SEGMENTS = {
-  'Maruti':'PV','Hyundai':'PV','Tata Motors PV':'PV','Mahindra':'PV',
-  'Tata Motors CV':'CV','Ashok Leyland':'CV','Eicher CV':'CV','Force Motors':'CV','SML Mahindra':'CV',
+  'Maruti':'PV','Hyundai':'PV','Tata Motors PV':'PV','Mahindra':'PV','Force Motors':'PV','SML Mahindra':'PV',
+  'Tata Motors CV':'CV','Ashok Leyland':'CV','Eicher CV':'CV',
   'Bajaj':'2W','Hero':'2W','Eicher 2W':'2W','OLA':'2W',
   'Atul Auto':'3W',
 };
@@ -1113,8 +1113,8 @@ const SEG_FILTER = {
   'all': null,
   '2W': ['Bajaj','Hero','Eicher 2W','OLA'],
   '3W': ['Atul Auto'],
-  'PV': ['Maruti','Hyundai','Tata Motors PV','Mahindra'],
-  'CV': ['Tata Motors CV','Ashok Leyland','Eicher CV','Force Motors','SML Mahindra'],
+  'PV': ['Maruti','Hyundai','Tata Motors PV','Mahindra','Force Motors','SML Mahindra'],
+  'CV': ['Tata Motors CV','Ashok Leyland','Eicher CV'],
   'EV': ['Tata EV','Mahindra 3W EV','OLA Electric','Atul EV'],
   'TR': ['M\u0026M Tractor'],
 };
