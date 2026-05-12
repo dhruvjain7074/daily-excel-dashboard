@@ -1174,6 +1174,12 @@ const SEG_FILTER = {
             yoy_label       = latest_label
             ttm_start_label = latest_label
 
+        # Enable legend on the market share doughnut chart
+        html_template = html_template.replace(
+            "type:'doughnut',data:{labels:cos,datasets:[{data:vals,backgroundColor:cos.map(c=>getColor(c)),borderColor:'#fff',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false}",
+            "type:'doughnut',data:{labels:cos,datasets:[{data:vals,backgroundColor:cos.map(c=>getColor(c)),borderColor:'#fff',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#4a5568',font:{size:10},boxWidth:10,padding:8}}"
+        )
+
         # Fix hardcoded segment counts to match our SEG_FILTER
         # PV: Maruti, Hyundai, Tata Motors PV, Mahindra, Force Motors, SML Mahindra = 6
         # CV: Tata Motors CV, Ashok Leyland, Eicher CV = 3
