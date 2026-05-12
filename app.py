@@ -936,6 +936,7 @@ if view == "Auto Dashboard":
         "OLA":            to_series(auto, "DATE_12", "OLA Total Sales"),
         "Eicher 2W":      to_series(auto, "DATE_13", "Eicher Total Sales"),
         "Eicher CV":      to_series(auto, "DATE_14", "Eicher CV Total Sales D+E"),
+        "TVS":            to_series(auto, "DATE_15", "TVS TOTAL SALES"),
     }
 
     # ── DETAIL — sub-series for drill-down modals ──
@@ -1044,6 +1045,20 @@ if view == "Auto Dashboard":
             "Export":   to_series(auto, "DATE_14", "Eicher CV Export Sales"),
             "Volvo":    to_series(auto, "DATE_14", "Eicher CV Volvo Sales"),
         },
+        "TVS": {
+            "Total":          to_series(auto, "DATE_15", "TVS TOTAL SALES"),
+            "2W Total":       to_series(auto, "DATE_15", "TVS 2W (TOTAL)"),
+            "3W Total":       to_series(auto, "DATE_15", "TVS 3W (TOTAL)"),
+            "Motorcycle":     to_series(auto, "DATE_15", "TVS MOTORCYCLE (TOTAL)"),
+            "Scooter":        to_series(auto, "DATE_15", "TVS SCOOTER (TOTAL)"),
+            "EV":             to_series(auto, "DATE_15", "TVS EV (TOTAL)"),
+            "Domestic":       to_series(auto, "DATE_15", "TVS TOTAL DOMESTIC"),
+            "Export":         to_series(auto, "DATE_15", "TVS TOTAL EXPORT"),
+            "2W Domestic":    to_series(auto, "DATE_15", "TVS 2W DOMESTIC"),
+            "3W Domestic":    to_series(auto, "DATE_15", "TVS 3W DOMESTIC"),
+            "2W Export":      to_series(auto, "DATE_15", "TVS 2W EXPORT"),
+            "3W Export":      to_series(auto, "DATE_15", "TVS 3W EXPORT"),
+        },
     }
 
     # ── EV_RAW ──
@@ -1053,6 +1068,7 @@ if view == "Auto Dashboard":
         "OLA Electric":  to_series(auto, "DATE_12", "OLA Total Sales"),
         "Atul EV":       to_series(auto, "DATE_8",  "ATUL Total EV L3"),
         "Tata ICE":      to_series(auto, "DATE_1",  "TMPV ICE SALES"),
+        "TVS EV":        to_series(auto, "DATE_15", "TVS EV (TOTAL)"),
     }
 
     # ── TR_RAW ──
@@ -1106,16 +1122,16 @@ if view == "Auto Dashboard":
 const SEGMENTS = {
   'Maruti':'PV','Hyundai':'PV','Tata Motors PV':'PV','Mahindra':'PV','Force Motors':'PV','SML Mahindra':'PV',
   'Tata Motors CV':'CV','Ashok Leyland':'CV','Eicher CV':'CV',
-  'Bajaj':'2W','Hero':'2W','Eicher 2W':'2W','OLA':'2W',
+  'Bajaj':'2W','Hero':'2W','Eicher 2W':'2W','OLA':'2W','TVS':'2W',
   'Atul Auto':'3W',
 };
 const SEG_FILTER = {
   'all': null,
-  '2W': ['Bajaj','Hero','Eicher 2W','OLA'],
+  '2W': ['Bajaj','Hero','Eicher 2W','OLA','TVS'],
   '3W': ['Atul Auto'],
   'PV': ['Maruti','Hyundai','Tata Motors PV','Mahindra','Force Motors','SML Mahindra'],
   'CV': ['Tata Motors CV','Ashok Leyland','Eicher CV'],
-  'EV': ['Tata EV','Mahindra 3W EV','OLA Electric','Atul EV'],
+  'EV': ['Tata EV','Mahindra 3W EV','OLA Electric','Atul EV','TVS EV'],
   'TR': ['M\u0026M Tractor'],
 };
 """
@@ -1168,6 +1184,15 @@ const SEG_FILTER = {
         html_template = html_template.replace(
             '>Commercial Vehicle<span class="seg-cnt">5</span>',
             '>Commercial Vehicle<span class="seg-cnt">3</span>'
+        )
+        html_template = html_template.replace(
+            '>2 Wheeler<span class="seg-cnt">4</span>',
+            '>2 Wheeler<span class="seg-cnt">5</span>'
+        )
+        # Update total company count (All Segments)
+        html_template = html_template.replace(
+            '>All Segments<span class="seg-cnt">14</span>',
+            '>All Segments<span class="seg-cnt">15</span>'
         )
 
         # Replace hardcoded month labels throughout the HTML
