@@ -1180,6 +1180,16 @@ const SEG_FILTER = {
             "type:'doughnut',data:{labels:cos,datasets:[{data:vals,backgroundColor:cos.map(c=>getColor(c)),borderColor:'#fff',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#4a5568',font:{size:10},boxWidth:10,padding:8}}"
         )
 
+        # Add TVS EV to EV_COS and EV_COLORS (hardcoded in HTML)
+        html_template = html_template.replace(
+            "const EV_COS = ['Tata EV','Mahindra 3W EV','OLA Electric','Atul EV'];",
+            "const EV_COS = ['Tata EV','Mahindra 3W EV','OLA Electric','Atul EV','TVS EV'];"
+        )
+        html_template = html_template.replace(
+            "const EV_COLORS = {'Tata EV':'#0d9e6a','Mahindra 3W EV':'#1d6af5','OLA Electric':'#e05c2a','Atul EV':'#7c3aed'};",
+            "const EV_COLORS = {'Tata EV':'#0d9e6a','Mahindra 3W EV':'#1d6af5','OLA Electric':'#e05c2a','Atul EV':'#7c3aed','TVS EV':'#0891b2'};"
+        )
+
         # Fix hardcoded segment counts to match our SEG_FILTER
         # PV: Maruti, Hyundai, Tata Motors PV, Mahindra, Force Motors, SML Mahindra = 6
         # CV: Tata Motors CV, Ashok Leyland, Eicher CV = 3
