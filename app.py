@@ -937,6 +937,7 @@ if view == "Auto Dashboard":
         "Eicher 2W":      to_series(auto, "DATE_13", "Eicher Total Sales"),
         "Eicher CV":      to_series(auto, "DATE_14", "Eicher CV Total Sales D+E"),
         "TVS":            to_series(auto, "DATE_15", "TVS TOTAL SALES"),
+        "TVS 3W":         to_series(auto, "DATE_15", "TVS 3W (TOTAL)"),
     }
 
     # ── DETAIL — sub-series for drill-down modals ──
@@ -1045,6 +1046,11 @@ if view == "Auto Dashboard":
             "Export":   to_series(auto, "DATE_14", "Eicher CV Export Sales"),
             "Volvo":    to_series(auto, "DATE_14", "Eicher CV Volvo Sales"),
         },
+        "TVS 3W": {
+            "Total":    to_series(auto, "DATE_15", "TVS 3W (TOTAL)"),
+            "Domestic": to_series(auto, "DATE_15", "TVS 3W DOMESTIC"),
+            "Export":   to_series(auto, "DATE_15", "TVS 3W EXPORT"),
+        },
         "TVS": {
             "Total":          to_series(auto, "DATE_15", "TVS TOTAL SALES"),
             "2W Total":       to_series(auto, "DATE_15", "TVS 2W (TOTAL)"),
@@ -1123,12 +1129,12 @@ const SEGMENTS = {
   'Maruti':'PV','Hyundai':'PV','Tata Motors PV':'PV','Mahindra':'PV','Force Motors':'PV','SML Mahindra':'PV',
   'Tata Motors CV':'CV','Ashok Leyland':'CV','Eicher CV':'CV',
   'Bajaj':'2W','Hero':'2W','Eicher 2W':'2W','OLA':'2W','TVS':'2W',
-  'Atul Auto':'3W',
+  'Atul Auto':'3W','TVS 3W':'3W',
 };
 const SEG_FILTER = {
   'all': null,
   '2W': ['Bajaj','Hero','Eicher 2W','OLA','TVS'],
-  '3W': ['Atul Auto','TVS'],
+  '3W': ['Atul Auto','TVS 3W'],
   'PV': ['Maruti','Hyundai','Tata Motors PV','Mahindra','Force Motors','SML Mahindra'],
   'CV': ['Tata Motors CV','Ashok Leyland','Eicher CV'],
   'EV': ['Tata EV','Mahindra 3W EV','OLA Electric','Atul EV','TVS EV'],
