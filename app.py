@@ -722,7 +722,7 @@ if view == "Index (PE / PB / DIV YLD)":
     df = df.loc[:, df.columns != ""]
 
     for c in ["Date_1", "Date_2", "Date_3"]:
-        df[c] = pd.to_datetime(df[c], format="%d/%m/%Y", errors="coerce")
+        df[c] = pd.to_datetime(df[c], format="%d-%m-%Y", errors="coerce")
     for c in ["P/E_1", "P/B_1", "Div Yield_1", "P/E_2", "P/B_2", "Div Yield_2", "P/E_3", "P/B_3", "Div Yield_3"]:
         df[c] = pd.to_numeric(df[c], errors="coerce")
 
@@ -751,11 +751,6 @@ if view == "Index (PE / PB / DIV YLD)":
         pfx = "sc"
         label = "Smallcap 250"
 
-    with st.expander("🔍 Debug"):
-        st.write("Total rows:", len(d))
-        st.write("Date min:", d["Date"].min())
-        st.write("Date max:", d["Date"].max())
-        st.write("Raw Date_1 sample (unparsed):", df_index_val["Date_1"].dropna().head(5).tolist())
     start_idx, end_idx = date_filter_widget(d["Date"].dropna(), f"idx_{pfx}")
     plot_single_line(d, "Date", "P/E",            title=f"{label} — P/E",            key=f"idx_{pfx}_pe",  date_range=(start_idx, end_idx))
     plot_single_line(d, "Date", "P/B",            title=f"{label} — P/B",            key=f"idx_{pfx}_pb",  date_range=(start_idx, end_idx))
