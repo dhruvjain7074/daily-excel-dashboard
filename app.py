@@ -751,6 +751,11 @@ if view == "Index (PE / PB / DIV YLD)":
         pfx = "sc"
         label = "Smallcap 250"
 
+    with st.expander("🔍 Debug"):
+        st.write("Total rows:", len(d))
+        st.write("Date min:", d["Date"].min())
+        st.write("Date max:", d["Date"].max())
+        st.write("First 3 raw dates from sheet:", df_index_val[f"Date_{pfx[0] if pfx=='n50' else ('2' if pfx=='mid' else '3')}"].dropna().head(3).tolist())
     start_idx, end_idx = date_filter_widget(d["Date"].dropna(), f"idx_{pfx}")
     plot_single_line(d, "Date", "P/E",            title=f"{label} — P/E",            key=f"idx_{pfx}_pe",  date_range=(start_idx, end_idx))
     plot_single_line(d, "Date", "P/B",            title=f"{label} — P/B",            key=f"idx_{pfx}_pb",  date_range=(start_idx, end_idx))
