@@ -70,7 +70,7 @@ html, body, [class*="css"] {
 }
 
 .block-container {
-    padding: 2.5rem 1rem 4rem 1rem !important;
+    padding: 2.5rem 0.3rem 4rem 0.3rem !important;
     max-width: 1400px !important;
 }
 
