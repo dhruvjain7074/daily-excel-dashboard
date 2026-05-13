@@ -736,24 +736,25 @@ if view == "Index (PE / PB / DIV YLD)":
     )
 
     if idx_choice == "Nifty 50":
-        d = df[["Date_1", "P/E_1", "P/B_1", "Div Yield_1"]].dropna().rename(
+        d = df[["Date_1", "P/E_1", "P/B_1", "Div Yield_1"]].dropna(subset=["Date_1"]).rename(
             columns={"Date_1": "Date", "P/E_1": "P/E", "P/B_1": "P/B", "Div Yield_1": "Dividend Yield"})
         pfx = "n50"
         label = "Nifty 50"
     elif idx_choice == "Nifty Midcap 100":
-        d = df[["Date_2", "P/E_2", "P/B_2", "Div Yield_2"]].dropna().rename(
+        d = df[["Date_2", "P/E_2", "P/B_2", "Div Yield_2"]].dropna(subset=["Date_2"]).rename(
             columns={"Date_2": "Date", "P/E_2": "P/E", "P/B_2": "P/B", "Div Yield_2": "Dividend Yield"})
         pfx = "mid"
         label = "Midcap 100"
     else:
-        d = df[["Date_3", "P/E_3", "P/B_3", "Div Yield_3"]].dropna().rename(
+        d = df[["Date_3", "P/E_3", "P/B_3", "Div Yield_3"]].dropna(subset=["Date_3"]).rename(
             columns={"Date_3": "Date", "P/E_3": "P/E", "P/B_3": "P/B", "Div Yield_3": "Dividend Yield"})
         pfx = "sc"
         label = "Smallcap 250"
 
-    plot_single_line(d, "Date", "P/E",            title=f"{label} — P/E",            key=f"idx_{pfx}_pe")
-    plot_single_line(d, "Date", "P/B",            title=f"{label} — P/B",            key=f"idx_{pfx}_pb")
-    plot_single_line(d, "Date", "Dividend Yield", title=f"{label} — Dividend Yield", key=f"idx_{pfx}_div")
+    start_idx, end_idx = date_filter_widget(d["Date"].dropna(), f"idx_{pfx}")
+    plot_single_line(d, "Date", "P/E",            title=f"{label} — P/E",            key=f"idx_{pfx}_pe",  date_range=(start_idx, end_idx))
+    plot_single_line(d, "Date", "P/B",            title=f"{label} — P/B",            key=f"idx_{pfx}_pb",  date_range=(start_idx, end_idx))
+    plot_single_line(d, "Date", "Dividend Yield", title=f"{label} — Dividend Yield", key=f"idx_{pfx}_div", date_range=(start_idx, end_idx))
 
 
 # =================================================
