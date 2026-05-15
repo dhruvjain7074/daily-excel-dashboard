@@ -615,19 +615,52 @@ if view == "Breadth Data":
     # prefix makes every chart key unique per dataset selection
     prefix = breadth_choice.replace(" ", "_").lower()
 
-    start_br, end_br = date_filter_widget(data[m["date"]].dropna(), f"br_{prefix}")
+    # ── Date filter + Timeframe selector ──
+    c1, c2 = st.columns([4, 1])
+    with c1:
+        start_br, end_br = date_filter_widget(data[m["date"]].dropna(), f"br_{prefix}")
+    with c2:
+        tf = st.selectbox(
+            "Timeframe",
+            ["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"],
+            key=f"tf_{prefix}",
+            label_visibility="visible",
+        )
+
+    tf_map = {"Daily": None, "Weekly": "W", "Monthly": "ME", "Quarterly": "QE", "Yearly": "YE"}
+    resample_freq = tf_map[tf]
+
     filtered = data[
         (data[m["date"]] >= start_br) &
         (data[m["date"]] <= end_br)
-    ]
+    ].copy()
 
-    plot_df1 = filtered[[m["date"], m["high"], m["low"]]].rename(
+    def resample_df(df, date_col, value_cols, freq):
+        """Resample breadth data — last value of each period (like TradingView close)."""
+        if freq is None:
+            return df
+        df = df.set_index(date_col).sort_index()
+        df = df[value_cols].apply(pd.to_numeric, errors="coerce")
+        df = df.resample(freq).last().dropna(how="all").reset_index()
+        df.rename(columns={"index": date_col}, inplace=True)
+        return df
+
+    # Resample filtered data
+    all_cols = [m["date"], m["high"], m["low"], m["hl"], m["hr"], m["lr"]]
+    filtered_r = resample_df(
+        filtered[all_cols].copy(),
+        m["date"],
+        [m["high"], m["low"], m["hl"], m["hr"], m["lr"]],
+        resample_freq
+    )
+
+    plot_df1 = filtered_r[[m["date"], m["high"], m["low"]]].rename(
         columns={m["date"]: "Date", m["high"]: "HIGH", m["low"]: "LOW"}
     )
     fig1 = px.line(
         plot_df1, x="Date", y=["HIGH", "LOW"],
         color_discrete_map={"HIGH": GREEN, "LOW": RED},
-        title="High & Low Count",
+        title=f"High & Low Count ({tf})",
     )
     fig1.update_traces(line=dict(width=1.8))
     fig1.update_traces(selector=dict(name="HIGH"),
@@ -637,12 +670,12 @@ if view == "Breadth Data":
     fig1.update_layout(**{**PLOT_LAYOUT, "height": 520})
     st.plotly_chart(fig1, use_container_width=True, config={"displayModeBar": False}, key=f"{prefix}_hl")
 
-    plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
-                     "Date", "HIGH/LOW RATIO", title="High / Low Ratio", key=f"{prefix}_hlr")
-    plot_single_line(filtered.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
-                     "Date", "HIGH / EMA 200", title="High / EMA 200", color=GREEN, key=f"{prefix}_hr")
-    plot_single_line(filtered.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
-                     "Date", "LOW / EMA 200", title="Low / EMA 200", color=RED, key=f"{prefix}_lr")
+    plot_single_line(filtered_r.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
+                     "Date", "HIGH/LOW RATIO", title=f"High / Low Ratio ({tf})", key=f"{prefix}_hlr")
+    plot_single_line(filtered_r.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
+                     "Date", "HIGH / EMA 200", title=f"High / EMA 200 ({tf})", color=GREEN, key=f"{prefix}_hr")
+    plot_single_line(filtered_r.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
+                     "Date", "LOW / EMA 200", title=f"Low / EMA 200 ({tf})", color=RED, key=f"{prefix}_lr")
 
 
 # =================================================
