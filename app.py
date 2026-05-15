@@ -636,7 +636,7 @@ if view == "Breadth Data":
     # ── Date filter + Timeframe selector ──
     c1, c2 = st.columns([4, 1])
     with c1:
-        start_br, end_br = date_filter_widget(data[m["date"]].dropna(), f"br_{prefix}")
+        start_br, end_br, tf_br = date_filter_widget(data[m["date"]].dropna(), f"br_{prefix}")
     with c2:
         tf = st.selectbox(
             "Timeframe",
@@ -716,7 +716,7 @@ if view == "RBI Net Liquidity Injected":
     rbi_2["AMOUNT"] = pd.to_numeric(rbi_2["AMOUNT"].astype(str).str.replace(",", "", regex=False), errors="coerce")
     rbi_2 = rbi_2.dropna().sort_values("DATE_2").rename(columns={"DATE_2": "Date", "AMOUNT": "Amount"})
 
-    start_rbi, end_rbi = date_filter_widget(pd.concat([rbi_1["Date"], rbi_2["Date"]]).dropna(), "rbi")
+    start_rbi, end_rbi, tf_rbi = date_filter_widget(pd.concat([rbi_1["Date"], rbi_2["Date"]]).dropna(), "rbi")
     plot_single_line(rbi_1, x="Date", y="Net Liquidity", title="Net Liquidity Injected", date_range=(start_rbi, end_rbi), key="rbi_netliq")
     plot_single_line(rbi_2, x="Date", y="Amount", title="Durable Liquidity (Amount)", date_range=(start_rbi, end_rbi), key="rbi_amount")
 
@@ -935,7 +935,7 @@ if view == "India Macroeconomic Indicators":
     loan = macro_prep("Date_3", "LOAN Growth %")
 
     all_macro = pd.concat([gdp["Date"], infl["Date"], loan["Date"]]).dropna()
-    start_m, end_m = date_filter_widget(all_macro, "macro")
+    start_m, end_m, tf_m = date_filter_widget(all_macro, "macro")
 
     plot_single_line(gdp,  "Date", "Value", title="GDP Growth %",  date_range=(start_m, end_m), key="macro_gdp")
     plot_single_line(infl, "Date", "Value", title="Inflation %",   date_range=(start_m, end_m), key="macro_infl")
@@ -1414,6 +1414,6 @@ if view == "Net MTF Outstanding":
     )
     df_plot = df_plot.dropna(subset=["DATE"]).rename(columns={"DATE": "Date", "NET MTF OUTSTANDING": "Net MTF Outstanding"})
 
-    start_mtf, end_mtf = date_filter_widget(df_plot["Date"].dropna(), "mtf")
+    start_mtf, end_mtf, tf_mtf = date_filter_widget(df_plot["Date"].dropna(), "mtf")
     plot_single_line(df_plot, "Date", "Net MTF Outstanding", title="Net MTF Outstanding",
                      date_range=(start_mtf, end_mtf))
