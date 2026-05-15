@@ -559,15 +559,33 @@ with col1:
 
 
 def date_filter_widget(df_dates, key):
-    """Render a date range picker. Returns (start, end)."""
+    """Render a date range + timeframe selector. Returns (start, end, resample_freq)."""
     d_min = df_dates.min().date() if not df_dates.empty else pd.Timestamp("2010-01-01").date()
     d_max = df_dates.max().date() if not df_dates.empty else pd.Timestamp.today().date()
-    dr = st.date_input("Date range", [d_min, d_max],
-                       min_value=d_min, max_value=d_max,
-                       key=f"dr_{key}", label_visibility="collapsed")
+    c1, c2 = st.columns([4, 1])
+    with c1:
+        dr = st.date_input("Date range", [d_min, d_max],
+                           min_value=d_min, max_value=d_max,
+                           key=f"dr_{key}", label_visibility="collapsed")
+    with c2:
+        tf = st.selectbox("TF", ["D", "W", "M", "Q", "Y"],
+                          key=f"tf_{key}", label_visibility="collapsed")
     start = pd.to_datetime(dr[0]) if len(dr) == 2 else pd.to_datetime(d_min)
     end   = pd.to_datetime(dr[1]) if len(dr) == 2 else pd.to_datetime(d_max)
-    return start, end
+    tf_map = {"D": None, "W": "W", "M": "ME", "Q": "QE", "Y": "YE"}
+    return start, end, tf_map[tf]
+
+
+def apply_tf(df, date_col, freq):
+    """Resample a dataframe by frequency using last value of each period."""
+    if freq is None or df.empty:
+        return df
+    numeric_cols = df.select_dtypes(include="number").columns.tolist()
+    df = df.set_index(date_col).sort_index()
+    df = df[numeric_cols].resample(freq).last().dropna(how="all").reset_index()
+    return df
+
+
 with col2:
     if st.button("↺ Refresh", help="Reload data from Google Sheets"):
         del st.session_state.data_loaded
@@ -784,10 +802,11 @@ if view == "Index (PE / PB / DIV YLD)":
         pfx = "sc"
         label = "Smallcap 250"
 
-    start_idx, end_idx = date_filter_widget(d["Date"].dropna(), f"idx_{pfx}")
-    plot_single_line(d, "Date", "P/E",            title=f"{label} — P/E",            key=f"idx_{pfx}_pe",  date_range=(start_idx, end_idx))
-    plot_single_line(d, "Date", "P/B",            title=f"{label} — P/B",            key=f"idx_{pfx}_pb",  date_range=(start_idx, end_idx))
-    plot_single_line(d, "Date", "Dividend Yield", title=f"{label} — Dividend Yield", key=f"idx_{pfx}_div", date_range=(start_idx, end_idx))
+    start_idx, end_idx, tf_idx = date_filter_widget(d["Date"].dropna(), f"idx_{pfx}")
+    d_tf = apply_tf(d, "Date", tf_idx)
+    plot_single_line(d_tf, "Date", "P/E",            title=f"{label} — P/E",            key=f"idx_{pfx}_pe",  date_range=(start_idx, end_idx))
+    plot_single_line(d_tf, "Date", "P/B",            title=f"{label} — P/B",            key=f"idx_{pfx}_pb",  date_range=(start_idx, end_idx))
+    plot_single_line(d_tf, "Date", "Dividend Yield", title=f"{label} — Dividend Yield", key=f"idx_{pfx}_div", date_range=(start_idx, end_idx))
 
 
 # =================================================
