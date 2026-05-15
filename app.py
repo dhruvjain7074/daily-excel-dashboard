@@ -687,8 +687,8 @@ if view == "RBI Net Liquidity Injected":
     rbi_2 = rbi_2.dropna().sort_values("DATE_2").rename(columns={"DATE_2": "Date", "AMOUNT": "Amount"})
 
     start_rbi, end_rbi, tf_rbi = date_filter_widget(pd.concat([rbi_1["Date"], rbi_2["Date"]]).dropna(), "rbi")
-    plot_single_line(rbi_1, x="Date", y="Net Liquidity", title="Net Liquidity Injected", date_range=(start_rbi, end_rbi), key="rbi_netliq")
-    plot_single_line(rbi_2, x="Date", y="Amount", title="Durable Liquidity (Amount)", date_range=(start_rbi, end_rbi), key="rbi_amount")
+    plot_single_line(apply_tf(rbi_1, "Date", tf_rbi), x="Date", y="Net Liquidity", title="Net Liquidity Injected", date_range=(start_rbi, end_rbi), key="rbi_netliq")
+    plot_single_line(apply_tf(rbi_2, "Date", tf_rbi), x="Date", y="Amount", title="Durable Liquidity (Amount)", date_range=(start_rbi, end_rbi), key="rbi_amount")
 
 
 # =================================================
@@ -702,11 +702,8 @@ if view == "Index Futures OI":
     for dc in ["Date_1", "Date_2", "Date_3", "DATE_4"]:
         oi[dc] = pd.to_datetime(oi[dc], format="%d/%m/%Y", errors="coerce")
 
-    min_date = min(oi[c].dropna().min() for c in ["Date_1", "Date_2", "Date_3", "DATE_4"]).date()
-    max_date = max(oi[c].dropna().max() for c in ["Date_1", "Date_2", "Date_3", "DATE_4"]).date()
-
-    start_date, end_date = st.date_input("Date range", [min_date, max_date], label_visibility="collapsed")
-    start_dt, end_dt = pd.to_datetime(start_date), pd.to_datetime(end_date)
+    all_oi_dates = pd.concat([oi[c].dropna() for c in ["Date_1","Date_2","Date_3","DATE_4"]])
+    start_dt, end_dt, tf_oi = date_filter_widget(all_oi_dates, "oi")
 
     def oi_filter(date_col, val_col):
         df_ = oi.loc[(oi[date_col] >= start_dt) & (oi[date_col] <= end_dt), [date_col, val_col]].rename(columns={date_col: "Date"})
@@ -714,14 +711,14 @@ if view == "Index Futures OI":
             df_[val_col] = pd.to_numeric(df_[val_col].astype(str).str.replace(",", "", regex=False), errors="coerce")
         return df_.dropna()
 
-    plot_single_line(oi_filter("Date_1", "Index Futures OI"), "Date", "Index Futures OI", title="Index Futures OI")
-    plot_single_line(oi_filter("Date_2", "Nifty Futures oi"), "Date", "Nifty Futures oi", title="Nifty Futures OI")
-    plot_single_line(oi_filter("Date_3", "total client oi"), "Date", "total client oi", title="Total Client OI")
+    plot_single_line(apply_tf(oi_filter("Date_1", "Index Futures OI"), "Date", tf_oi), "Date", "Index Futures OI", title="Index Futures OI", key="oi1")
+    plot_single_line(apply_tf(oi_filter("Date_2", "Nifty Futures oi"), "Date", tf_oi), "Date", "Nifty Futures oi", title="Nifty Futures OI", key="oi2")
+    plot_single_line(apply_tf(oi_filter("Date_3", "total client oi"), "Date", tf_oi), "Date", "total client oi", title="Total Client OI", key="oi3")
 
     client_fii = oi.loc[(oi["DATE_4"] >= start_dt) & (oi["DATE_4"] <= end_dt), ["DATE_4", "Client OI", "FII OI"]].rename(columns={"DATE_4": "Date"})
     for c in ["Client OI", "FII OI"]:
         client_fii[c] = pd.to_numeric(client_fii[c].astype(str).str.replace(",", "", regex=False), errors="coerce")
-    client_fii = client_fii.dropna(how="all", subset=["Client OI", "FII OI"])
+    client_fii = apply_tf(client_fii.dropna(how="all", subset=["Client OI", "FII OI"]), "Date", tf_oi)
 
     fig_cf = px.line(client_fii, x="Date", y=["Client OI", "FII OI"],
                      color_discrete_sequence=[LINE_COLOR, RED],
@@ -1385,5 +1382,5 @@ if view == "Net MTF Outstanding":
     df_plot = df_plot.dropna(subset=["DATE"]).rename(columns={"DATE": "Date", "NET MTF OUTSTANDING": "Net MTF Outstanding"})
 
     start_mtf, end_mtf, tf_mtf = date_filter_widget(df_plot["Date"].dropna(), "mtf")
-    plot_single_line(df_plot, "Date", "Net MTF Outstanding", title="Net MTF Outstanding",
-                     date_range=(start_mtf, end_mtf))
+    plot_single_line(apply_tf(df_plot, "Date", tf_mtf), "Date", "Net MTF Outstanding",
+                     title="Net MTF Outstanding", date_range=(start_mtf, end_mtf))
