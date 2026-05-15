@@ -648,7 +648,7 @@ if view == "Breadth Data":
     fig1 = px.line(
         plot_df1, x="Date", y=["HIGH", "LOW"],
         color_discrete_map={"HIGH": GREEN, "LOW": RED},
-        title=f"High & Low Count ({tf})",
+        title="High & Low Count",
     )
     fig1.update_traces(line=dict(width=1.8))
     fig1.update_traces(selector=dict(name="HIGH"),
@@ -659,11 +659,11 @@ if view == "Breadth Data":
     st.plotly_chart(fig1, use_container_width=True, config={"displayModeBar": False}, key=f"{prefix}_hl")
 
     plot_single_line(filtered_r.rename(columns={m["date"]: "Date", m["hl"]: "HIGH/LOW RATIO"}),
-                     "Date", "HIGH/LOW RATIO", title=f"High / Low Ratio ({tf})", key=f"{prefix}_hlr")
+                     "Date", "HIGH/LOW RATIO", title="High / Low Ratio", key=f"{prefix}_hlr")
     plot_single_line(filtered_r.rename(columns={m["date"]: "Date", m["hr"]: "HIGH / EMA 200"}),
-                     "Date", "HIGH / EMA 200", title=f"High / EMA 200 ({tf})", color=GREEN, key=f"{prefix}_hr")
+                     "Date", "HIGH / EMA 200", title="High / EMA 200", color=GREEN, key=f"{prefix}_hr")
     plot_single_line(filtered_r.rename(columns={m["date"]: "Date", m["lr"]: "LOW / EMA 200"}),
-                     "Date", "LOW / EMA 200", title=f"Low / EMA 200 ({tf})", color=RED, key=f"{prefix}_lr")
+                     "Date", "LOW / EMA 200", title="Low / EMA 200", color=RED, key=f"{prefix}_lr")
 
 
 # =================================================
