@@ -633,44 +633,14 @@ if view == "Breadth Data":
     # prefix makes every chart key unique per dataset selection
     prefix = breadth_choice.replace(" ", "_").lower()
 
-    # ── Date filter + Timeframe selector ──
-    c1, c2 = st.columns([4, 1])
-    with c1:
-        start_br, end_br, tf_br = date_filter_widget(data[m["date"]].dropna(), f"br_{prefix}")
-    with c2:
-        tf = st.selectbox(
-            "Timeframe",
-            ["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"],
-            key=f"tf_{prefix}",
-            label_visibility="visible",
-        )
-
-    tf_map = {"Daily": None, "Weekly": "W", "Monthly": "ME", "Quarterly": "QE", "Yearly": "YE"}
-    resample_freq = tf_map[tf]
+    start_br, end_br, tf_br = date_filter_widget(data[m["date"]].dropna(), f"br_{prefix}")
 
     filtered = data[
         (data[m["date"]] >= start_br) &
         (data[m["date"]] <= end_br)
     ].copy()
 
-    def resample_df(df, date_col, value_cols, freq):
-        """Resample breadth data — last value of each period (like TradingView close)."""
-        if freq is None:
-            return df
-        df = df.set_index(date_col).sort_index()
-        df = df[value_cols].apply(pd.to_numeric, errors="coerce")
-        df = df.resample(freq).last().dropna(how="all").reset_index()
-        df.rename(columns={"index": date_col}, inplace=True)
-        return df
-
-    # Resample filtered data
-    all_cols = [m["date"], m["high"], m["low"], m["hl"], m["hr"], m["lr"]]
-    filtered_r = resample_df(
-        filtered[all_cols].copy(),
-        m["date"],
-        [m["high"], m["low"], m["hl"], m["hr"], m["lr"]],
-        resample_freq
-    )
+    filtered_r = apply_tf(filtered, m["date"], tf_br)
 
     plot_df1 = filtered_r[[m["date"], m["high"], m["low"]]].rename(
         columns={m["date"]: "Date", m["high"]: "HIGH", m["low"]: "LOW"}
