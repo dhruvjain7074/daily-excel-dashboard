@@ -1241,6 +1241,143 @@ const SEG_FILTER = {
             '>All Segments<span class="seg-cnt">15</span>'
         )
 
+        # ── COMPUTE FY_RAW (April–March financial year totals) ──
+        from collections import defaultdict
+        fy_raw = {}
+        for co, series in RAW.items():
+            fy_totals = defaultdict(int)
+            fy_counts = defaultdict(int)
+            for ym, val in zip(series["dates"], series["values"]):
+                year, month = int(ym[:4]), int(ym[5:7])
+                fy = year if month >= 4 else year - 1
+                fy_totals[fy] += val
+                fy_counts[fy] += 1
+            fy_raw[co] = {
+                "years":  [f"FY{str(fy)[2:]}-{str(fy+1)[2:]}" for fy, cnt in sorted(fy_totals.items()) if cnt >= 9],
+                "values": [fy_totals[fy] for fy, cnt in sorted(fy_totals.items()) if cnt >= 9],
+            }
+
+        # ── COMPUTE SHARE_HISTORY (monthly market share % per company) ──
+        all_months_set = set()
+        for s in RAW.values():
+            all_months_set.update(s["dates"])
+        all_months_sorted = sorted(all_months_set)
+        co_month_val = {co: dict(zip(s["dates"], s["values"])) for co, s in RAW.items()}
+        share_history = {co: {"dates": [], "values": []} for co in RAW}
+        for ym in all_months_sorted:
+            month_total = sum(co_month_val[co].get(ym, 0) for co in RAW)
+            if month_total == 0:
+                continue
+            for co in RAW:
+                val = co_month_val[co].get(ym, 0)
+                if val > 0:
+                    share_history[co]["dates"].append(ym)
+                    share_history[co]["values"].append(round(val * 100 / month_total, 2))
+
+        # ── COMPUTE CY_TOTALS (current FY April to latest month) ──
+        latest_ym_set = sorted(all_months_set)[-1]
+        lyr, lmo = int(latest_ym_set[:4]), int(latest_ym_set[5:7])
+        fy_start_year = lyr if lmo >= 4 else lyr - 1
+        fy_start = f"{fy_start_year}-04"
+        cy_totals = {}
+        for co, series in RAW.items():
+            cy_totals[co] = sum(v for d, v in zip(series["dates"], series["values"]) if d >= fy_start)
+        fy_label = f"FY{str(fy_start_year)[2:]}-{str(fy_start_year+1)[2:]}"
+
+        # ── INJECT DATA OBJECTS ──
+        fy_json = json.dumps(fy_raw, ensure_ascii=False)
+        sh_json = json.dumps(share_history, ensure_ascii=False)
+        cy_json = json.dumps(cy_totals, ensure_ascii=False)
+        html_template = html_template.replace(
+            "// EV data",
+            f"const FY_RAW = {fy_json};\nconst SHARE_HISTORY = {sh_json};\nconst CY_TOTALS = {cy_json};\nconst CY_LABEL = '{fy_label}';\n// EV data"
+        )
+
+        # ── MONTHLY/YEARLY TOGGLE on trend card ──
+        html_template = html_template.replace(
+            '<div class="card-title">Monthly Sales Trend</div>',
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">'
+            '<div class="card-title" id="trendCardTitle">Monthly Sales Trend</div>'
+            '<div style="display:flex;gap:4px">'
+            '<button class="tab-btn active" style="padding:4px 10px;font-size:10.5px" onclick="setTrendMode(\'monthly\',this)" id="btnMonthly">Monthly</button>'
+            '<button class="tab-btn" style="padding:4px 10px;font-size:10.5px" onclick="setTrendMode(\'yearly\',this)" id="btnYearly">FY Yearly</button>'
+            '</div></div>'
+        )
+
+        # ── LATEST/HISTORICAL TOGGLE on share card ──
+        html_template = html_template.replace(
+            '<div class="card-title">Market Share</div>',
+            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">'
+            '<div class="card-title">Market Share</div>'
+            '<div style="display:flex;gap:4px">'
+            '<button class="tab-btn active" style="padding:4px 10px;font-size:10.5px" onclick="setShareMode(\'latest\',this)" id="btnShareLatest">Latest</button>'
+            '<button class="tab-btn" style="padding:4px 10px;font-size:10.5px" onclick="setShareMode(\'history\',this)" id="btnShareHistory">Historical</button>'
+            '</div></div>'
+        )
+
+        # ── CY YTD column in table header ──
+        html_template = html_template.replace(
+            '<th>TTM Total</th>',
+            f'<th>{fy_label} YTD</th><th>TTM Total</th>',
+            1
+        )
+
+        # ── INJECT NEW JS (before INIT) ──
+        new_js = (
+            "let trendMode='monthly';\n"
+            "function setTrendMode(mode,btn){\n"
+            "  trendMode=mode;\n"
+            "  document.querySelectorAll('#btnMonthly,#btnYearly').forEach(b=>b.classList.remove('active'));\n"
+            "  btn.classList.add('active');\n"
+            "  document.getElementById('trendCardTitle').textContent=mode==='yearly'?'FY Yearly Sales Trend':'Monthly Sales Trend';\n"
+            "  redraw();\n"
+            "}\n"
+            "let shareMode='latest';\n"
+            "function setShareMode(mode,btn){\n"
+            "  shareMode=mode;\n"
+            "  document.querySelectorAll('#btnShareLatest,#btnShareHistory').forEach(b=>b.classList.remove('active'));\n"
+            "  btn.classList.add('active');\n"
+            "  redraw();\n"
+            "}\n"
+        )
+        html_template = html_template.replace(
+            "// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n// INIT",
+            new_js + "// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n// INIT"
+        )
+
+        # ── PATCH buildTrend to support yearly mode ──
+        yearly_patch = (
+            "function buildTrend(cos,mode){\n"
+            "  if(trendMode==='yearly'){\n"
+            "    const fyDates=[...new Set(cos.flatMap(c=>(FY_RAW[c]||{years:[]}).years))].sort();\n"
+            "    const ds=cos.map(c=>({label:c,data:fyDates.map(fy=>{const r=FY_RAW[c]||{years:[],values:[]};const i=r.years.indexOf(fy);return i>=0?r.values[i]:0;}),backgroundColor:getColor(c)+'aa',borderColor:getColor(c),borderWidth:1.5,borderRadius:3}));\n"
+            "    return {type:mode==='bar'?'bar':'line',data:{labels:fyDates,datasets:ds}};\n"
+            "  }"
+        )
+        html_template = html_template.replace("function buildTrend(cos,mode){", yearly_patch)
+
+        # ── PATCH buildShare to support historical mode ──
+        history_patch = (
+            "function buildShare(cos){\n"
+            "  if(shareMode==='history'){\n"
+            "    const allD=[...new Set(cos.flatMap(c=>(SHARE_HISTORY[c]||{dates:[]}).dates))].sort();\n"
+            "    const sl=selPeriod>=9999?allD:allD.slice(-selPeriod);\n"
+            "    const ds=cos.map(c=>({label:c,data:sl.map(d=>{const sh=SHARE_HISTORY[c]||{dates:[],values:[]};const i=sh.dates.indexOf(d);return i>=0?sh.values[i]:null;}),borderColor:getColor(c),backgroundColor:getColor(c)+'22',borderWidth:1.5,fill:false,tension:.3,pointRadius:0}));\n"
+            "    return {type:'line',data:{labels:sl,datasets:ds}};\n"
+            "  }"
+        )
+        html_template = html_template.replace("function buildShare(cos){", history_patch)
+
+        # ── PATCH table row to add CY YTD ──
+        html_template = html_template.replace(
+            "const ttm=sum(vals.slice(-12));",
+            "const ttm=sum(vals.slice(-12));const cytd=CY_TOTALS[c]||0;"
+        )
+        html_template = html_template.replace(
+            "`<td>${fmt(ttm)}</td>",
+            "`<td>${fmt(cytd)}</td><td>${fmt(ttm)}</td>"
+        )
+
         # Replace hardcoded month labels throughout the HTML
         # Latest month (was "Feb 2026")
         html_template = html_template.replace("Feb 2026", latest_label)
