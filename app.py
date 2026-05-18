@@ -909,6 +909,32 @@ if view == "India Macroeconomic Indicators":
     plot_single_line(loan, "Date", "Value", title="Loan Growth %", date_range=(start_m, end_m), key="macro_loan")
 
 
+
+def compute_fy_raw(raw_dict):
+    """Group monthly RAW series into Indian financial year (Apr-Mar) totals."""
+    fy_raw = {}
+    for co, series in raw_dict.items():
+        dates, values = series["dates"], series["values"]
+        fy_map = {}
+        for d, v in zip(dates, values):
+            yr, mo = int(d[:4]), int(d[5:7])
+            fy_start = yr if mo >= 4 else yr - 1
+            label = f"FY{str(fy_start)[2:]}-{str(fy_start+1)[2:]}"
+            fy_map[label] = fy_map.get(label, 0) + v
+        sorted_fy = sorted(fy_map.items())
+        fy_raw[co] = {"years": [x[0] for x in sorted_fy], "values": [x[1] for x in sorted_fy]}
+    return fy_raw
+
+def compute_cy_total(raw_dict, latest_month):
+    """Sum Apr of current FY up to latest_month for each company."""
+    yr, mo = int(latest_month[:4]), int(latest_month[5:7])
+    fy_start = yr if mo >= 4 else yr - 1
+    fy_apr = f"{fy_start}-04"
+    cy = {}
+    for co, series in raw_dict.items():
+        cy[co] = sum(v for d, v in zip(series["dates"], series["values"]) if fy_apr <= d <= latest_month)
+    return cy
+
 # =================================================
 # AUTO DASHBOARD
 # =================================================
