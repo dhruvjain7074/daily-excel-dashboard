@@ -1156,6 +1156,12 @@ if view == "Auto Dashboard":
             f'const DETAIL = {detail_json};',
             html_template, flags=re.DOTALL, count=1
         )
+        # Inject FY_RAW before EV_RAW is replaced (must happen before regex wipes the anchor)
+        html_template = html_template.replace(
+            "\n// EV data\nconst EV_RAW",
+            f"\nconst FY_RAW = {fy_json};\nconst SHARE_HISTORY = {sh_json};\nconst CY_TOTALS = {cy_json};\nconst CY_LABEL = '{fy_label}';\n// EV data\nconst EV_RAW"
+        )
+
         # Replace EV_RAW = {...};
         html_template = re.sub(
             r'const EV_RAW = \{.*?\};',
@@ -1314,133 +1320,8 @@ const SEG_FILTER = {
         fy_json = json.dumps(fy_raw, ensure_ascii=False)
         sh_json = json.dumps(share_history, ensure_ascii=False)
         cy_json = json.dumps(cy_totals, ensure_ascii=False)
-        html_template = html_template.replace(
-            "// EV data",
-            f"const FY_RAW = {fy_json};\nconst SHARE_HISTORY = {sh_json};\nconst CY_TOTALS = {cy_json};\nconst CY_LABEL = '{fy_label}';\n// EV data"
-        )
+        # FY_RAW injected earlier (before EV_RAW regex)
 
-        # ── MONTHLY/YEARLY TOGGLE on trend card ──
-        html_template = html_template.replace(
-            '<div class="card-title">Monthly Sales Trend</div>',
-            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">'
-            '<div class="card-title" id="trendCardTitle">Monthly Sales Trend</div>'
-            '<div style="display:flex;gap:4px">'
-            '<button class="tab-btn active" style="padding:4px 10px;font-size:10.5px" onclick="setTrendMode(\'monthly\',this)" id="btnMonthly">Monthly</button>'
-            '<button class="tab-btn" style="padding:4px 10px;font-size:10.5px" onclick="setTrendMode(\'yearly\',this)" id="btnYearly">FY Yearly</button>'
-            '</div></div>'
-        )
-
-        # ── LATEST/HISTORICAL TOGGLE on share card ──
-        html_template = html_template.replace(
-            '<div class="card-title">Market Share</div>',
-            '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">'
-            '<div class="card-title">Market Share</div>'
-            '<div style="display:flex;gap:4px">'
-            '<button class="tab-btn active" style="padding:4px 10px;font-size:10.5px" onclick="setShareMode(\'latest\',this)" id="btnShareLatest">Latest</button>'
-            '<button class="tab-btn" style="padding:4px 10px;font-size:10.5px" onclick="setShareMode(\'history\',this)" id="btnShareHistory">Historical</button>'
-            '</div></div>'
-        )
-
-        # ── CY YTD column in table header ──
-        html_template = html_template.replace(
-            '<th>TTM Total</th>',
-            f'<th>{fy_label} YTD</th><th>TTM Total</th>',
-            1
-        )
-
-        # ── INJECT NEW JS (before INIT) ──
-        new_js = (
-            "let trendMode='monthly';\n"
-            "function setTrendMode(mode,btn){\n"
-            "  trendMode=mode;\n"
-            "  document.querySelectorAll('#btnMonthly,#btnYearly').forEach(b=>b.classList.remove('active'));\n"
-            "  btn.classList.add('active');\n"
-            "  document.getElementById('trendCardTitle').textContent=mode==='yearly'?'FY Yearly Sales Trend':'Monthly Sales Trend';\n"
-            "  redraw();\n"
-            "}\n"
-            "let shareMode='latest';\n"
-            "function setShareMode(mode,btn){\n"
-            "  shareMode=mode;\n"
-            "  document.querySelectorAll('#btnShareLatest,#btnShareHistory').forEach(b=>b.classList.remove('active'));\n"
-            "  btn.classList.add('active');\n"
-            "  redraw();\n"
-            "}\n"
-        )
-        html_template = html_template.replace(
-            "// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n// INIT",
-            new_js + "// \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n// INIT"
-        )
-
-        # ── PATCH buildTrend — replace entire function with FY-aware version ──
-        old_trend_fn = (
-            "function buildTrend(){\n"
-            "  const ctx=document.getElementById('trendChart').getContext('2d');\n"
-            "  if(tChart)tChart.destroy();\n"
-            "  const cos=[...selCos];\n"
-            "  let allDates=new Set();\n"
-            "  cos.forEach(c=>sliced(c,selPeriod).dates.forEach(d=>allDates.add(d)));\n"
-            "  const labels=[...allDates].sort();\n"
-            "  const datasets=cos.map(c=>{\n"
-            "    const {dates,values}=sliced(c,selPeriod);\n"
-            "    const map=Object.fromEntries(dates.map((d,i)=>[d,values[i]]));\n"
-            "    let data;\n"
-            "    if(selMode==='yoy'){\n"
-            "      const full=RAW[c];\n"
-            "      const fm=Object.fromEntries(full.dates.map((d,i)=>[d,full.values[i]]));\n"
-            "      data=labels.map(d=>{const v=fm[d];if(!v)return null;const pv=fm[(+d.slice(0,4)-1)+d.slice(4)];if(!pv)return null;return+((v-pv)/pv*100).toFixed(1);});\n"
-            "    }else{data=labels.map(d=>map[d]??null);}\n"
-            "    return{label:c,data,borderColor:colorOf(c),backgroundColor:colorOf(c)+'18',borderWidth:2,pointRadius:0,pointHoverRadius:4,tension:.3,fill:false,spanGaps:false,type:selView==='bar'?'bar':'line'};\n"
-            "  });\n"
-            "  tChart=new Chart(ctx,{type:selView==='bar'?'bar':'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:'#4a5568',font:{size:10.5},boxWidth:10,padding:12}},tooltip:{backgroundColor:'#1e293b',borderColor:'#334155',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#cbd5e1',callbacks:{label:c=>`  ${c.dataset.label}: ${selMode==='yoy'?c.parsed.y?.toFixed(1)+'%':fmt(c.parsed.y)}`}}},schools:{x:{ticks:{color:'#8a96a8',font:{size:10},maxTicksLimit:14},grid:{color:'#f0f3f7'}},y:{ticks:{color:'#8a96a8',font:{size:10},callback:v=>selMode==='yoy'?v+'%':fmt(v)},grid:{color:'#f0f3f7'}}}}});\n"
-            "  document.getElementById('trendSub').textContent=[...selCos].slice(0,5).join(' · ')+([...selCos].length>5?'…':'');\n"
-            "}"
-        )
-        new_trend_fn = (
-            "function buildTrend(){\n"
-            "  const ctx=document.getElementById('trendChart').getContext('2d');\n"
-            "  if(tChart)tChart.destroy();\n"
-            "  const cos=[...selCos];\n"
-            "  if(typeof trendMode!=='undefined'&&trendMode==='yearly'){\n"
-            "    const fyDates=[...new Set(cos.flatMap(c=>{const r=FY_RAW[c];return r?r.years:[];}))].sort();\n"
-            "    const datasets=cos.map(c=>{\n"
-            "      const r=FY_RAW[c]||{years:[],values:[]};\n"
-            "      let data;\n"
-            "      if(selMode==='yoy'){\n"
-            "        data=fyDates.map(fy=>{\n"
-            "          const i=r.years.indexOf(fy);if(i<0)return null;\n"
-            "          const v=r.values[i];\n"
-            "          const ps=fy.split('-');const prevFY='FY'+(+ps[0].slice(2)-1)+'-'+(+ps[1]-1);\n"
-            "          const pi=r.years.indexOf(prevFY);if(pi<0)return null;\n"
-            "          return+((v-r.values[pi])/r.values[pi]*100).toFixed(1);\n"
-            "        });\n"
-            "      }else{\n"
-            "        data=fyDates.map(fy=>{const i=r.years.indexOf(fy);return i>=0?r.values[i]:null;});\n"
-            "      }\n"
-            "      return{label:c,data,borderColor:colorOf(c),backgroundColor:colorOf(c)+'18',borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:.2,fill:false,spanGaps:false,type:selView==='bar'?'bar':'line'};\n"
-            "    });\n"
-            "    tChart=new Chart(ctx,{type:selView==='bar'?'bar':'line',data:{labels:fyDates,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:'#4a5568',font:{size:10.5},boxWidth:10,padding:12}},tooltip:{backgroundColor:'#1e293b',borderColor:'#334155',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#cbd5e1',callbacks:{label:c=>`  ${c.dataset.label}: ${selMode==='yoy'?c.parsed.y?.toFixed(1)+'%':fmt(c.parsed.y)}`}}},scales:{x:{ticks:{color:'#8a96a8',font:{size:10}},grid:{color:'#f0f3f7'}},y:{ticks:{color:'#8a96a8',font:{size:10},callback:v=>selMode==='yoy'?v+'%':fmt(v)},grid:{color:'#f0f3f7'}}}}});\n"
-            "    document.getElementById('trendSub').textContent='FY (Apr\u2013Mar) \u00b7 '+cos.slice(0,5).join(' \u00b7 ')+(cos.length>5?'\u2026':'');\n"
-            "    return;\n"
-            "  }\n"
-            "  let allDates=new Set();\n"
-            "  cos.forEach(c=>sliced(c,selPeriod).dates.forEach(d=>allDates.add(d)));\n"
-            "  const labels=[...allDates].sort();\n"
-            "  const datasets=cos.map(c=>{\n"
-            "    const {dates,values}=sliced(c,selPeriod);\n"
-            "    const map=Object.fromEntries(dates.map((d,i)=>[d,values[i]]));\n"
-            "    let data;\n"
-            "    if(selMode==='yoy'){\n"
-            "      const full=RAW[c];\n"
-            "      const fm=Object.fromEntries(full.dates.map((d,i)=>[d,full.values[i]]));\n"
-            "      data=labels.map(d=>{const v=fm[d];if(!v)return null;const pv=fm[(+d.slice(0,4)-1)+d.slice(4)];if(!pv)return null;return+((v-pv)/pv*100).toFixed(1);});\n"
-            "    }else{data=labels.map(d=>map[d]??null);}\n"
-            "    return{label:c,data,borderColor:colorOf(c),backgroundColor:colorOf(c)+'18',borderWidth:2,pointRadius:0,pointHoverRadius:4,tension:.3,fill:false,spanGaps:false,type:selView==='bar'?'bar':'line'};\n"
-            "  });\n"
-            "  tChart=new Chart(ctx,{type:selView==='bar'?'bar':'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{color:'#4a5568',font:{size:10.5},boxWidth:10,padding:12}},tooltip:{backgroundColor:'#1e293b',borderColor:'#334155',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#cbd5e1',callbacks:{label:c=>`  ${c.dataset.label}: ${selMode==='yoy'?c.parsed.y?.toFixed(1)+'%':fmt(c.parsed.y)}`}}},scales:{x:{ticks:{color:'#8a96a8',font:{size:10},maxTicksLimit:14},grid:{color:'#f0f3f7'}},y:{ticks:{color:'#8a96a8',font:{size:10},callback:v=>selMode==='yoy'?v+'%':fmt(v)},grid:{color:'#f0f3f7'}}}}});\n"
-            "  document.getElementById('trendSub').textContent=[...selCos].slice(0,5).join(' \u00b7 ')+([...selCos].length>5?'\u2026':'');\n"
-            "}"
-        )
-        html_template = html_template.replace(old_trend_fn, new_trend_fn)
 
         # ── PATCH buildShare to support historical mode ──
         history_patch = (
