@@ -1156,12 +1156,6 @@ if view == "Auto Dashboard":
             f'const DETAIL = {detail_json};',
             html_template, flags=re.DOTALL, count=1
         )
-        # Inject FY_RAW before EV_RAW is replaced (must happen before regex wipes the anchor)
-        html_template = html_template.replace(
-            "\n// EV data\nconst EV_RAW",
-            f"\nconst FY_RAW = {fy_json};\nconst SHARE_HISTORY = {sh_json};\nconst CY_TOTALS = {cy_json};\nconst CY_LABEL = '{fy_label}';\n// EV data\nconst EV_RAW"
-        )
-
         # Replace EV_RAW = {...};
         html_template = re.sub(
             r'const EV_RAW = \{.*?\};',
@@ -1320,7 +1314,13 @@ const SEG_FILTER = {
         fy_json = json.dumps(fy_raw, ensure_ascii=False)
         sh_json = json.dumps(share_history, ensure_ascii=False)
         cy_json = json.dumps(cy_totals, ensure_ascii=False)
-        # FY_RAW injected earlier (before EV_RAW regex)
+
+        # Inject FY_RAW — after fy_json is computed, inject before EV_RAW
+        fy_inject = f"const FY_RAW = {fy_json};\nconst SHARE_HISTORY = {sh_json};\nconst CY_TOTALS = {cy_json};\nconst CY_LABEL = '{fy_label}';"
+        html_template = html_template.replace(
+            "// EV data\nconst EV_RAW",
+            fy_inject + "\n// EV data\nconst EV_RAW"
+        )
 
 
         # ── PATCH buildShare to support historical mode ──
