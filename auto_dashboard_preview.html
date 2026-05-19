@@ -191,11 +191,13 @@ tbody tr:hover td{background:#f0f5ff;}
     <div id="stdCharts">
       <div class="charts-grid">
         <div class="card">
-          <div class="card-title">Monthly Sales Trend</div>
+          <div class="card-title" id="trendCardTitle">Monthly Sales Trend</div>
           <div class="card-sub" id="trendSub">Selected companies</div>
           <div class="tab-row">
             <button class="tab-btn active" onclick="setTrendView('line',this)">Line</button>
             <button class="tab-btn" onclick="setTrendView('bar',this)">Bar</button>
+            <button class="tab-btn active" onclick="setTrendMode('monthly',this)" id="btnMonthly" style="margin-left:8px">Monthly</button>
+            <button class="tab-btn" onclick="setTrendMode('yearly',this)" id="btnYearly">FY Yearly</button>
           </div>
           <div style="height:280px"><canvas id="trendChart"></canvas></div>
         </div>
@@ -463,10 +465,49 @@ function toggleKPI(c,card){
 // ══════════════════════════════════════════════════
 // TREND
 // ══════════════════════════════════════════════════
+let trendMode='monthly';
+function setTrendMode(mode,btn){
+  trendMode=mode;
+  document.querySelectorAll('#btnMonthly,#btnYearly').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('trendCardTitle').textContent=mode==='yearly'?'FY Yearly Sales Trend (Apr–Mar)':'Monthly Sales Trend';
+  buildTrend();
+}
 function buildTrend(){
   const ctx=document.getElementById('trendChart').getContext('2d');
   if(tChart)tChart.destroy();
   const cos=[...selCos];
+  if(trendMode==='yearly'){
+    const fyDates=[...new Set(cos.flatMap(c=>(FY_RAW[c]||{years:[]}).years))].sort();
+    const datasets=cos.map(c=>{
+      const r=FY_RAW[c]||{years:[],values:[]};
+      let data;
+      if(selMode==='yoy'){
+        data=fyDates.map(fy=>{
+          const i=r.years.indexOf(fy);if(i<0)return null;
+          const v=r.values[i];
+          const parts=fy.split('-');
+          const prevFY='FY'+(parseInt(parts[0].slice(2))-1)+'-'+(parseInt(parts[1])-1);
+          const pi=r.years.indexOf(prevFY);if(pi<0)return null;
+          return+((v-r.values[pi])/r.values[pi]*100).toFixed(1);
+        });
+      }else{
+        data=fyDates.map(fy=>{const i=r.years.indexOf(fy);return i>=0?r.values[i]:null;});
+      }
+      return{label:c,data,borderColor:colorOf(c),backgroundColor:colorOf(c)+'18',
+        borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:.2,
+        fill:false,spanGaps:false,type:selView==='bar'?'bar':'line'};
+    });
+    tChart=new Chart(ctx,{type:selView==='bar'?'bar':'line',data:{labels:fyDates,datasets},
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+        plugins:{legend:{position:'top',labels:{color:'#4a5568',font:{size:10.5},boxWidth:10,padding:12}},
+          tooltip:{backgroundColor:'#1e293b',borderColor:'#334155',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#cbd5e1',
+            callbacks:{label:c=>`  ${c.dataset.label}: ${selMode==='yoy'?c.parsed.y?.toFixed(1)+'%':fmt(c.parsed.y)}`}}},
+        scales:{x:{ticks:{color:'#8a96a8',font:{size:10}},grid:{color:'#f0f3f7'}},
+                y:{ticks:{color:'#8a96a8',font:{size:10},callback:v=>selMode==='yoy'?v+'%':fmt(v)},grid:{color:'#f0f3f7'}}}}});
+    document.getElementById('trendSub').textContent='FY (Apr–Mar) · '+cos.slice(0,5).join(' · ')+(cos.length>5?'…':'');
+    return;
+  }
   let allDates=new Set();
   cos.forEach(c=>sliced(c,selPeriod).dates.forEach(d=>allDates.add(d)));
   const labels=[...allDates].sort();
