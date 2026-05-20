@@ -278,6 +278,7 @@ tbody tr:hover td{background:#f0f5ff;}
               <th>Feb 2025</th>
               <th>YoY %</th>
               <th>TTM Total</th>
+              <th>FY Total</th>
               <th>All-time Peak</th>
               <th>12M Bar</th>
             </tr>
@@ -571,6 +572,22 @@ function buildTTM(){
 // ══════════════════════════════════════════════════
 // TABLE
 // ══════════════════════════════════════════════════
+// Current FY total — sum all months in the current financial year (Apr–Mar)
+function fyTotal(c){
+  const s=getSrc(c); if(!s) return 0;
+  const dates=s.dates, values=s.values;
+  if(!dates||!dates.length) return 0;
+  // Determine current FY start: if latest month >= Apr, FY starts that year; else previous year
+  const latestD=new Date(dates[dates.length-1]+'-01');
+  const fyStartYear=latestD.getMonth()>=3?latestD.getFullYear():latestD.getFullYear()-1;
+  const fyStart=fyStartYear+'-04';
+  let total=0;
+  for(let i=0;i<dates.length;i++){
+    if(dates[i]>=fyStart) total+=values[i];
+  }
+  return total;
+}
+
 function buildTable(){
   const tbody=document.getElementById('tableBody');
   const cos=visibleCos().slice().sort((a,b)=>{const sa=getSrc(a),sb=getSrc(b);return(sb?sb.values.at(-1):0)-(sa?sa.values.at(-1):0);});
@@ -578,7 +595,7 @@ function buildTable(){
   tbody.innerHTML=cos.map((c,i)=>{
     const s=getSrc(c); if(!s) return '';
     const lv=s.values.at(-1), pm=s.values.at(-2), yv=s.values.length>=13?s.values.at(-13):null;
-    const mom=pct(lv,pm), yoyp=pct(lv,yv), ttmv=ttm(c), pkv=peak(c);
+    const mom=pct(lv,pm), yoyp=pct(lv,yv), ttmv=ttm(c), pkv=peak(c), fyv=fyTotal(c);
     const rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
     const barW=Math.round((ttmv/maxTTM)*80);
     const col=getColor(c);
@@ -592,6 +609,7 @@ function buildTable(){
       <td style="color:var(--text3)">${fmt(yv)}</td>
       <td>${chgHtml(yoyp)}</td>
       <td>${fmt(ttmv)}</td>
+      <td style="color:var(--text3)">${fmt(fyv)}</td>
       <td style="color:var(--text3)">${fmt(pkv)}</td>
       <td><div class="bar-bg"><div class="bar-inner" style="width:${barW}px;background:${col}"></div></div></td>
     </tr>`;
