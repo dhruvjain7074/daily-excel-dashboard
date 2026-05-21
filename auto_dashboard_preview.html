@@ -203,8 +203,13 @@ tbody tr:hover td{background:#f0f5ff;}
         </div>
         <div class="card">
           <div class="card-title">Market Share</div>
-          <div class="card-sub">February 2026 — units dispatched</div>
-          <div style="height:320px"><canvas id="shareChart"></canvas></div>
+          <div class="card-sub" id="shareSub">Current period — units dispatched</div>
+          <div class="tab-row">
+            <button class="tab-btn active" id="btnShareCurrent" onclick="setShareMode('current',this)">Current</button>
+            <button class="tab-btn" id="btnShareHist" onclick="setShareMode('historical',this)">Historical FY</button>
+          </div>
+          <div id="shareCurrentDiv" style="height:280px"><canvas id="shareChart"></canvas></div>
+          <div id="shareHistDiv" style="height:280px;display:none"><canvas id="shareHistChart"></canvas></div>
         </div>
       </div>
       <div class="charts-grid-3">
@@ -534,7 +539,98 @@ function buildShare(){
   const ctx=document.getElementById('shareChart').getContext('2d');
   if(sChart)sChart.destroy();
   const cos=visibleCos(), vals=cos.map(c=>{const s=getSrc(c);return s?s.values.at(-1):0;}), total=vals.reduce((a,b)=>a+b,0);
+  if(document.getElementById('shareSub')) document.getElementById('shareSub').textContent='Current period — units dispatched';
   sChart=new Chart(ctx,{type:'doughnut',data:{labels:cos,datasets:[{data:vals,backgroundColor:cos.map(c=>getColor(c)),borderColor:'#fff',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e293b',borderColor:'#334155',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#cbd5e1',callbacks:{label:c=>`  ${c.label}: ${fmt(c.parsed)} (${((c.parsed/total)*100).toFixed(1)}%)`}}}}});
+}
+
+// ══════════════════════════════════════════════════
+// MARKET SHARE HISTORICAL
+// ══════════════════════════════════════════════════
+let shareMode = 'current';
+let shChart = null;
+
+function setShareMode(mode, btn) {
+  shareMode = mode;
+  document.querySelectorAll('#btnShareCurrent,#btnShareHist').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('shareCurrentDiv').style.display = mode === 'current' ? 'block' : 'none';
+  document.getElementById('shareHistDiv').style.display   = mode === 'historical' ? 'block' : 'none';
+  if (mode === 'historical') buildShareHistory();
+  else buildShare();
+}
+
+function buildShareHistory() {
+  const ctx = document.getElementById('shareHistChart').getContext('2d');
+  if (shChart) shChart.destroy();
+  const cos = visibleCos();
+
+  // Build per-FY totals for each company and compute % share per FY
+  const fyTotalsMap = {};
+  cos.forEach(c => {
+    const r = FY_RAW[c];
+    if (!r) return;
+    r.years.forEach((fy, i) => {
+      if (!fyTotalsMap[fy]) fyTotalsMap[fy] = {};
+      fyTotalsMap[fy][c] = (fyTotalsMap[fy][c] || 0) + r.values[i];
+    });
+  });
+
+  // Only keep FYs where ALL selected companies have data (full years only)
+  const allFYs = Object.keys(fyTotalsMap).sort();
+
+  // Compute segment total per FY (sum across all visible cos)
+  const segTotals = {};
+  allFYs.forEach(fy => {
+    segTotals[fy] = cos.reduce((sum, c) => sum + (fyTotalsMap[fy]?.[c] || 0), 0);
+  });
+
+  const datasets = cos.map(c => {
+    const data = allFYs.map(fy => {
+      const v = fyTotalsMap[fy]?.[c];
+      const t = segTotals[fy];
+      if (!v || !t) return null;
+      return +((v / t) * 100).toFixed(1);
+    });
+    return {
+      label: c,
+      data,
+      borderColor: colorOf(c),
+      backgroundColor: colorOf(c) + '18',
+      borderWidth: 2,
+      pointRadius: 3,
+      pointHoverRadius: 5,
+      tension: 0.2,
+      fill: false,
+      spanGaps: false,
+    };
+  });
+
+  shChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: allFYs, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top', labels: { color: '#4a5568', font: { size: 10.5 }, boxWidth: 10, padding: 12 } },
+        tooltip: {
+          backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1,
+          titleColor: '#f1f5f9', bodyColor: '#cbd5e1',
+          callbacks: { label: c => `  ${c.dataset.label}: ${c.parsed.y?.toFixed(1)}%` }
+        }
+      },
+      scales: {
+        x: { ticks: { color: '#8a96a8', font: { size: 10 } }, grid: { color: '#f0f3f7' } },
+        y: {
+          ticks: { color: '#8a96a8', font: { size: 10 }, callback: v => v + '%' },
+          grid: { color: '#f0f3f7' },
+          title: { display: true, text: 'Market Share %', color: '#8a96a8', font: { size: 10 } }
+        }
+      }
+    }
+  });
+  document.getElementById('shareSub').textContent = 'Historical FY market share (Apr–Mar)';
 }
 
 // ══════════════════════════════════════════════════
