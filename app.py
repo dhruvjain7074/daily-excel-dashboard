@@ -1249,11 +1249,6 @@ const SEG_FILTER = {
             '>3 Wheeler<span class="seg-cnt">1</span>',
             '>3 Wheeler<span class="seg-cnt">2</span>'
         )
-        # Update FY Total column header with actual FY label
-        html_template = html_template.replace(
-            '<th>FY Total</th>',
-            f'<th>FY {str(fy_start_year)[-2:]}-{str(fy_start_year+1)[-2:]}</th>'
-        )
         html_template = html_template.replace(
             '>Passenger Vehicle<span class="seg-cnt">3</span>',
             '>Passenger Vehicle<span class="seg-cnt">6</span>'
@@ -1314,6 +1309,7 @@ const SEG_FILTER = {
         for co, series in RAW.items():
             cy_totals[co] = sum(v for d, v in zip(series["dates"], series["values"]) if d >= fy_start)
         fy_label = f"FY{str(fy_start_year)[2:]}-{str(fy_start_year+1)[2:]}"
+        html_template = html_template.replace('<th>FY Total</th>', f'<th>{fy_label}</th>')
 
         # ── INJECT DATA OBJECTS ──
         fy_json = json.dumps(fy_raw, ensure_ascii=False)
