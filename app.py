@@ -1249,6 +1249,11 @@ const SEG_FILTER = {
             '>3 Wheeler<span class="seg-cnt">1</span>',
             '>3 Wheeler<span class="seg-cnt">2</span>'
         )
+        # Update FY Total column header with actual FY label
+        html_template = html_template.replace(
+            '<th>FY Total</th>',
+            f'<th>FY {str(fy_start_year)[-2:]}-{str(fy_start_year+1)[-2:]}</th>'
+        )
         html_template = html_template.replace(
             '>Passenger Vehicle<span class="seg-cnt">3</span>',
             '>Passenger Vehicle<span class="seg-cnt">6</span>'
