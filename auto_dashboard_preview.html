@@ -84,6 +84,11 @@ hr.sdiv{margin:8px 14px;border:none;border-top:1px solid var(--border);}
 .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
 .charts-grid-3{display:grid;grid-template-columns:5fr 4fr 3fr;gap:16px;margin-bottom:16px;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;box-shadow:var(--shadow);}
+.card.expanded{grid-column:1/-1;transition:all .2s;}
+.expand-btn{background:none;border:none;cursor:pointer;color:var(--text3);padding:2px 4px;border-radius:4px;font-size:13px;margin-left:auto;display:flex;align-items:center;transition:color .15s;}
+.expand-btn:hover{color:var(--text);}
+.card-header{display:flex;align-items:flex-start;gap:8px;margin-bottom:2px;}
+.card-header .card-title{flex:1;}
 .card-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text);margin-bottom:2px;}
 .card-sub{font-size:11px;color:var(--text3);margin-bottom:16px;}
 .tab-row{display:flex;gap:6px;margin-bottom:16px;}
@@ -190,8 +195,11 @@ tbody tr:hover td{background:#f0f5ff;}
     <!-- Standard charts -->
     <div id="stdCharts">
       <div class="charts-grid">
-        <div class="card">
-          <div class="card-title" id="trendCardTitle">Monthly Sales Trend</div>
+        <div class="card" id="trendCard">
+          <div class="card-header">
+            <div class="card-title" id="trendCardTitle">Monthly Sales Trend</div>
+            <button class="expand-btn" onclick="toggleExpand('trendCard','trendChart',buildTrend)" title="Expand">⤢</button>
+          </div>
           <div class="card-sub" id="trendSub">Selected companies</div>
           <div class="tab-row">
             <button class="tab-btn active" onclick="setTrendView('line',this)">Line</button>
@@ -199,10 +207,13 @@ tbody tr:hover td{background:#f0f5ff;}
             <button class="tab-btn active" onclick="setTrendMode('monthly',this)" id="btnMonthly" style="margin-left:8px">Monthly</button>
             <button class="tab-btn" onclick="setTrendMode('yearly',this)" id="btnYearly">FY Yearly</button>
           </div>
-          <div style="height:280px"><canvas id="trendChart"></canvas></div>
+          <div id="trendChartWrap" style="height:280px"><canvas id="trendChart"></canvas></div>
         </div>
-        <div class="card">
-          <div class="card-title">Market Share</div>
+        <div class="card" id="shareCard">
+          <div class="card-header">
+            <div class="card-title">Market Share</div>
+            <button class="expand-btn" onclick="toggleExpand('shareCard','shareChart',()=>shareMode==='historical'?buildShareHistory():buildShare())" title="Expand">⤢</button>
+          </div>
           <div class="card-sub" id="shareSub">Current period — units dispatched</div>
           <div class="tab-row">
             <button class="tab-btn active" id="btnShareCurrent" onclick="setShareMode('current',this)">Current</button>
@@ -890,6 +901,28 @@ function redraw(){
 // INIT
 // ══════════════════════════════════════════════════
 buildCoList(); redraw();
+
+// ══════════════════════════════════════════════════
+// EXPAND CARD
+// ══════════════════════════════════════════════════
+function toggleExpand(cardId, chartId, rebuildFn) {
+  const card = document.getElementById(cardId);
+  const wrap = card.querySelector('[id$="ChartWrap"]') || card.querySelector('[id$="CurrentDiv"]') || card.querySelector('div[style*="height"]');
+  const btn  = card.querySelector('.expand-btn');
+  const isExpanded = card.classList.contains('expanded');
+  card.classList.toggle('expanded');
+  if (!isExpanded) {
+    // Expand: taller chart, icon changes
+    if (wrap) wrap.style.height = '520px';
+    if (btn)  btn.textContent = '⤡';
+  } else {
+    // Collapse
+    if (wrap) wrap.style.height = '280px';
+    if (btn)  btn.textContent = '⤢';
+  }
+  // Rebuild chart after resize so it fills new dimensions
+  setTimeout(rebuildFn, 50);
+}
 </script>
 </body>
 </html>
