@@ -577,13 +577,17 @@ function fyTotal(c){
   const s=getSrc(c); if(!s) return 0;
   const dates=s.dates, values=s.values;
   if(!dates||!dates.length) return 0;
-  // Determine current FY start: if latest month >= Apr, FY starts that year; else previous year
+  // Current FY: Apr of fyStartYear to Mar of fyStartYear+1
+  // If latest month is Apr-onwards, current FY started this year; else last year
   const latestD=new Date(dates[dates.length-1]+'-01');
-  const fyStartYear=latestD.getMonth()>=3?latestD.getFullYear():latestD.getFullYear()-1;
+  const latestYear=latestD.getFullYear();
+  const latestMonth=latestD.getMonth(); // 0-indexed; March=2, April=3
+  const fyStartYear=latestMonth>=3?latestYear:latestYear-1;
   const fyStart=fyStartYear+'-04';
+  const fyEnd=(fyStartYear+1)+'-03';
   let total=0;
   for(let i=0;i<dates.length;i++){
-    if(dates[i]>=fyStart) total+=values[i];
+    if(dates[i]>=fyStart && dates[i]<=fyEnd) total+=values[i];
   }
   return total;
 }
