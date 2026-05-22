@@ -797,6 +797,14 @@ function closeModal(){
   document.getElementById('modalOverlay').classList.remove('open');
   if(modalTCh){modalTCh.destroy();modalTCh=null;}
   if(modalBCh){modalBCh.destroy();modalBCh=null;}
+  // Reset expand state when modal closes
+  if(modalTrendExpanded){
+    modalTrendExpanded=false;
+    document.getElementById('modalTrendCard').classList.remove('modal-chart-expanded');
+    document.getElementById('modalBarCard').style.display='';
+    document.getElementById('modalTrendWrap').style.height='240px';
+    document.getElementById('modalTrendExpandBtn').textContent='⤢';
+  }
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 
