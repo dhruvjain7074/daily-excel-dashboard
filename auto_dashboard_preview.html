@@ -126,6 +126,7 @@ tbody tr:hover td{background:#f0f5ff;}
 .modal-kpi-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:6px;}
 .modal-kpi-val{font-size:18px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
 .modal-charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.modal-charts.single-col{grid-template-columns:1fr;}
 
 /* EV / TR SECTIONS */
 .special-section{display:none;margin-bottom:16px;}
@@ -809,7 +810,7 @@ function closeModal(){
   // Reset expand state when modal closes
   if(modalTrendExpanded){
     modalTrendExpanded=false;
-    document.getElementById('modalTrendCard').classList.remove('modal-chart-expanded');
+    document.getElementById('modalChartsGrid').classList.remove('single-col');
     document.getElementById('modalBarCard').style.display='';
     document.getElementById('modalTrendWrap').style.height='240px';
     document.getElementById('modalTrendExpandBtn').textContent='⤢';
@@ -944,17 +945,17 @@ function toggleExpand(cardId, chartId, rebuildFn) {
 let modalTrendExpanded=false;
 function toggleModalTrend(){
   modalTrendExpanded=!modalTrendExpanded;
-  const card=document.getElementById('modalTrendCard');
+  const grid=document.getElementById('modalChartsGrid');
   const barCard=document.getElementById('modalBarCard');
   const wrap=document.getElementById('modalTrendWrap');
   const btn=document.getElementById('modalTrendExpandBtn');
   if(modalTrendExpanded){
-    card.classList.add('modal-chart-expanded');
+    grid.classList.add('single-col');
     barCard.style.display='none';
     wrap.style.height='480px';
     btn.innerHTML='&#10561;';
   }else{
-    card.classList.remove('modal-chart-expanded');
+    grid.classList.remove('single-col');
     barCard.style.display='';
     wrap.style.height='240px';
     btn.innerHTML='&#10562;';
