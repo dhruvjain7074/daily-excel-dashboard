@@ -319,9 +319,18 @@ tbody tr:hover td{background:#f0f5ff;}
     </div>
     <div class="modal-body">
       <div class="modal-kpis" id="modalKpis"></div>
-      <div class="modal-charts">
-        <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Monthly Trend — All Sub-Categories</div><div style="height:240px"><canvas id="modalTrendChart"></canvas></div></div>
-        <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Latest Month Breakdown</div><div style="height:240px"><canvas id="modalBarChart"></canvas></div></div>
+      <div class="modal-charts" id="modalChartsGrid">
+        <div id="modalTrendCard">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Monthly Trend — All Sub-Categories</div>
+            <button id="modalTrendExpandBtn" onclick="toggleModalTrend()" title="Expand" style="background:none;border:1px solid #e2e8f0;cursor:pointer;color:#64748b;padding:2px 8px;border-radius:4px;font-size:14px;line-height:1.4;">&#10562;</button>
+          </div>
+          <div id="modalTrendWrap" style="height:240px"><canvas id="modalTrendChart"></canvas></div>
+        </div>
+        <div id="modalBarCard">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Latest Month Breakdown</div>
+          <div style="height:240px"><canvas id="modalBarChart"></canvas></div>
+        </div>
       </div>
     </div>
   </div>
@@ -930,6 +939,27 @@ function toggleExpand(cardId, chartId, rebuildFn) {
   }
   // Rebuild chart after resize so it fills new dimensions
   setTimeout(rebuildFn, 50);
+}
+
+let modalTrendExpanded=false;
+function toggleModalTrend(){
+  modalTrendExpanded=!modalTrendExpanded;
+  const card=document.getElementById('modalTrendCard');
+  const barCard=document.getElementById('modalBarCard');
+  const wrap=document.getElementById('modalTrendWrap');
+  const btn=document.getElementById('modalTrendExpandBtn');
+  if(modalTrendExpanded){
+    card.classList.add('modal-chart-expanded');
+    barCard.style.display='none';
+    wrap.style.height='480px';
+    btn.innerHTML='&#10561;';
+  }else{
+    card.classList.remove('modal-chart-expanded');
+    barCard.style.display='';
+    wrap.style.height='240px';
+    btn.innerHTML='&#10562;';
+  }
+  setTimeout(()=>{if(modalTCh)modalTCh.resize();},60);
 }
 </script>
 </body>
