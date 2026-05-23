@@ -9,7 +9,6 @@ from google.oauth2.service_account import Credentials
 # =================================================
 # IMAGE LOADER (CACHED – PERFORMANCE FIX)
 # =================================================
-@st.cache_data(show_spinner=False)
 def get_sorted_images(folder):
     def extract_datetime(filename):
         try:
@@ -1456,8 +1455,14 @@ if view == "Multiasset Chart (One View)":
             return
         cols = st.columns(3)
         for i, img in enumerate(images):
+            path = os.path.join(folder, img)
+            if not os.path.exists(path):
+                continue
             with cols[i % 3]:
-                st.image(os.path.join(folder, img))
+                try:
+                    st.image(path)
+                except Exception:
+                    pass
 
     tab1, tab2, tab3 = st.tabs(["Main", "Broad Indices", "Sectoral Indices"])
 
