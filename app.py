@@ -1487,9 +1487,70 @@ if view == "Nifty 50 Fwd & Bwd Returns":
 
     ret = df_nifty_ret.copy()
 
-    with st.expander("🔍 Debug — columns and sample"):
-        st.write("Columns:", list(ret.columns))
-        st.write("First 3 rows:", ret.head(3).to_dict())
+    # Parse date
+    ret["Date"] = pd.to_datetime(ret["Date"], format="%d-%b-%Y", errors="coerce")
+
+    # Parse percentage columns — strip % and convert to float
+    pct_cols = ["Bkw 1 YR", "Bkw 2 YR", "Bkw 3 YR", "Bkw 5 YR",
+                "Fwd 1yr", "Fwd 2yr", "Fwd 3yr", "Fwd 5yr"]
+    for col in pct_cols:
+        if col in ret.columns:
+            ret[col] = pd.to_numeric(
+                ret[col].astype(str).str.replace("%", "", regex=False).str.strip(),
+                errors="coerce"
+            )
+
+    ret["Price"] = pd.to_numeric(ret["Price"], errors="coerce")
+    ret = ret.dropna(subset=["Date"]).sort_values("Date")
+
+    # Date filter
+    start_r, end_r, tf_r = date_filter_widget(ret["Date"].dropna(), "nifty_ret")
+    ret_f = ret[(ret["Date"] >= start_r) & (ret["Date"] <= end_r)].copy()
+    ret_f = apply_tf(ret_f, "Date", tf_r)
+
+    # View selector
+    ret_view = st.radio(
+        "View",
+        ["Nifty Price", "Backward Returns", "Forward Returns"],
+        horizontal=True, key="ret_view", label_visibility="collapsed"
+    )
+
+    if ret_view == "Nifty Price":
+        plot_single_line(ret_f, "Date", "Price", title="Nifty 50 Price", key="ret_price")
+
+    elif ret_view == "Backward Returns":
+        bkw_cols = ["Bkw 1 YR", "Bkw 2 YR", "Bkw 3 YR", "Bkw 5 YR"]
+        bkw_choice = st.radio("Period", bkw_cols, horizontal=True,
+                              key="bkw_choice", label_visibility="collapsed")
+        d = ret_f[["Date", bkw_choice]].dropna()
+        fig = px.line(d, x="Date", y=bkw_choice, title=f"Nifty 50 — {bkw_choice}")
+        fig.update_traces(line=dict(width=1.8, color=LINE_COLOR),
+                          hovertemplate="<b>%{x|%d %b %Y}</b><br>%{y:.2f}%<extra></extra>")
+        fig.add_hline(y=0, line=dict(color="#e8e8e5", width=1))
+        fig.update_layout(**{**PLOT_LAYOUT, "height": 520,
+                              "yaxis": {**PLOT_LAYOUT["yaxis"],
+                                        "ticksuffix": "%", "tickformat": ".1f"}})
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False},
+                        key=f"bkw_{bkw_choice}")
+
+    else:  # Forward Returns
+        fwd_cols = ["Fwd 1yr", "Fwd 2yr", "Fwd 3yr", "Fwd 5yr"]
+        fwd_choice = st.radio("Period", fwd_cols, horizontal=True,
+                              key="fwd_choice", label_visibility="collapsed")
+        d = ret_f[["Date", fwd_choice]].dropna()
+
+        # Color bars: green if positive, red if negative
+        colors = [GREEN if v >= 0 else RED for v in d[fwd_choice]]
+
+        fig = px.bar(d, x="Date", y=fwd_choice, title=f"Nifty 50 — {fwd_choice}")
+        fig.update_traces(marker_color=colors, marker_line_width=0,
+                          hovertemplate="<b>%{x|%d %b %Y}</b><br>%{y:.2f}%<extra></extra>")
+        fig.add_hline(y=0, line=dict(color="#e8e8e5", width=1))
+        fig.update_layout(**{**PLOT_LAYOUT, "height": 520,
+                              "yaxis": {**PLOT_LAYOUT["yaxis"],
+                                        "ticksuffix": "%", "tickformat": ".1f"}})
+        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False},
+                        key=f"fwd_{fwd_choice}")
 
 # =================================================
 # NET MTF OUTSTANDING
