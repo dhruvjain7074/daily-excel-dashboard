@@ -820,7 +820,7 @@ if view == "Metal Charts":
     }
 
     metals = ["Hindustan Copper", "SAIL", "NMDC", "NMDC Steel", "NALCO", "Coal India",
-              "Hindustan Zinc", "Vedanta", "DXY"]
+              "Hindustan Zinc", "Vedanta", "DXY", "stock-dxy"]
     tabs = st.tabs(metals)
 
     for tab, metal in zip(tabs, metals):
@@ -1483,14 +1483,63 @@ if view == "Net MTF Outstanding":
 
     mtf = df_mtf.copy()
 
-    df_plot = mtf[["DATE", "NET MTF OUTSTANDING"]].copy()
-    df_plot["DATE"] = pd.to_datetime(df_plot["DATE"], format="%d-%b-%Y", errors="coerce")
-    df_plot["NET MTF OUTSTANDING"] = pd.to_numeric(
-        df_plot["NET MTF OUTSTANDING"].astype(str).str.replace(",", "", regex=False).str.strip(),
-        errors="coerce"
-    )
-    df_plot = df_plot.dropna(subset=["DATE"]).rename(columns={"DATE": "Date", "NET MTF OUTSTANDING": "Net MTF Outstanding"})
+    # ── Radio selector for the two views ──
+    mtf_view = st.radio("View", ["Net MTF", "Companies MTF"], horizontal=True,
+                        key="mtf_view_radio", label_visibility="collapsed")
 
-    start_mtf, end_mtf, tf_mtf = date_filter_widget(df_plot["Date"].dropna(), "mtf")
-    plot_single_line(apply_tf(df_plot, "Date", tf_mtf), "Date", "Net MTF Outstanding",
-                     title="Net MTF Outstanding", date_range=(start_mtf, end_mtf))
+    if mtf_view == "Net MTF":
+        df_plot = mtf[["DATE", "NET MTF OUTSTANDING"]].copy()
+        df_plot["DATE"] = pd.to_datetime(df_plot["DATE"], format="%d-%b-%Y", errors="coerce")
+        df_plot["NET MTF OUTSTANDING"] = pd.to_numeric(
+            df_plot["NET MTF OUTSTANDING"].astype(str).str.replace(",", "", regex=False).str.strip(),
+            errors="coerce"
+        )
+        df_plot = df_plot.dropna(subset=["DATE"]).rename(
+            columns={"DATE": "Date", "NET MTF OUTSTANDING": "Net MTF Outstanding"})
+
+        start_mtf, end_mtf, tf_mtf = date_filter_widget(df_plot["Date"].dropna(), "mtf_net")
+        plot_single_line(apply_tf(df_plot, "Date", tf_mtf), "Date", "Net MTF Outstanding",
+                         title="Net MTF Outstanding", date_range=(start_mtf, end_mtf))
+
+    else:
+        # ── Companies MTF — date col, value col pairs ──
+        COMPANY_MTF_MAP = {
+            "HINDCOPPER":   ("DATE_2",  "HINDCOPPER MTF OUTSTANDING"),
+            "SAIL":         ("DATE_3",  "SAIL MTF OUTSTANDING"),
+            "NALCO":        ("DATE_4",  "NALCO MTF OUTSTANDING"),
+            "GOLDBEES":     ("DATE_5",  "GOLDBEES MTF OUTSTANDING"),
+            "SILVERBEES":   ("DATE_6",  "SILVERBEES MTF OUTSTANDING"),
+            "BHARTIARTL":   ("DATE_7",  "BHARTIARTL MTF OUTSTANDING"),
+            "SBIN":         ("DATE_8",  "SBIN MTF OUTSTANDING"),
+            "ONGC":         ("DATE_9",  "ONGC MTF OUTSTANDING"),
+            "M&M":          ("DATE_10", "M&M MTF OUTSTANDING"),
+            "COALINDIA":    ("DATE_11", "COALINDIA MTF OUTSTANDING"),
+            "NMDC":         ("DATE_12", "NMDC MTF OUTSTANDING"),
+            "CARBORUNDUM":  ("DATE_13", "CARBORUNDUM MTF OUTSTANDING"),
+            "TMPV":         ("DATE_14", "TMPV MTF OUTSTANDING"),
+            "RELIANCE":     ("DATE_15", "RELIANCE MTF OUTSTANDING"),
+            "IDEA":         ("DATE_16", "IDEA MTF OUTSTANDING"),
+        }
+
+        company = st.radio("Company", list(COMPANY_MTF_MAP.keys()), horizontal=True,
+                           key="mtf_company_radio", label_visibility="collapsed")
+
+        date_col, val_col = COMPANY_MTF_MAP[company]
+
+        if date_col not in mtf.columns or val_col not in mtf.columns:
+            st.warning(f"Column not found in sheet: {val_col}")
+        else:
+            df_co = mtf[[date_col, val_col]].copy()
+            df_co[date_col] = pd.to_datetime(df_co[date_col], format="%d-%b-%Y", errors="coerce")
+            df_co[val_col] = pd.to_numeric(
+                df_co[val_col].astype(str).str.replace(",", "", regex=False).str.strip(),
+                errors="coerce"
+            )
+            df_co = df_co.dropna(subset=[date_col]).rename(
+                columns={date_col: "Date", val_col: "Value"})
+
+            start_co, end_co, tf_co = date_filter_widget(df_co["Date"].dropna(), f"mtf_{company}")
+            plot_single_line(apply_tf(df_co, "Date", tf_co), "Date", "Value",
+                             title=f"{company} — MTF Outstanding",
+                             date_range=(start_co, end_co),
+                             key=f"mtf_co_{company}")
