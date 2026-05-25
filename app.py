@@ -1488,6 +1488,8 @@ if view == "Net MTF Outstanding":
                         key="mtf_view_radio", label_visibility="collapsed")
 
     if mtf_view == "Net MTF":
+        with st.expander("🔍 Debug — MTF columns"):
+            st.write(list(mtf.columns))
         df_plot = mtf[["DATE", "NET MTF OUTSTANDING"]].copy()
         df_plot["DATE"] = pd.to_datetime(df_plot["DATE"], format="%d-%b-%Y", errors="coerce")
         df_plot["NET MTF OUTSTANDING"] = pd.to_numeric(
