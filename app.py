@@ -820,7 +820,7 @@ if view == "Metal Charts":
     }
 
     metals = ["Hindustan Copper", "SAIL", "NMDC", "NMDC Steel", "NALCO", "Coal India",
-              "Hindustan Zinc", "Vedanta", "DXY", "stock-dxy"]
+              "Hindustan Zinc", "Vedanta", "DXY"]
     tabs = st.tabs(metals)
 
     for tab, metal in zip(tabs, metals):
