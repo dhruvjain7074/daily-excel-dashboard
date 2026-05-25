@@ -1488,16 +1488,14 @@ if view == "Net MTF Outstanding":
                         key="mtf_view_radio", label_visibility="collapsed")
 
     if mtf_view == "Net MTF":
-        with st.expander("🔍 Debug — MTF columns"):
-            st.write(list(mtf.columns))
-        df_plot = mtf[["DATE", "NET MTF OUTSTANDING"]].copy()
-        df_plot["DATE"] = pd.to_datetime(df_plot["DATE"], format="%d-%b-%Y", errors="coerce")
+        df_plot = mtf[["DATE_1", "NET MTF OUTSTANDING"]].copy()
+        df_plot["DATE_1"] = pd.to_datetime(df_plot["DATE_1"], format="%d-%b-%Y", errors="coerce")
         df_plot["NET MTF OUTSTANDING"] = pd.to_numeric(
             df_plot["NET MTF OUTSTANDING"].astype(str).str.replace(",", "", regex=False).str.strip(),
             errors="coerce"
         )
-        df_plot = df_plot.dropna(subset=["DATE"]).rename(
-            columns={"DATE": "Date", "NET MTF OUTSTANDING": "Net MTF Outstanding"})
+        df_plot = df_plot.dropna(subset=["DATE_1"]).rename(
+            columns={"DATE_1": "Date", "NET MTF OUTSTANDING": "Net MTF Outstanding"})
 
         start_mtf, end_mtf, tf_mtf = date_filter_widget(df_plot["Date"].dropna(), "mtf_net")
         plot_single_line(apply_tf(df_plot, "Date", tf_mtf), "Date", "Net MTF Outstanding",
