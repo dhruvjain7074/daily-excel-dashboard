@@ -475,8 +475,9 @@ def load_data():
     df_india_macro = read_worksheet("India macroeconomic indicators")
     df_auto_sales  = read_worksheet("AUTOMOBILE SALES VOLUME")
     df_mtf         = read_worksheet("mtf outstanding")
+    df_nifty_ret   = read_worksheet("Nifty_50 Fwd&Bwd Returns")
 
-    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales, df_india_macro, df_mtf
+    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales, df_india_macro, df_mtf, df_nifty_ret
 
 
 # Load all data once per session — stored in session_state so switching
@@ -493,6 +494,7 @@ if "data_loaded" not in st.session_state:
             st.session_state.df_auto_sales,
             st.session_state.df_india_macro,
             st.session_state.df_mtf,
+            st.session_state.df_nifty_ret,
         ) = load_data()
         st.session_state.data_loaded = True
 
@@ -505,6 +507,7 @@ df_global_rates= st.session_state.df_global_rates
 df_auto_sales  = st.session_state.df_auto_sales
 df_india_macro = st.session_state.df_india_macro
 df_mtf         = st.session_state.df_mtf
+df_nifty_ret   = st.session_state.df_nifty_ret
 
 # ── CLEAN df_main ──
 numeric_cols_main = [
@@ -550,6 +553,7 @@ VIEWS = [
     "Magazine Cover",
     "Multiasset Chart (One View)",
     "Net MTF Outstanding",
+    "Nifty 50 Fwd & Bwd Returns",
 ]
 
 col1, col2 = st.columns([6, 1])
@@ -1473,6 +1477,19 @@ if view == "Multiasset Chart (One View)":
     with tab3:
         show_images_grid("multiasset_charts/sectoral_indices")
 
+
+# =================================================
+# NIFTY 50 FWD & BWD RETURNS
+# =================================================
+if view == "Nifty 50 Fwd & Bwd Returns":
+
+    st.markdown("#### Nifty 50 Forward & Backward Returns")
+
+    ret = df_nifty_ret.copy()
+
+    with st.expander("🔍 Debug — columns and sample"):
+        st.write("Columns:", list(ret.columns))
+        st.write("First 3 rows:", ret.head(3).to_dict())
 
 # =================================================
 # NET MTF OUTSTANDING
