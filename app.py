@@ -1490,7 +1490,7 @@ if view == "Nifty 50 Fwd & Bwd Returns":
     # Parse date
     ret["Date"] = pd.to_datetime(ret["Date"], format="%d-%b-%Y", errors="coerce")
 
-    # Parse percentage columns — strip % and convert to float
+    # Parse percentage columns
     pct_cols = ["Bkw 1 YR", "Bkw 2 YR", "Bkw 3 YR", "Bkw 5 YR",
                 "Fwd 1yr", "Fwd 2yr", "Fwd 3yr", "Fwd 5yr"]
     for col in pct_cols:
@@ -1499,58 +1499,107 @@ if view == "Nifty 50 Fwd & Bwd Returns":
                 ret[col].astype(str).str.replace("%", "", regex=False).str.strip(),
                 errors="coerce"
             )
-
     ret["Price"] = pd.to_numeric(ret["Price"], errors="coerce")
     ret = ret.dropna(subset=["Date"]).sort_values("Date")
-
-    # Date filter
-    start_r, end_r, tf_r = date_filter_widget(ret["Date"].dropna(), "nifty_ret")
-    ret_f = ret[(ret["Date"] >= start_r) & (ret["Date"] <= end_r)].copy()
-    ret_f = apply_tf(ret_f, "Date", tf_r)
 
     # View selector
     ret_view = st.radio(
         "View",
-        ["Nifty Price", "Backward Returns", "Forward Returns"],
+        ["Matrix Table", "Nifty Price", "Backward Returns", "Forward Returns"],
         horizontal=True, key="ret_view", label_visibility="collapsed"
     )
 
-    if ret_view == "Nifty Price":
-        plot_single_line(ret_f, "Date", "Price", title="Nifty 50 Price", key="ret_price")
+    if ret_view == "Matrix Table":
+        # Date filter for matrix
+        start_r, end_r, tf_r = date_filter_widget(ret["Date"].dropna(), "nifty_matrix")
+        ret_f = ret[(ret["Date"] >= start_r) & (ret["Date"] <= end_r)].copy()
 
-    elif ret_view == "Backward Returns":
-        bkw_cols = ["Bkw 1 YR", "Bkw 2 YR", "Bkw 3 YR", "Bkw 5 YR"]
-        bkw_choice = st.radio("Period", bkw_cols, horizontal=True,
-                              key="bkw_choice", label_visibility="collapsed")
-        d = ret_f[["Date", bkw_choice]].dropna()
-        fig = px.line(d, x="Date", y=bkw_choice, title=f"Nifty 50 — {bkw_choice}")
-        fig.update_traces(line=dict(width=1.8, color=LINE_COLOR),
-                          hovertemplate="<b>%{x|%d %b %Y}</b><br>%{y:.2f}%<extra></extra>")
-        fig.add_hline(y=0, line=dict(color="#e8e8e5", width=1))
-        fig.update_layout(**{**PLOT_LAYOUT, "height": 520,
-                              "yaxis": {**PLOT_LAYOUT["yaxis"],
-                                        "ticksuffix": "%", "tickformat": ".1f"}})
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False},
-                        key=f"bkw_{bkw_choice}")
+        def fmt_val(v):
+            if pd.isna(v):
+                return ""
+            return f"{v:.2f}%"
 
-    else:  # Forward Returns
-        fwd_cols = ["Fwd 1yr", "Fwd 2yr", "Fwd 3yr", "Fwd 5yr"]
-        fwd_choice = st.radio("Period", fwd_cols, horizontal=True,
-                              key="fwd_choice", label_visibility="collapsed")
-        d = ret_f[["Date", fwd_choice]].dropna()
+        def cell_class(v):
+            if pd.isna(v):
+                return ""
+            return "red" if v < 0 else "green"
 
-        # Color bars: green if positive, red if negative
-        colors = [GREEN if v >= 0 else RED for v in d[fwd_choice]]
+        # Build HTML matrix table
+        rows_html = ""
+        for _, row in ret_f.iterrows():
+            rows_html += "<tr>"
+            for col in ["Bkw 5 YR", "Bkw 3 YR", "Bkw 2 YR", "Bkw 1 YR"]:
+                v = row[col]
+                rows_html += f'<td class="{cell_class(v)}">{fmt_val(v)}</td>'
+            date_str = row["Date"].strftime("%b %Y") if pd.notna(row["Date"]) else ""
+            price_str = f"{row['Price']:,.0f}" if pd.notna(row["Price"]) else ""
+            rows_html += f'<td class="center">{date_str}<br><b>{price_str}</b></td>'
+            for col in ["Fwd 1yr", "Fwd 2yr", "Fwd 3yr", "Fwd 5yr"]:
+                v = row[col]
+                rows_html += f'<td class="{cell_class(v)}">{fmt_val(v)}</td>'
+            rows_html += "</tr>"
 
-        fig = px.bar(d, x="Date", y=fwd_choice, title=f"Nifty 50 — {fwd_choice}")
-        fig.update_traces(marker_color=colors, marker_line_width=0,
-                          hovertemplate="<b>%{x|%d %b %Y}</b><br>%{y:.2f}%<extra></extra>")
-        fig.add_hline(y=0, line=dict(color="#e8e8e5", width=1))
-        fig.update_layout(**{**PLOT_LAYOUT, "height": 520,
-                              "yaxis": {**PLOT_LAYOUT["yaxis"],
-                                        "ticksuffix": "%", "tickformat": ".1f"}})
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False},
-                        key=f"fwd_{fwd_choice}")
+        matrix_html = f"""
+        <style>
+          .matrix-wrap{{overflow-x:auto;}}
+          .matrix-tbl{{border-collapse:collapse;width:100%;font-family:'DM Mono',monospace;font-size:12px;}}
+          .matrix-tbl th{{background:#f2f2f0;border:1px solid #e8e8e5;padding:8px 12px;
+                          text-align:center;font-size:11px;font-weight:600;
+                          text-transform:uppercase;letter-spacing:.06em;color:#6b6b64;}}
+          .matrix-tbl td{{border:1px solid #e8e8e5;padding:5px 10px;text-align:center;}}
+          .matrix-tbl .green{{background:#d1fae5;color:#065f46;}}
+          .matrix-tbl .red{{background:#fee2e2;color:#991b1b;}}
+          .matrix-tbl .center{{background:#ffffff;font-weight:600;color:#1a1a18;
+                               border-left:2px solid #1a1a18;border-right:2px solid #1a1a18;}}
+        </style>
+        <div class="matrix-wrap">
+        <table class="matrix-tbl">
+          <thead><tr>
+            <th>Bkw 5Y</th><th>Bkw 3Y</th><th>Bkw 2Y</th><th>Bkw 1Y</th>
+            <th>Date / Price</th>
+            <th>Fwd 1Y</th><th>Fwd 2Y</th><th>Fwd 3Y</th><th>Fwd 5Y</th>
+          </tr></thead>
+          <tbody>{rows_html}</tbody>
+        </table>
+        </div>
+        """
+        st.markdown(matrix_html, unsafe_allow_html=True)
+
+    else:
+        # Date filter + timeframe for charts
+        start_r, end_r, tf_r = date_filter_widget(ret["Date"].dropna(), "nifty_ret")
+        ret_f = ret[(ret["Date"] >= start_r) & (ret["Date"] <= end_r)].copy()
+        ret_f = apply_tf(ret_f, "Date", tf_r)
+
+        if ret_view == "Nifty Price":
+            plot_single_line(ret_f, "Date", "Price", title="Nifty 50 Price", key="ret_price")
+
+        elif ret_view == "Backward Returns":
+            bkw_choice = st.radio("Period", ["Bkw 1 YR","Bkw 2 YR","Bkw 3 YR","Bkw 5 YR"],
+                                  horizontal=True, key="bkw_choice", label_visibility="collapsed")
+            d = ret_f[["Date", bkw_choice]].dropna()
+            fig = px.line(d, x="Date", y=bkw_choice, title=f"Nifty 50 — {bkw_choice}")
+            fig.update_traces(line=dict(width=1.8, color=LINE_COLOR),
+                              hovertemplate="<b>%{x|%d %b %Y}</b><br>%{y:.2f}%<extra></extra>")
+            fig.add_hline(y=0, line=dict(color="#e8e8e5", width=1))
+            fig.update_layout(**{**PLOT_LAYOUT, "height": 520,
+                                  "yaxis": {**PLOT_LAYOUT["yaxis"], "ticksuffix": "%", "tickformat": ".1f"}})
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False},
+                            key=f"bkw_{bkw_choice}")
+
+        else:  # Forward Returns
+            fwd_choice = st.radio("Period", ["Fwd 1yr","Fwd 2yr","Fwd 3yr","Fwd 5yr"],
+                                  horizontal=True, key="fwd_choice", label_visibility="collapsed")
+            d = ret_f[["Date", fwd_choice]].dropna()
+            colors = [GREEN if v >= 0 else RED for v in d[fwd_choice]]
+            fig = px.bar(d, x="Date", y=fwd_choice, title=f"Nifty 50 — {fwd_choice}")
+            fig.update_traces(marker_color=colors, marker_line_width=0,
+                              hovertemplate="<b>%{x|%d %b %Y}</b><br>%{y:.2f}%<extra></extra>")
+            fig.add_hline(y=0, line=dict(color="#e8e8e5", width=1))
+            fig.update_layout(**{**PLOT_LAYOUT, "height": 520,
+                                  "yaxis": {**PLOT_LAYOUT["yaxis"], "ticksuffix": "%", "tickformat": ".1f"}})
+            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False},
+                            key=f"fwd_{fwd_choice}")
 
 # =================================================
 # NET MTF OUTSTANDING
