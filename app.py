@@ -1605,8 +1605,9 @@ if view == "Net MTF Outstanding":
             "IRCTC":        ("DATE_22", "IRCTC MTF OUTSTANDING"),
         }
 
-        company = st.selectbox("Company", list(COMPANY_MTF_MAP.keys()),
-                              key="mtf_company_select", label_visibility="collapsed")
+        company = st.radio("Company", list(COMPANY_MTF_MAP.keys()),
+                           horizontal=True, key="mtf_company_radio",
+                           label_visibility="collapsed")
 
         date_col, val_col = COMPANY_MTF_MAP[company]
 
