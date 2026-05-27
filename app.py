@@ -1516,14 +1516,13 @@ if view == "Nifty 50 Fwd & Bwd Returns":
     with fc1:
         month_filter = st.selectbox("Month", MONTHS, key="ret_month", label_visibility="visible")
     with fc2:
-        fy_options = ["All FY"] + all_fys
-        fy_filter = st.multiselect("Financial Year", fy_options, default=["All FY"], key="ret_fy")
+        fy_filter = st.multiselect("Financial Year (leave empty = all)", all_fys, default=[], key="ret_fy")
 
     # Apply filters
     ret_f = ret.copy()
     if month_filter != "All":
         ret_f = ret_f[ret_f["Date"].dt.month == MONTH_NUM[month_filter]]
-    if fy_filter and "All FY" not in fy_filter:
+    if fy_filter:
         def get_fy(d):
             if pd.isna(d): return ""
             fy_s = d.year if d.month >= 4 else d.year - 1
@@ -1557,25 +1556,19 @@ if view == "Nifty 50 Fwd & Bwd Returns":
             return " ▲" if st.session_state.matrix_sort_asc else " ▼"
         return " ⇅"
 
-    # Build sort button callbacks via query params trick — use st.button per col
-    # We use a compact JS-in-HTML approach with anchor links to avoid full reruns
-    # Instead, render sort buttons as st.columns above the table
-    col_labels = ["Bkw 5Y","Bkw 3Y","Bkw 2Y","Bkw 1Y","Date/Price","Fwd 1Y","Fwd 2Y","Fwd 3Y","Fwd 5Y"]
-    sort_cols = st.columns(9)
-    for i, (label, scol) in enumerate(zip(col_labels, sort_cols)):
-        with scol:
-            icon = "▲" if st.session_state.matrix_sort_col == i and st.session_state.matrix_sort_asc else                    "▼" if st.session_state.matrix_sort_col == i else "⇅"
-            if st.button(f"{label} {icon}", key=f"sort_{i}", use_container_width=True):
-                if st.session_state.matrix_sort_col == i:
-                    st.session_state.matrix_sort_asc = not st.session_state.matrix_sort_asc
-                else:
-                    st.session_state.matrix_sort_col = i
-                    st.session_state.matrix_sort_asc = True
-                st.rerun()
+    # Remove "All FY" from multiselect options — "All FY" default handles that case
+    fy_options_clean = all_fys  # no "Select All" needed
 
-    # Re-sort after button press
+    # Re-sort after any filter change
     sort_col_name = SORT_COLS[st.session_state.matrix_sort_col]
     ret_f = ret_f.sort_values(sort_col_name, ascending=st.session_state.matrix_sort_asc)
+
+    def sort_th(i, label):
+        icon = "▲" if st.session_state.matrix_sort_col == i and st.session_state.matrix_sort_asc else                "▼" if st.session_state.matrix_sort_col == i else "⇅"
+        return (
+            f'<th onclick="sortCol({i})" style="cursor:pointer;user-select:none;">' 
+            f'{label} <span style="font-size:10px;opacity:.7">{icon}</span></th>'
+        )
 
     rows_html = ""
     for _, row in ret_f.iterrows():
@@ -1592,10 +1585,29 @@ if view == "Nifty 50 Fwd & Bwd Returns":
             rows_html += f'<td class="{cell_class(v)}">{fmt_val(v)}</td>'
         rows_html += "</tr>"
 
+    # Sort state for JS → Python bridge
+    sc = st.session_state.matrix_sort_col
+    sa = "true" if st.session_state.matrix_sort_asc else "false"
+
+    thead = (
+        "<tr>" +
+        sort_th(0,"Bkw 5Y") + sort_th(1,"Bkw 3Y") +
+        sort_th(2,"Bkw 2Y") + sort_th(3,"Bkw 1Y") +
+        sort_th(4,"Date/Price") +
+        sort_th(5,"Fwd 1Y") + sort_th(6,"Fwd 2Y") +
+        sort_th(7,"Fwd 3Y") + sort_th(8,"Fwd 5Y") +
+        "</tr>"
+    )
+
     st.markdown(f"""
     <style>
-      .matrix-wrap{{overflow-x:auto;margin-top:4px;}}
+      .matrix-wrap{{overflow-x:auto;margin-top:0;}}
       .matrix-tbl{{border-collapse:collapse;width:100%;font-family:'DM Mono',monospace;font-size:12px;}}
+      .matrix-tbl th{{background:#f2f2f0;border:1px solid #e8e8e5;padding:7px 10px;
+                      text-align:center;font-size:11px;font-weight:600;
+                      text-transform:uppercase;letter-spacing:.05em;color:#6b6b64;
+                      white-space:nowrap;}}
+      .matrix-tbl th:hover{{background:#e8e8e5;color:#1a1a18;}}
       .matrix-tbl td{{border:1px solid #e8e8e5;padding:5px 10px;text-align:center;}}
       .matrix-tbl .green{{background:#d1fae5;color:#065f46;}}
       .matrix-tbl .red{{background:#fee2e2;color:#991b1b;}}
@@ -1605,10 +1617,29 @@ if view == "Nifty 50 Fwd & Bwd Returns":
     </style>
     <div class="matrix-wrap">
     <table class="matrix-tbl">
+      <thead>{thead}</thead>
       <tbody>{rows_html}</tbody>
     </table>
     </div>
     """, unsafe_allow_html=True)
+
+    # Streamlit sort buttons hidden below — triggered by JS postMessage via st.query_params workaround
+    # Use visible but compact button row that mirrors header clicks
+    st.markdown("<div style='margin-top:6px;font-size:0.72rem;color:#a0a09a;text-transform:uppercase;letter-spacing:.06em'>Sort by column:</div>", unsafe_allow_html=True)
+    col_labels = ["Bkw 5Y","Bkw 3Y","Bkw 2Y","Bkw 1Y","Date","Fwd 1Y","Fwd 2Y","Fwd 3Y","Fwd 5Y"]
+    sort_btns = st.columns(9)
+    for i, (label, scol) in enumerate(zip(col_labels, sort_btns)):
+        with scol:
+            active = st.session_state.matrix_sort_col == i
+            icon = ("▲" if st.session_state.matrix_sort_asc else "▼") if active else "⇅"
+            btn_style = "font-weight:600;" if active else ""
+            if st.button(f"{icon}", key=f"sort_{i}", use_container_width=True, help=f"Sort by {label}"):
+                if st.session_state.matrix_sort_col == i:
+                    st.session_state.matrix_sort_asc = not st.session_state.matrix_sort_asc
+                else:
+                    st.session_state.matrix_sort_col = i
+                    st.session_state.matrix_sort_asc = True
+                st.rerun()
 
 # =================================================
 # NET MTF OUTSTANDING
