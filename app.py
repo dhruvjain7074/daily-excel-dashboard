@@ -1486,11 +1486,8 @@ if view == "Nifty 50 Fwd & Bwd Returns":
     st.markdown("#### Nifty 50 Forward & Backward Returns")
 
     ret = df_nifty_ret.copy()
-
-    # Parse date
     ret["Date"] = pd.to_datetime(ret["Date"], format="%d-%b-%Y", errors="coerce")
 
-    # Parse percentage columns
     pct_cols = ["Bkw 1 YR", "Bkw 2 YR", "Bkw 3 YR", "Bkw 5 YR",
                 "Fwd 1yr", "Fwd 2yr", "Fwd 3yr", "Fwd 5yr"]
     for col in pct_cols:
@@ -1499,28 +1496,86 @@ if view == "Nifty 50 Fwd & Bwd Returns":
                 ret[col].astype(str).str.replace("%", "", regex=False).str.strip(),
                 errors="coerce"
             )
-    ret["Price"] = pd.to_numeric(ret["Price"], errors="coerce")
-    ret = ret.dropna(subset=["Date"]).sort_values("Date")
+    ret["Price"] = pd.to_numeric(
+        ret["Price"].astype(str).str.replace(",", "", regex=False).str.strip(),
+        errors="coerce"
+    )
+    ret = ret.dropna(subset=["Date"]).sort_values("Date").reset_index(drop=True)
 
-    # Date filter
-    start_r, end_r, _ = date_filter_widget(ret["Date"].dropna(), "nifty_matrix")
-    ret_f = ret[(ret["Date"] >= start_r) & (ret["Date"] <= end_r)].copy()
+    # ── Filters ──
+    MONTHS = ["All", "Jan","Feb","Mar","Apr","May","Jun",
+              "Jul","Aug","Sep","Oct","Nov","Dec"]
+    MONTH_NUM = {m: i for i, m in enumerate(MONTHS[1:], 1)}
+
+    all_fys = sorted(set(
+        f"FY{str(d.year if d.month >= 4 else d.year-1)[2:]}-{str((d.year if d.month >= 4 else d.year-1)+1)[2:]}"
+        for d in ret["Date"] if pd.notna(d)
+    ))
+
+    fc1, fc2 = st.columns([1, 2])
+    with fc1:
+        month_filter = st.selectbox("Month", MONTHS, key="ret_month", label_visibility="visible")
+    with fc2:
+        fy_options = ["All FY"] + all_fys
+        fy_filter = st.multiselect("Financial Year", fy_options, default=["All FY"], key="ret_fy")
+
+    # Apply filters
+    ret_f = ret.copy()
+    if month_filter != "All":
+        ret_f = ret_f[ret_f["Date"].dt.month == MONTH_NUM[month_filter]]
+    if fy_filter and "All FY" not in fy_filter:
+        def get_fy(d):
+            if pd.isna(d): return ""
+            fy_s = d.year if d.month >= 4 else d.year - 1
+            return f"FY{str(fy_s)[2:]}-{str(fy_s+1)[2:]}"
+        ret_f = ret_f[ret_f["Date"].apply(get_fy).isin(fy_filter)]
+
+    # ── Sort state via session ──
+    SORT_COLS = {
+        0: "Bkw 5 YR", 1: "Bkw 3 YR", 2: "Bkw 2 YR", 3: "Bkw 1 YR",
+        4: "Date", 5: "Fwd 1yr", 6: "Fwd 2yr", 7: "Fwd 3yr", 8: "Fwd 5yr"
+    }
+    if "matrix_sort_col" not in st.session_state:
+        st.session_state.matrix_sort_col = 4
+        st.session_state.matrix_sort_asc = False
+
+    sort_col_name = SORT_COLS[st.session_state.matrix_sort_col]
+    ret_f = ret_f.sort_values(sort_col_name, ascending=st.session_state.matrix_sort_asc)
 
     def fmt_val(v):
-        if pd.isna(v) or str(v).strip() in ("", "nan"):
-            return ""
-        try:
-            return f"{float(v):.2f}%"
-        except Exception:
-            return ""
+        if pd.isna(v): return ""
+        try: return f"{float(v):.2f}%"
+        except: return ""
 
     def cell_class(v):
-        if pd.isna(v) or str(v).strip() in ("", "nan"):
-            return ""
-        try:
-            return "red" if float(v) < 0 else "green"
-        except Exception:
-            return ""
+        if pd.isna(v): return ""
+        try: return "red" if float(v) < 0 else "green"
+        except: return ""
+
+    def sort_icon(col_idx):
+        if st.session_state.matrix_sort_col == col_idx:
+            return " ▲" if st.session_state.matrix_sort_asc else " ▼"
+        return " ⇅"
+
+    # Build sort button callbacks via query params trick — use st.button per col
+    # We use a compact JS-in-HTML approach with anchor links to avoid full reruns
+    # Instead, render sort buttons as st.columns above the table
+    col_labels = ["Bkw 5Y","Bkw 3Y","Bkw 2Y","Bkw 1Y","Date/Price","Fwd 1Y","Fwd 2Y","Fwd 3Y","Fwd 5Y"]
+    sort_cols = st.columns(9)
+    for i, (label, scol) in enumerate(zip(col_labels, sort_cols)):
+        with scol:
+            icon = "▲" if st.session_state.matrix_sort_col == i and st.session_state.matrix_sort_asc else                    "▼" if st.session_state.matrix_sort_col == i else "⇅"
+            if st.button(f"{label} {icon}", key=f"sort_{i}", use_container_width=True):
+                if st.session_state.matrix_sort_col == i:
+                    st.session_state.matrix_sort_asc = not st.session_state.matrix_sort_asc
+                else:
+                    st.session_state.matrix_sort_col = i
+                    st.session_state.matrix_sort_asc = True
+                st.rerun()
+
+    # Re-sort after button press
+    sort_col_name = SORT_COLS[st.session_state.matrix_sort_col]
+    ret_f = ret_f.sort_values(sort_col_name, ascending=st.session_state.matrix_sort_asc)
 
     rows_html = ""
     for _, row in ret_f.iterrows():
@@ -1529,44 +1584,31 @@ if view == "Nifty 50 Fwd & Bwd Returns":
             v = row.get(col, float("nan"))
             rows_html += f'<td class="{cell_class(v)}">{fmt_val(v)}</td>'
         date_str = row["Date"].strftime("%b %Y") if pd.notna(row["Date"]) else ""
-        # Price: keep original string value to avoid NaN from failed float conversion
-        price_raw = df_nifty_ret.loc[row.name, "Price"] if row.name in df_nifty_ret.index else row.get("Price", "")
-        try:
-            price_str = f"{float(str(price_raw).replace(',','')):.0f}"
-        except Exception:
-            price_str = str(price_raw)
+        price_v = row.get("Price", float("nan"))
+        price_str = f"{price_v:,.0f}" if pd.notna(price_v) else ""
         rows_html += f'<td class="center">{date_str}<br><b>{price_str}</b></td>'
         for col in ["Fwd 1yr", "Fwd 2yr", "Fwd 3yr", "Fwd 5yr"]:
             v = row.get(col, float("nan"))
             rows_html += f'<td class="{cell_class(v)}">{fmt_val(v)}</td>'
         rows_html += "</tr>"
 
-    matrix_html = f"""
+    st.markdown(f"""
     <style>
-      .matrix-wrap{{overflow-x:auto;}}
+      .matrix-wrap{{overflow-x:auto;margin-top:4px;}}
       .matrix-tbl{{border-collapse:collapse;width:100%;font-family:'DM Mono',monospace;font-size:12px;}}
-      .matrix-tbl th{{background:#f2f2f0;border:1px solid #e8e8e5;padding:8px 12px;
-                      text-align:center;font-size:11px;font-weight:600;
-                      text-transform:uppercase;letter-spacing:.06em;color:#6b6b64;}}
       .matrix-tbl td{{border:1px solid #e8e8e5;padding:5px 10px;text-align:center;}}
       .matrix-tbl .green{{background:#d1fae5;color:#065f46;}}
       .matrix-tbl .red{{background:#fee2e2;color:#991b1b;}}
-      .matrix-tbl .center{{background:#ffffff;font-weight:600;color:#1a1a18;
+      .matrix-tbl .center{{background:#fff;font-weight:600;color:#1a1a18;
                            border-left:2px solid #1a1a18;border-right:2px solid #1a1a18;
                            min-width:90px;}}
     </style>
     <div class="matrix-wrap">
     <table class="matrix-tbl">
-      <thead><tr>
-        <th>Bkw 5Y</th><th>Bkw 3Y</th><th>Bkw 2Y</th><th>Bkw 1Y</th>
-        <th>Date / Price</th>
-        <th>Fwd 1Y</th><th>Fwd 2Y</th><th>Fwd 3Y</th><th>Fwd 5Y</th>
-      </tr></thead>
       <tbody>{rows_html}</tbody>
     </table>
     </div>
-    """
-    st.markdown(matrix_html, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 # =================================================
 # NET MTF OUTSTANDING
