@@ -979,7 +979,7 @@ if view == "Auto Dashboard":
         "SML Mahindra":   to_series(auto, "DATE_6", "SML MAHINDRA TOTAL SALES"),
         "Maruti":         to_series(auto, "DATE_7", "MARUTI TOTAL SALES"),
         "Atul Auto":      to_series(auto, "DATE_8", "ATUL Total sales D+E"),
-        "Ashok Leyland":  to_series(auto, "DATE_9", "AL total vehicles"),
+        "Ashok Leyland":  to_series(auto, "DATE_9", "AL TOTAL VEHICLES D+E"),
         "Bajaj":          to_series(auto, "DATE_10", "Bajaj Total Sales D+E"),
         "Hero":           to_series(auto, "DATE_11", "Hero Total Sales D+E"),
         "OLA":            to_series(auto, "DATE_12", "OLA Total Sales"),
