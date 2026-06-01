@@ -550,6 +550,7 @@ VIEWS = [
     "Global Interest Rates",
     "India Macroeconomic Indicators",
     "Auto Dashboard",
+    "Auto Industry Dashboard",
     "Magazine Cover",
     "Multiasset Chart (One View)",
     "Net MTF Outstanding",
@@ -1717,3 +1718,200 @@ if view == "Net MTF Outstanding":
                              title=f"{company} — MTF Outstanding",
                              date_range=(start_co, end_co),
                              key=f"mtf_co_{company}")
+
+
+# =================================================
+# AUTO INDUSTRY DASHBOARD (NEW 7-TAB VERSION)
+# =================================================
+if view == "Auto Industry Dashboard":
+    import json
+    import streamlit.components.v1 as _components_new
+
+    auto = df_auto_sales.copy()
+
+    def to_s(df, date_col, val_col):
+        if date_col not in df.columns or val_col not in df.columns:
+            return {"dates": [], "values": []}
+        tmp = df[[date_col, val_col]].copy()
+        parsed = pd.to_datetime(tmp[date_col], format="%d-%b-%Y", errors="coerce")
+        mask = parsed.isna()
+        if mask.any():
+            parsed[mask] = pd.to_datetime(tmp[date_col][mask], format="%d-%b-%y", errors="coerce")
+        tmp[date_col] = parsed
+        tmp[val_col] = pd.to_numeric(
+            tmp[val_col].astype(str).str.replace(",", "", regex=False).str.strip(),
+            errors="coerce"
+        )
+        tmp = tmp.dropna().sort_values(date_col)
+        return {
+            "dates":  tmp[date_col].dt.strftime("%Y-%m").tolist(),
+            "values": tmp[val_col].astype(int).tolist(),
+        }
+
+    RAW_NEW = {
+        "Tata Motors PV": to_s(auto, "DATE_1", "TMPV TOTAL"),
+        "Tata Motors CV": to_s(auto, "DATE_2", "TMCV TOTAL SALES"),
+        "Mahindra":       to_s(auto, "DATE_3", "M&M TOTAL PV"),
+        "Hyundai":        to_s(auto, "DATE_4", "HYUNDAI TOTAL SALES"),
+        "Force Motors":   to_s(auto, "DATE_5", "FORCE TOTAL SALES"),
+        "SML Mahindra":   to_s(auto, "DATE_6", "SML MAHINDRA TOTAL SALES"),
+        "Maruti":         to_s(auto, "DATE_7", "MARUTI TOTAL SALES"),
+        "Atul Auto":      to_s(auto, "DATE_8", "ATUL Total sales D+E"),
+        "Ashok Leyland":  to_s(auto, "DATE_9", "AL total vehicles"),
+        "Bajaj":          to_s(auto, "DATE_10", "Bajaj Total Sales D+E"),
+        "Hero":           to_s(auto, "DATE_11", "Hero Total Sales D+E"),
+        "OLA":            to_s(auto, "DATE_12", "OLA Total Sales"),
+        "Eicher 2W":      to_s(auto, "DATE_13", "Eicher Total Sales"),
+        "Eicher CV":      to_s(auto, "DATE_14", "Eicher CV Total Sales D+E"),
+        "TVS":            to_s(auto, "DATE_15", "TVS TOTAL SALES"),
+        "TVS 3W":         to_s(auto, "DATE_15", "TVS 3W (TOTAL)"),
+    }
+
+    DETAIL_NEW = {
+        "Tata Motors PV": {
+            "Total":     to_s(auto, "DATE_1", "TMPV TOTAL"),
+            "Domestic":  to_s(auto, "DATE_1", "TMPV DOMESTIC SALES"),
+            "Export":    to_s(auto, "DATE_1", "TMPV INTL SALES"),
+            "EV Sales":  to_s(auto, "DATE_1", "TMPV EV SALES"),
+            "ICE Sales": to_s(auto, "DATE_1", "TMPV ICE SALES"),
+        },
+        "Tata Motors CV": {
+            "Total":              to_s(auto, "DATE_2", "TMCV TOTAL SALES"),
+            "Domestic":           to_s(auto, "DATE_2", "TMCV TOTAL DOMESTIC SALES"),
+            "Export":             to_s(auto, "DATE_2", "TMCV INTL BUSINESS"),
+            "HCV Trucks":         to_s(auto, "DATE_2", "TMCV HCV TRUCKS"),
+            "ILMCV Trucks":       to_s(auto, "DATE_2", "TMCV ILMCV TRUCKS"),
+            "Passenger Carriers": to_s(auto, "DATE_2", "TMCV PASSENGER CARRIERS"),
+        },
+        "Mahindra": {
+            "Total":          to_s(auto, "DATE_3", "M&M TOTAL SALES"),
+            "Total PV":       to_s(auto, "DATE_3", "M&M TOTAL PV"),
+            "Domestic CV":    to_s(auto, "DATE_3", "M&M DOMESTIC CV"),
+            "Export":         to_s(auto, "DATE_3", "M&M TOTAL EXPORT"),
+            "LCV <2T":        to_s(auto, "DATE_3", "M&M LCV < 2T"),
+            "LCV 2-3.5T":     to_s(auto, "DATE_3", "M&M LCV 2-3.5T"),
+            "3W EV":          to_s(auto, "DATE_3", "M&M 3 W INC EV"),
+        },
+        "Hyundai": {
+            "Total":    to_s(auto, "DATE_4", "HYUNDAI TOTAL SALES"),
+            "Domestic": to_s(auto, "DATE_4", "HYUNDAI DOMESTIC SALES"),
+            "Export":   to_s(auto, "DATE_4", "HYUNDAI EXPORT SALES"),
+        },
+        "Force Motors": {
+            "Total":    to_s(auto, "DATE_5", "FORCE TOTAL SALES"),
+            "Domestic": to_s(auto, "DATE_5", "FORCE DOMESTIC SALES"),
+            "Export":   to_s(auto, "DATE_5", "FORCE EXPORTSALES"),
+        },
+        "SML Mahindra": {
+            "Total": to_s(auto, "DATE_6", "SML MAHINDRA TOTAL SALES"),
+            "CV":    to_s(auto, "DATE_6", "SML MAHINDRA CV"),
+            "PV":    to_s(auto, "DATE_6", "SML MAHINDRA PV"),
+        },
+        "Maruti": {
+            "Total":  to_s(auto, "DATE_7", "MARUTI TOTAL SALES"),
+            "PV":     to_s(auto, "DATE_7", "MARUTI PV"),
+            "Export": to_s(auto, "DATE_7", "MARUTI EXPORT"),
+        },
+        "Atul Auto": {
+            "Total":     to_s(auto, "DATE_8", "ATUL Total sales D+E"),
+            "Domestic":  to_s(auto, "DATE_8", "ATUL Total Domestic sales"),
+            "IC Engine": to_s(auto, "DATE_8", "ATUL Total 3w - IC Engine"),
+            "EV L3":     to_s(auto, "DATE_8", "ATUL Total EV L3"),
+            "EV L5":     to_s(auto, "DATE_8", "ATUL Total EV L5"),
+            "Export":    to_s(auto, "DATE_8", "ATUL Export 3w - IC Engine"),
+        },
+        "Ashok Leyland": {
+            "Total":          to_s(auto, "DATE_9", "AL total vehicles"),
+            "Domestic":       to_s(auto, "DATE_9", "AL TOTAL DOMESTIC VEHICLES"),
+            "M&HCV Trucks":   to_s(auto, "DATE_9", "AL DOMESTIC M&HCV TRUCKS"),
+            "M&HCV Bus":      to_s(auto, "DATE_9", "AL DOMESTIC M&HCV BUS"),
+            "LCV":            to_s(auto, "DATE_9", "AL DOMESTIC LCV"),
+            "Export M&HCV":   to_s(auto, "DATE_9", "AL TOTAL M&HCV EXPORT"),
+        },
+        "Bajaj": {
+            "Total":       to_s(auto, "DATE_10", "Bajaj Total Sales D+E"),
+            "2W Domestic": to_s(auto, "DATE_10", "Bajaj 2W Domestic"),
+            "2W Export":   to_s(auto, "DATE_10", "Bajaj 2W Export"),
+            "Total 2W":    to_s(auto, "DATE_10", "Bajaj Total 2W D+E"),
+            "CV Domestic": to_s(auto, "DATE_10", "Bajaj CV Domestic"),
+            "CV Export":   to_s(auto, "DATE_10", "Bajaj CV Export"),
+        },
+        "Hero": {
+            "Total":       to_s(auto, "DATE_11", "Hero Total Sales D+E"),
+            "Domestic":    to_s(auto, "DATE_11", "Hero Domestic Sales"),
+            "Export":      to_s(auto, "DATE_11", "Hero Export Sales"),
+            "Motorcycles": to_s(auto, "DATE_11", "Hero Motorcycles Total"),
+            "Scooters":    to_s(auto, "DATE_11", "Hero Scooters Total"),
+        },
+        "OLA": {
+            "Total": to_s(auto, "DATE_12", "OLA Total Sales"),
+        },
+        "Eicher 2W": {
+            "Total":  to_s(auto, "DATE_13", "Eicher Total Sales"),
+            "<350cc": to_s(auto, "DATE_13", "Eicher Less than 350 cc"),
+            ">350cc": to_s(auto, "DATE_13", "Eicher greater than 350 cc"),
+            "Export": to_s(auto, "DATE_13", "Eicher Total Export"),
+        },
+        "Eicher CV": {
+            "Total":    to_s(auto, "DATE_14", "Eicher CV Total Sales D+E"),
+            "Domestic": to_s(auto, "DATE_14", "Eicher CV Domestic sales"),
+            "Export":   to_s(auto, "DATE_14", "Eicher CV Export Sales"),
+        },
+        "TVS": {
+            "Total":      to_s(auto, "DATE_15", "TVS TOTAL SALES"),
+            "2W Total":   to_s(auto, "DATE_15", "TVS 2W (TOTAL)"),
+            "3W Total":   to_s(auto, "DATE_15", "TVS 3W (TOTAL)"),
+            "Motorcycle": to_s(auto, "DATE_15", "TVS MOTORCYCLE (TOTAL)"),
+            "Scooter":    to_s(auto, "DATE_15", "TVS SCOOTER (TOTAL)"),
+            "EV":         to_s(auto, "DATE_15", "TVS EV (TOTAL)"),
+            "Domestic":   to_s(auto, "DATE_15", "TVS TOTAL DOMESTIC"),
+            "Export":     to_s(auto, "DATE_15", "TVS TOTAL EXPORT"),
+            "2W Domestic":to_s(auto, "DATE_15", "TVS 2W DOMESTIC"),
+            "3W Domestic":to_s(auto, "DATE_15", "TVS 3W DOMESTIC"),
+            "2W Export":  to_s(auto, "DATE_15", "TVS 2W EXPORT"),
+            "3W Export":  to_s(auto, "DATE_15", "TVS 3W EXPORT"),
+        },
+        "TVS 3W": {
+            "Total":    to_s(auto, "DATE_15", "TVS 3W (TOTAL)"),
+            "Domestic": to_s(auto, "DATE_15", "TVS 3W DOMESTIC"),
+            "Export":   to_s(auto, "DATE_15", "TVS 3W EXPORT"),
+        },
+    }
+
+    EV_RAW_NEW = {
+        "Tata EV":       to_s(auto, "DATE_1",  "TMPV EV SALES"),
+        "OLA Electric":  to_s(auto, "DATE_12", "OLA Total Sales"),
+        "TVS EV":        to_s(auto, "DATE_15", "TVS EV (TOTAL)"),
+        "Atul EV":       to_s(auto, "DATE_8",  "ATUL Total EV L3"),
+        "Mahindra 3W EV":to_s(auto, "DATE_3",  "M&M 3 W INC EV"),
+    }
+
+    TR_RAW_NEW = {
+        "M&M Tractor":          to_s(auto, "DATE_3", "M&M TRACTOR TOTAL"),
+        "M&M Tractor Domestic": to_s(auto, "DATE_3", "M&M TRACTOR DOMESTIC"),
+        "M&M Tractor Export":   to_s(auto, "DATE_3", "M&M TRACTOR EXPORT"),
+    }
+
+    template_path_new = "auto_industry_dashboard.html"
+    try:
+        with open(template_path_new, "r", encoding="utf-8") as f:
+            html_new = f.read()
+
+        import re as _re2
+        html_new = _re2.sub(r'const RAW = \{\};',    f'const RAW = {json.dumps(RAW_NEW, ensure_ascii=False)};', html_new, count=1)
+        html_new = _re2.sub(r'const DETAIL = \{\};', f'const DETAIL = {json.dumps(DETAIL_NEW, ensure_ascii=False)};', html_new, count=1)
+        html_new = _re2.sub(r'const EV_RAW = \{\};', f'const EV_RAW = {json.dumps(EV_RAW_NEW, ensure_ascii=False)};', html_new, count=1)
+        html_new = _re2.sub(r'const TR_RAW = \{\};', f'const TR_RAW = {json.dumps(TR_RAW_NEW, ensure_ascii=False)};', html_new, count=1)
+
+        st.markdown("""
+<style>
+.dashboard-header { display: none !important; }
+.block-container { padding: 0 !important; max-width: 100% !important; }
+section[data-testid="stVerticalBlock"] > div:first-child { display: none !important; }
+</style>
+""", unsafe_allow_html=True)
+
+        _components_new.html(html_new, height=920, scrolling=True)
+
+    except FileNotFoundError:
+        st.error(f"Template not found: {template_path_new}. Please ensure auto_industry_dashboard.html is in the app root.")
