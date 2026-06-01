@@ -1051,7 +1051,7 @@ if view == "Auto Dashboard":
             "Export":   to_series(auto, "DATE_8", "ATUL Export 3w - IC Engine"),
         },
         "Ashok Leyland": {
-            "Total":          to_series(auto, "DATE_9", "AL total vehicles"),
+            "Total":          to_series(auto, "DATE_9", "AL TOTAL VEHICLES D+E"),
             "Domestic":       to_series(auto, "DATE_9", "AL TOTAL DOMESTIC VEHICLES"),
             "M&HCV Trucks":   to_series(auto, "DATE_9", "AL DOMESTIC M&HCV TRUCKS"),
             "M&HCV Bus":      to_series(auto, "DATE_9", "AL DOMESTIC M&HCV BUS"),
