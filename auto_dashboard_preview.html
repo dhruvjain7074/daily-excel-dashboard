@@ -252,12 +252,32 @@ tbody tr:hover td{background:#f0f5ff;}
       </div>
       <div class="card-sub" style="margin-bottom:16px">Tata EV · Mahindra 3W EV · OLA Electric · Atul EV — monthly dispatches</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-        <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">EV Monthly Trend</div><div style="height:240px"><canvas id="evTrendChart"></canvas></div></div>
-        <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">EV Market Share — Feb 2026</div><div style="height:240px"><canvas id="evShareChart"></canvas></div></div>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">EV Sales Trend</div>
+            <div style="display:flex;gap:4px">
+              <button class="tab-btn active" id="btnEvMonthly" onclick="setEvTrend('monthly',this)" style="padding:3px 8px;font-size:10px">Monthly</button>
+              <button class="tab-btn" id="btnEvFY" onclick="setEvTrend('yearly',this)" style="padding:3px 8px;font-size:10px">FY Yearly</button>
+            </div>
+          </div>
+          <div style="height:240px"><canvas id="evTrendChart"></canvas></div>
+        </div>
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em" id="evShareTitle">EV Market Share</div>
+            <div style="display:flex;gap:4px">
+              <button class="tab-btn active" id="btnEvShareCurrent" onclick="setEvShare('current',this)" style="padding:3px 8px;font-size:10px">Current</button>
+              <button class="tab-btn" id="btnEvShareHist" onclick="setEvShare('historical',this)" style="padding:3px 8px;font-size:10px">Historical FY</button>
+            </div>
+          </div>
+          <div id="evShareCurrentDiv" style="height:240px"><canvas id="evShareChart"></canvas></div>
+          <div id="evShareHistDiv" style="height:240px;display:none"><canvas id="evShareHistChart"></canvas></div>
+        </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Tata EV vs ICE — Last 24 Months</div><div style="height:220px"><canvas id="evIceChart"></canvas></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
         <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">EV YoY Growth</div><div style="height:220px"><canvas id="evYoyChart"></canvas></div></div>
+        <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">EV Seasonality (Avg by Month)</div><div style="height:220px"><canvas id="evSeasonChart"></canvas></div></div>
+        <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">TTM Rank</div><div style="height:220px"><canvas id="evTTMChart"></canvas></div></div>
       </div>
     </div>
 
@@ -395,7 +415,7 @@ let selCos = new Set(['Hero','Bajaj','Maruti','Mahindra']);
 
 // Chart refs
 let tChart,sChart,yChart,seasonCh,ttmCh,modalTCh,modalBCh;
-let evTCh,evSCh,evICh,evYCh,trTCh,trSpCh,trStCh,trSeCh;
+let evTCh,evSCh,evYCh,evSeCh,evTtmCh,trTCh,trSpCh,trStCh,trSeCh;
 
 // ══════════════════════════════════════════════════
 // HELPERS
@@ -741,7 +761,11 @@ function buildTable(){
 // DRILL-DOWN MODAL
 // ══════════════════════════════════════════════════
 function openModal(company){
-  const detail = DETAIL[company];
+  // For EV companies not in DETAIL, build a single-series detail from EV_RAW
+  let detail = DETAIL[company];
+  if(!detail && EV_RAW[company]){
+    detail = { 'Total': EV_RAW[company] };
+  }
   if(!detail){alert('No detailed breakdown available for '+company);return;}
 
   document.getElementById('modalTitle').textContent = company + ' — Detailed Breakdown';
@@ -834,18 +858,161 @@ function buildEV(){
     const evVals=EV_COS.map(c=>EV_RAW[c].values.at(-1));
     const evTotal=evVals.reduce((a,b)=>a+b,0);
     evSCh=new Chart(document.getElementById('evShareChart').getContext('2d'),{type:'doughnut',data:{labels:EV_COS,datasets:[{data:evVals,backgroundColor:Object.values(EV_COLORS),borderColor:'#fff',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{color:'#4a5568',font:{size:10},boxWidth:10,padding:6}},tooltip:{backgroundColor:'#1e293b',borderColor:'#334155',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#cbd5e1',callbacks:{label:c=>`  ${c.label}: ${fmt(c.parsed)} (${((c.parsed/evTotal)*100).toFixed(1)}%)`}}}}});
-    // EV vs ICE
-    if(evICh)evICh.destroy();
-    const n=24; const evD=EV_RAW['Tata EV'], iceD=EV_RAW['Tata ICE'];
-    let allD2=new Set([...evD.dates,...iceD.dates]); const lbl2=[...allD2].sort().slice(-n);
-    const evMap=Object.fromEntries(evD.dates.map((d,i)=>[d,evD.values[i]]));
-    const iceMap=Object.fromEntries(iceD.dates.map((d,i)=>[d,iceD.values[i]]));
-    evICh=new Chart(document.getElementById('evIceChart').getContext('2d'),{type:'bar',data:{labels:lbl2,datasets:[{label:'EV',data:lbl2.map(d=>evMap[d]??0),backgroundColor:'#0d9e6a35',borderColor:'#0d9e6a',borderWidth:1.5,borderRadius:3,stack:'s'},{label:'ICE',data:lbl2.map(d=>iceMap[d]??0),backgroundColor:'#1d6af520',borderColor:'#1d6af5',borderWidth:1.5,borderRadius:3,stack:'s'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{color:'#4a5568',font:{size:10},boxWidth:10,padding:6}},tooltip:{mode:'index',backgroundColor:'#1e293b',borderColor:'#334155',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#cbd5e1',callbacks:{label:c=>`  ${c.dataset.label}: ${fmt(c.parsed.y)}`,afterBody:items=>{const e=items.find(i=>i.dataset.label==='EV'),ic=items.find(i=>i.dataset.label==='ICE');if(e&&ic&&(e.parsed.y+ic.parsed.y)>0)return[`  EV Share: ${((e.parsed.y/(e.parsed.y+ic.parsed.y))*100).toFixed(1)}%`];return[];}}}},scales:{x:{ticks:{color:'#8a96a8',font:{size:9},maxTicksLimit:12},grid:{color:'#f0f3f7'},stacked:true},y:{ticks:{color:'#8a96a8',font:{size:9},callback:v=>fmt(v)},grid:{color:'#f0f3f7'},stacked:true}}}});
+
     // EV YoY
     if(evYCh)evYCh.destroy();
     const evRows=EV_COS.map(c=>{const v=EV_RAW[c].values;const lv=v.at(-1),yv=v.length>=13?v.at(-13):null;return{c,lv,yv,p:pct(lv,yv)};}).filter(r=>r.p!==null).sort((a,b)=>b.p-a.p);
     evYCh=new Chart(document.getElementById('evYoyChart').getContext('2d'),{type:'bar',data:{labels:evRows.map(r=>r.c),datasets:[{data:evRows.map(r=>r.p),backgroundColor:evRows.map(r=>r.p>=0?'#dcfce7':'#fee2e2'),borderColor:evRows.map(r=>r.p>=0?'#0d9e6a':'#e0341f'),borderWidth:1.5,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e293b',borderColor:'#334155',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#cbd5e1',callbacks:{label:c=>{const r=evRows[c.dataIndex];return`  ${c.parsed.x>0?'▲':'▼'} ${Math.abs(c.parsed.x).toFixed(1)}%  (${fmt(r.lv)} vs ${fmt(r.yv)})`;}}}},scales:{x:{ticks:{color:'#8a96a8',font:{size:10},callback:v=>v+'%'},grid:{color:'#f0f3f7'}},y:{ticks:{color:'#0f1923',font:{size:11,weight:'600'}},grid:{display:false}}}}});
+    // EV Seasonality — average volume by calendar month across all years
+    if(evSeCh) evSeCh.destroy();
+    const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const seasonMap={};
+    EV_COS.forEach(c=>{
+      EV_RAW[c].dates.forEach((d,i)=>{
+        const mo=parseInt(d.slice(5,7))-1;
+        if(!seasonMap[mo]) seasonMap[mo]={sum:0,cnt:0};
+        seasonMap[mo].sum+=EV_RAW[c].values[i];
+        seasonMap[mo].cnt++;
+      });
+    });
+    const seasonAvg=MONTH_NAMES.map((_,i)=>seasonMap[i]?+(seasonMap[i].sum/seasonMap[i].cnt).toFixed(0):0);
+    const maxSea=Math.max(...seasonAvg);
+    evSeCh=new Chart(document.getElementById('evSeasonChart').getContext('2d'),{
+      type:'bar',
+      data:{labels:MONTH_NAMES,datasets:[{data:seasonAvg,
+        backgroundColor:seasonAvg.map(v=>v===maxSea?'#0d9e6a':'#0d9e6a30'),
+        borderColor:seasonAvg.map(v=>v===maxSea?'#0d9e6a':'#0d9e6a80'),
+        borderWidth:1.5,borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{
+        legend:{display:false},
+        tooltip:{backgroundColor:'#1e293b',borderColor:'#334155',borderWidth:1,
+          titleColor:'#f1f5f9',bodyColor:'#cbd5e1',
+          callbacks:{label:c=>`  Avg: ${fmt(c.parsed.y)}`}}},
+        scales:{
+          x:{ticks:{color:'#8a96a8',font:{size:9}},grid:{color:'#f0f3f7'}},
+          y:{ticks:{color:'#8a96a8',font:{size:9},callback:v=>fmt(v)},grid:{color:'#f0f3f7'}}
+        }}});
+    // TTM Rank — trailing 12-month total per EV company, horizontal bar
+    if(evTtmCh) evTtmCh.destroy();
+    const ttmRows=EV_COS.map(c=>{
+      const vals=EV_RAW[c].values;
+      const ttmVal=vals.slice(-12).reduce((a,b)=>a+b,0);
+      return{c,ttmVal};
+    }).sort((a,b)=>b.ttmVal-a.ttmVal);
+    evTtmCh=new Chart(document.getElementById('evTTMChart').getContext('2d'),{
+      type:'bar',
+      data:{labels:ttmRows.map(r=>r.c),datasets:[{
+        data:ttmRows.map(r=>r.ttmVal),
+        backgroundColor:ttmRows.map((_,i)=>i===0?'#0d9e6a':i===1?'#1d6af5':i===2?'#d97706':'#e2e8f0'),
+        borderColor:ttmRows.map((_,i)=>i===0?'#0d9e6a':i===1?'#1d6af5':i===2?'#d97706':'#cbd5e1'),
+        borderWidth:1.5,borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+        plugins:{legend:{display:false},
+          tooltip:{backgroundColor:'#1e293b',borderColor:'#334155',borderWidth:1,
+            titleColor:'#f1f5f9',bodyColor:'#cbd5e1',
+            callbacks:{label:c=>`  TTM: ${fmt(c.parsed.x)}`}}},
+        scales:{
+          x:{ticks:{color:'#8a96a8',font:{size:9},callback:v=>fmt(v)},grid:{color:'#f0f3f7'}},
+          y:{ticks:{color:'#0f1923',font:{size:11,weight:'600'}},grid:{display:false}}
+        }}});
   },60);
+}
+
+// ══════════════════════════════════════════════════
+// EV TREND & SHARE MODES
+// ══════════════════════════════════════════════════
+let evTrendMode = 'monthly';
+let evShareMode = 'current';
+let evShCh = null;
+
+function setEvTrend(mode, btn) {
+  evTrendMode = mode;
+  document.querySelectorAll('#btnEvMonthly,#btnEvFY').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (mode === 'yearly') buildEvFYTrend(); else buildEV();
+}
+
+function setEvShare(mode, btn) {
+  evShareMode = mode;
+  document.querySelectorAll('#btnEvShareCurrent,#btnEvShareHist').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('evShareCurrentDiv').style.display = mode === 'current' ? 'block' : 'none';
+  document.getElementById('evShareHistDiv').style.display   = mode === 'historical' ? 'block' : 'none';
+  document.getElementById('evShareTitle').textContent = mode === 'historical' ? 'EV Market Share — Historical FY' : 'EV Market Share — Current';
+  if (mode === 'historical') buildEvShareHist();
+}
+
+function getFyMap() {
+  const fyMap = {};
+  EV_COS.forEach(c => {
+    const {dates, values} = EV_RAW[c];
+    dates.forEach((d, i) => {
+      const yr = parseInt(d.slice(0,4)), mo = parseInt(d.slice(5,7));
+      const fyStart = mo >= 4 ? yr : yr - 1;
+      const fyLabel = 'FY' + String(fyStart).slice(2) + '-' + String(fyStart+1).slice(2);
+      if (!fyMap[fyLabel]) fyMap[fyLabel] = {};
+      fyMap[fyLabel][c] = (fyMap[fyLabel][c] || 0) + values[i];
+    });
+  });
+  return fyMap;
+}
+
+function buildEvFYTrend() {
+  if (evTCh) evTCh.destroy();
+  const fyMap = getFyMap();
+  const fyLabels = Object.keys(fyMap).sort();
+  const datasets = EV_COS.map(c => ({
+    label: c,
+    data: fyLabels.map(fy => fyMap[fy]?.[c] ?? null),
+    borderColor: EV_COLORS[c], backgroundColor: EV_COLORS[c] + '20',
+    borderWidth: 2.5, pointRadius: 3, tension: 0.2, fill: false, spanGaps: false,
+  }));
+  evTCh = new Chart(document.getElementById('evTrendChart').getContext('2d'), {
+    type: 'bar', data: { labels: fyLabels, datasets },
+    options: { responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#4a5568', font: { size: 10 }, boxWidth: 10, padding: 6 } },
+        tooltip: { backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1,
+          titleColor: '#f1f5f9', bodyColor: '#cbd5e1',
+          callbacks: { label: c => '  ' + c.dataset.label + ': ' + fmt(c.parsed.y) } }
+      },
+      scales: {
+        x: { ticks: { color: '#8a96a8', font: { size: 9 }, maxRotation: 45 }, grid: { color: '#f0f3f7' } },
+        y: { ticks: { color: '#8a96a8', font: { size: 9 }, callback: v => fmt(v) }, grid: { color: '#f0f3f7' } }
+      }
+    }
+  });
+}
+
+function buildEvShareHist() {
+  if (evShCh) evShCh.destroy();
+  const fyMap = getFyMap();
+  const fyLabels = Object.keys(fyMap).sort();
+  const fyTotals = {};
+  fyLabels.forEach(fy => { fyTotals[fy] = EV_COS.reduce((s, c) => s + (fyMap[fy]?.[c] || 0), 0); });
+  const datasets = EV_COS.map(c => ({
+    label: c,
+    data: fyLabels.map(fy => fyTotals[fy] > 0 ? +((fyMap[fy]?.[c] || 0) / fyTotals[fy] * 100).toFixed(1) : null),
+    borderColor: EV_COLORS[c], backgroundColor: EV_COLORS[c] + '20',
+    borderWidth: 2, pointRadius: 3, pointHoverRadius: 5, tension: 0.2, fill: false, spanGaps: false,
+  }));
+  evShCh = new Chart(document.getElementById('evShareHistChart').getContext('2d'), {
+    type: 'line', data: { labels: fyLabels, datasets },
+    options: { responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'bottom', labels: { color: '#4a5568', font: { size: 10 }, boxWidth: 10, padding: 6 } },
+        tooltip: { backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1,
+          titleColor: '#f1f5f9', bodyColor: '#cbd5e1',
+          callbacks: { label: c => '  ' + c.dataset.label + ': ' + (c.parsed.y != null ? c.parsed.y.toFixed(1) + '%' : '') } }
+      },
+      scales: {
+        x: { ticks: { color: '#8a96a8', font: { size: 9 }, maxRotation: 45 }, grid: { color: '#f0f3f7' } },
+        y: { ticks: { color: '#8a96a8', font: { size: 9 }, callback: v => v + '%' }, grid: { color: '#f0f3f7' } }
+      }
+    }
+  });
 }
 
 // ══════════════════════════════════════════════════
