@@ -1420,29 +1420,22 @@ if view == "Magazine Cover":
 
     st.markdown("#### Magazine Cover")
 
-    tab1, tab2 = st.tabs(["India", "Others"])
+    all_images = []
+    for folder in ["magazine_cover/india", "magazine_cover/others"]:
+        for img in get_sorted_images(folder):
+            all_images.append(os.path.join(folder, img))
 
-    with tab1:
-        folder = "magazine_cover/india"
-        images = get_sorted_images(folder)
-        if not images:
-            st.info("No India covers available.")
-        else:
-            cols = st.columns(3)
-            for i, img in enumerate(images):
+    if not all_images:
+        st.info("No covers available.")
+    else:
+        cols = st.columns(3)
+        for i, path in enumerate(all_images):
+            if os.path.exists(path):
                 with cols[i % 3]:
-                    st.image(os.path.join(folder, img))
-
-    with tab2:
-        folder = "magazine_cover/others"
-        images = get_sorted_images(folder)
-        if not images:
-            st.info("No other covers available.")
-        else:
-            cols = st.columns(3)
-            for i, img in enumerate(images):
-                with cols[i % 3]:
-                    st.image(os.path.join(folder, img))
+                    try:
+                        st.image(path, use_column_width=True)
+                    except Exception:
+                        pass
 
 
 # =================================================
