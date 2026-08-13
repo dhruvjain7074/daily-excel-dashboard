@@ -1441,7 +1441,7 @@ if view == "Magazine Cover":
 # =================================================
 # MULTIASSET CHART (ONE VIEW)
 # =================================================
-if view == "multiasset_charts":
+if view == "Multiasset Chart (One View)":
 
     st.markdown("#### Multiasset Chart — One View")
 
