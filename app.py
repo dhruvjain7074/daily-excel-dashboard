@@ -1461,14 +1461,19 @@ if view == "Multiasset Chart (One View)":
                 except Exception:
                     pass
 
+    freq = st.radio("Frequency", ["Weekly", "Monthly"], horizontal=True,
+                    key="multiasset_freq")
+
+    base = "multiasset_charts" if freq == "Weekly" else "multiasset_charts_monthly"
+
     tab1, tab2, tab3 = st.tabs(["Main", "Broad Indices", "Sectoral Indices"])
 
     with tab1:
-        show_images_grid("multiasset_charts/main")
+        show_images_grid(f"{base}/main")
     with tab2:
-        show_images_grid("multiasset_charts/broad_indices")
+        show_images_grid(f"{base}/broad_indices")
     with tab3:
-        show_images_grid("multiasset_charts/sectoral_indices")
+        show_images_grid(f"{base}/sectoral_indices")
 
 
 # =================================================
