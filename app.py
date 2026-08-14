@@ -1464,7 +1464,7 @@ if view == "Multiasset Chart (One View)":
     freq = st.radio("Frequency", ["Weekly", "Monthly"], horizontal=True,
                     key="multiasset_freq")
 
-    base = "multiasset_charts" if freq == "Weekly" else "multiasset_charts_monthly"
+    base = f"multiasset_charts/{freq.lower()}"
 
     tab1, tab2, tab3 = st.tabs(["Main", "Broad Indices", "Sectoral Indices"])
 
