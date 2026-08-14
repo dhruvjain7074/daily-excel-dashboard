@@ -1421,9 +1421,8 @@ if view == "Magazine Cover":
     st.markdown("#### Magazine Cover")
 
     all_images = []
-    for folder in ["magazine_cover/india", "magazine_cover/others"]:
-        for img in get_sorted_images(folder):
-            all_images.append(os.path.join(folder, img))
+    for img in get_sorted_images("magazine_cover"):
+        all_images.append(os.path.join("magazine_cover", img))
 
     if not all_images:
         st.info("No covers available.")
