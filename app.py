@@ -824,7 +824,7 @@ if view == "Metal Charts":
     }
 
     metals = ["Hindustan Copper", "SAIL", "NMDC", "NMDC Steel", "NALCO", "Coal India",
-              "Hindustan Zinc", "Vedanta", "DXY","ONGC", "stock-dxy"]
+              "Hindustan Zinc", "Vedanta", "DXY", "stock-dxy"]
     tabs = st.tabs(metals)
 
     for tab, metal in zip(tabs, metals):
@@ -957,6 +957,9 @@ if view == "Auto Dashboard":
         mask = parsed.isna()
         if mask.any():
             parsed[mask] = pd.to_datetime(tmp[date_col][mask], format="%d-%b-%y", errors="coerce")
+        mask = parsed.isna()
+        if mask.any():  # quarterly style e.g. "Jun 2008" (JLR)
+            parsed[mask] = pd.to_datetime(tmp[date_col][mask].astype(str).str.strip(), format="%b %Y", errors="coerce")
         tmp[date_col] = parsed
         tmp[val_col]  = pd.to_numeric(
             tmp[val_col].astype(str).str.replace(",", "", regex=False).str.strip(),
@@ -972,6 +975,7 @@ if view == "Auto Dashboard":
     # ── Build RAW — one "Total" series per company used by the dashboard ──
     RAW = {
         "Tata Motors PV": to_series(auto, "DATE_1", "TMPV TOTAL"),
+        "JLR":            to_series(auto, "DATE_16", "JLR (TOTAL)"),
         "Tata Motors CV": to_series(auto, "DATE_2", "TMCV TOTAL SALES"),
         "Mahindra":       to_series(auto, "DATE_3", "M&M TOTAL PV"),
         "Hyundai":        to_series(auto, "DATE_4", "HYUNDAI TOTAL SALES"),
@@ -1024,6 +1028,11 @@ if view == "Auto Dashboard":
             "Total":    to_series(auto, "DATE_4", "HYUNDAI TOTAL SALES"),
             "Domestic": to_series(auto, "DATE_4", "HYUNDAI DOMESTIC SALES"),
             "Export":   to_series(auto, "DATE_4", "HYUNDAI EXPORT SALES"),
+        },
+        "JLR": {
+            "Total":      to_series(auto, "DATE_16", "JLR (TOTAL)"),
+            "Jaguar":     to_series(auto, "DATE_16", "JAGUAR TOTAL"),
+            "Land Rover": to_series(auto, "DATE_16", "LANDROVER TOTAL"),
         },
         "Force Motors": {
             "Total":    to_series(auto, "DATE_5", "FORCE TOTAL SALES"),
@@ -1175,7 +1184,7 @@ if view == "Auto Dashboard":
         # Patch SEGMENTS and SEG_FILTER in JS to match our actual company names
         js_patch = """
 const SEGMENTS = {
-  'Maruti':'PV','Hyundai':'PV','Tata Motors PV':'PV','Mahindra':'PV','Force Motors':'PV','SML Mahindra':'PV',
+  'Maruti':'PV','Hyundai':'PV','Tata Motors PV':'PV','Mahindra':'PV','Force Motors':'PV','SML Mahindra':'PV','JLR':'PV',
   'Tata Motors CV':'CV','Ashok Leyland':'CV','Eicher CV':'CV',
   'Bajaj':'2W','Hero':'2W','Eicher 2W':'2W','OLA':'2W','TVS':'2W',
   'Atul Auto':'3W','TVS 3W':'3W',
@@ -1184,7 +1193,7 @@ const SEG_FILTER = {
   'all': null,
   '2W': ['Bajaj','Hero','Eicher 2W','OLA','TVS'],
   '3W': ['Atul Auto','TVS 3W'],
-  'PV': ['Maruti','Hyundai','Tata Motors PV','Mahindra','Force Motors','SML Mahindra'],
+  'PV': ['Maruti','Hyundai','Tata Motors PV','Mahindra','Force Motors','SML Mahindra','JLR'],
   'CV': ['Tata Motors CV','Ashok Leyland','Eicher CV'],
   'EV': ['Tata EV','Mahindra 3W EV','OLA Electric','Atul EV','TVS EV'],
   'TR': ['M\u0026M Tractor'],
@@ -1208,8 +1217,8 @@ const SEG_FILTER = {
         from dateutil.relativedelta import relativedelta
 
         all_dates = []
-        for s in RAW.values():
-            if s["dates"]:
+        for _k, s in RAW.items():
+            if s["dates"] and _k != "JLR":
                 all_dates.extend(s["dates"])
 
         if all_dates:
@@ -1254,7 +1263,7 @@ const SEG_FILTER = {
         )
         html_template = html_template.replace(
             '>Passenger Vehicle<span class="seg-cnt">3</span>',
-            '>Passenger Vehicle<span class="seg-cnt">6</span>'
+            '>Passenger Vehicle<span class="seg-cnt">7</span>'
         )
         html_template = html_template.replace(
             '>Commercial Vehicle<span class="seg-cnt">5</span>',
@@ -1267,7 +1276,7 @@ const SEG_FILTER = {
         # Update total company count (All Segments)
         html_template = html_template.replace(
             '>All Segments<span class="seg-cnt">14</span>',
-            '>All Segments<span class="seg-cnt">15</span>'
+            '>All Segments<span class="seg-cnt">16</span>'
         )
 
         # ── COMPUTE FY_RAW (April–March financial year totals) ──
@@ -1282,24 +1291,25 @@ const SEG_FILTER = {
                 fy_totals[fy] += val
                 fy_counts[fy] += 1
             fy_raw[co] = {
-                "years":  [f"FY{str(fy)[2:]}-{str(fy+1)[2:]}" for fy, cnt in sorted(fy_totals.items()) if cnt >= 9],
-                "values": [fy_totals[fy] for fy, cnt in sorted(fy_totals.items()) if cnt >= 9],
+                "years":  [f"FY{str(fy)[2:]}-{str(fy+1)[2:]}" for fy, cnt in sorted(fy_totals.items()) if cnt >= (4 if co == "JLR" else 9)],
+                "values": [fy_totals[fy] for fy, cnt in sorted(fy_totals.items()) if cnt >= (4 if co == "JLR" else 9)],
             }
 
         # ── COMPUTE SHARE_HISTORY (monthly market share % per company) ──
         all_months_set = set()
-        for s in RAW.values():
-            all_months_set.update(s["dates"])
+        for _k, s in RAW.items():
+            if _k != "JLR":
+                all_months_set.update(s["dates"])
         all_months_sorted = sorted(all_months_set)
         co_month_val = {co: dict(zip(s["dates"], s["values"])) for co, s in RAW.items()}
         share_history = {co: {"dates": [], "values": []} for co in RAW}
         for ym in all_months_sorted:
-            month_total = sum(co_month_val[co].get(ym, 0) for co in RAW)
+            month_total = sum(co_month_val[co].get(ym, 0) for co in RAW if co != "JLR")
             if month_total == 0:
                 continue
             for co in RAW:
                 val = co_month_val[co].get(ym, 0)
-                if val > 0:
+                if val > 0 and co != "JLR":
                     share_history[co]["dates"].append(ym)
                     share_history[co]["values"].append(round(val * 100 / month_total, 2))
 
@@ -1420,21 +1430,29 @@ if view == "Magazine Cover":
 
     st.markdown("#### Magazine Cover")
 
-    all_images = []
-    for img in get_sorted_images("magazine_cover"):
-        all_images.append(os.path.join("magazine_cover", img))
+    tab1, tab2 = st.tabs(["India", "Others"])
 
-    if not all_images:
-        st.info("No covers available.")
-    else:
-        cols = st.columns(3)
-        for i, path in enumerate(all_images):
-            if os.path.exists(path):
+    with tab1:
+        folder = "magazine_cover/india"
+        images = get_sorted_images(folder)
+        if not images:
+            st.info("No India covers available.")
+        else:
+            cols = st.columns(3)
+            for i, img in enumerate(images):
                 with cols[i % 3]:
-                    try:
-                        st.image(path, use_column_width=True)
-                    except Exception:
-                        pass
+                    st.image(os.path.join(folder, img))
+
+    with tab2:
+        folder = "magazine_cover/others"
+        images = get_sorted_images(folder)
+        if not images:
+            st.info("No other covers available.")
+        else:
+            cols = st.columns(3)
+            for i, img in enumerate(images):
+                with cols[i % 3]:
+                    st.image(os.path.join(folder, img))
 
 
 # =================================================
@@ -1460,19 +1478,14 @@ if view == "Multiasset Chart (One View)":
                 except Exception:
                     pass
 
-    freq = st.radio("Frequency", ["Weekly", "Monthly"], horizontal=True,
-                    key="multiasset_freq")
-
-    base = f"multiasset_charts/{freq.lower()}"
-
     tab1, tab2, tab3 = st.tabs(["Main", "Broad Indices", "Sectoral Indices"])
 
     with tab1:
-        show_images_grid(f"{base}/main")
+        show_images_grid("multiasset_charts/main")
     with tab2:
-        show_images_grid(f"{base}/broad_indices")
+        show_images_grid("multiasset_charts/broad_indices")
     with tab3:
-        show_images_grid(f"{base}/sectoral_indices")
+        show_images_grid("multiasset_charts/sectoral_indices")
 
 
 # =================================================
@@ -1560,6 +1573,13 @@ if view == "Nifty 50 Fwd & Bwd Returns":
     sort_col_name = SORT_COLS[st.session_state.matrix_sort_col]
     ret_f = ret_f.sort_values(sort_col_name, ascending=st.session_state.matrix_sort_asc)
 
+    def sort_th(i, label):
+        icon = "▲" if st.session_state.matrix_sort_col == i and st.session_state.matrix_sort_asc else                "▼" if st.session_state.matrix_sort_col == i else "⇅"
+        return (
+            f'<th onclick="sortCol({i})" style="cursor:pointer;user-select:none;">' 
+            f'{label} <span style="font-size:10px;opacity:.7">{icon}</span></th>'
+        )
+
     rows_html = ""
     for _, row in ret_f.iterrows():
         rows_html += "<tr>"
@@ -1575,20 +1595,19 @@ if view == "Nifty 50 Fwd & Bwd Returns":
             rows_html += f'<td class="{cell_class(v)}">{fmt_val(v)}</td>'
         rows_html += "</tr>"
 
-    # Single sort button row directly above table — acts as column headers
-    col_labels = ["Bkw 5Y","Bkw 3Y","Bkw 2Y","Bkw 1Y","Date/Price","Fwd 1Y","Fwd 2Y","Fwd 3Y","Fwd 5Y"]
-    sort_btns = st.columns(9)
-    for i, (label, scol) in enumerate(zip(col_labels, sort_btns)):
-        with scol:
-            active = st.session_state.matrix_sort_col == i
-            icon = ("▲" if st.session_state.matrix_sort_asc else "▼") if active else "⇅"
-            if st.button(f"{label} {icon}", key=f"sort_{i}", use_container_width=True):
-                if st.session_state.matrix_sort_col == i:
-                    st.session_state.matrix_sort_asc = not st.session_state.matrix_sort_asc
-                else:
-                    st.session_state.matrix_sort_col = i
-                    st.session_state.matrix_sort_asc = True
-                st.rerun()
+    # Sort state for JS → Python bridge
+    sc = st.session_state.matrix_sort_col
+    sa = "true" if st.session_state.matrix_sort_asc else "false"
+
+    thead = (
+        "<tr>" +
+        sort_th(0,"Bkw 5Y") + sort_th(1,"Bkw 3Y") +
+        sort_th(2,"Bkw 2Y") + sort_th(3,"Bkw 1Y") +
+        sort_th(4,"Date/Price") +
+        sort_th(5,"Fwd 1Y") + sort_th(6,"Fwd 2Y") +
+        sort_th(7,"Fwd 3Y") + sort_th(8,"Fwd 5Y") +
+        "</tr>"
+    )
 
     st.markdown(f"""
     <style>
@@ -1608,12 +1627,29 @@ if view == "Nifty 50 Fwd & Bwd Returns":
     </style>
     <div class="matrix-wrap">
     <table class="matrix-tbl">
+      <thead>{thead}</thead>
       <tbody>{rows_html}</tbody>
     </table>
     </div>
     """, unsafe_allow_html=True)
 
-
+    # Streamlit sort buttons hidden below — triggered by JS postMessage via st.query_params workaround
+    # Use visible but compact button row that mirrors header clicks
+    st.markdown("<div style='margin-top:6px;font-size:0.72rem;color:#a0a09a;text-transform:uppercase;letter-spacing:.06em'>Sort by column:</div>", unsafe_allow_html=True)
+    col_labels = ["Bkw 5Y","Bkw 3Y","Bkw 2Y","Bkw 1Y","Date","Fwd 1Y","Fwd 2Y","Fwd 3Y","Fwd 5Y"]
+    sort_btns = st.columns(9)
+    for i, (label, scol) in enumerate(zip(col_labels, sort_btns)):
+        with scol:
+            active = st.session_state.matrix_sort_col == i
+            icon = ("▲" if st.session_state.matrix_sort_asc else "▼") if active else "⇅"
+            btn_style = "font-weight:600;" if active else ""
+            if st.button(f"{icon}", key=f"sort_{i}", use_container_width=True, help=f"Sort by {label}"):
+                if st.session_state.matrix_sort_col == i:
+                    st.session_state.matrix_sort_asc = not st.session_state.matrix_sort_asc
+                else:
+                    st.session_state.matrix_sort_col = i
+                    st.session_state.matrix_sort_asc = True
+                st.rerun()
 
 # =================================================
 # NET MTF OUTSTANDING
