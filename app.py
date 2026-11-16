@@ -1708,6 +1708,9 @@ if view == "Net MTF Outstanding":
             "TATATECH":     ("DATE_20", "TATATECH MTF OUTSTANDING"),
             "AIAENG":       ("DATE_21", "AIAENG MTF OUTSTANDING"),
             "IRCTC":        ("DATE_22", "IRCTC MTF OUTSTANDING"),
+            "L&T":          ("DATE_23", "L&T MTF OUTSTANDING"),
+            "GRASIM":       ("DATE_24", "GRASIM MTF OUTSTANDING"),
+            "BHEL":         ("DATE_25", "BHEL MTF OUTSTANDING"),
         }
 
         company = st.radio("Company", list(COMPANY_MTF_MAP.keys()),
