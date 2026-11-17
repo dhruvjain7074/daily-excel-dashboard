@@ -911,13 +911,24 @@ if view == "IEX Volumes":
         for c in iex_cols:
             iex[c] = pd.to_numeric(iex[c].astype(str).str.replace(",", "", regex=False).str.strip(), errors="coerce")
 
-        metric = st.radio("Metric", iex_cols, horizontal=True,
-                          key="iex_radio", label_visibility="collapsed")
+        gas_cols  = [c for c in iex_cols if "mmbtu" in c.lower()]
+        elec_cols = [c for c in iex_cols if c not in gas_cols]
+
+        grp = st.radio("Market", ["Electricity Volumes", "Gas Volumes"], horizontal=True,
+                       key="iex_group", label_visibility="collapsed")
+        grp_key  = "elec" if grp == "Electricity Volumes" else "gas"
+        opt_cols = elec_cols if grp_key == "elec" else gas_cols
+        if not opt_cols:
+            st.info("No data available.")
+            st.stop()
+
+        metric = st.radio("Metric", opt_cols, horizontal=True,
+                          key=f"iex_radio_{grp_key}", label_visibility="collapsed")
         df_ = iex[["DATE", metric]].dropna()
-        start, end, freq = date_filter_widget(df_["DATE"], "iex")
+        start, end, freq = date_filter_widget(df_["DATE"], f"iex_{grp_key}")
         df_ = df_[(df_["DATE"] >= start) & (df_["DATE"] <= end)]
         df_ = apply_tf(df_, "DATE", freq)
-        plot_single_line(df_, "DATE", metric, title=metric, key="iex_chart")
+        plot_single_line(df_, "DATE", metric, title=metric, key=f"iex_chart_{grp_key}")
 
 
 # =================================================
