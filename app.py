@@ -476,8 +476,9 @@ def load_data():
     df_auto_sales  = read_worksheet("AUTOMOBILE SALES VOLUME")
     df_mtf         = read_worksheet("mtf outstanding")
     df_nifty_ret   = read_worksheet("Nifty_50 Fwd&Bwd Returns")
+    df_iex         = read_worksheet("IEX Volumes")
 
-    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales, df_india_macro, df_mtf, df_nifty_ret
+    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales, df_india_macro, df_mtf, df_nifty_ret, df_iex
 
 
 # Load all data once per session — stored in session_state so switching
@@ -495,6 +496,7 @@ if "data_loaded" not in st.session_state:
             st.session_state.df_india_macro,
             st.session_state.df_mtf,
             st.session_state.df_nifty_ret,
+            st.session_state.df_iex,
         ) = load_data()
         st.session_state.data_loaded = True
 
@@ -508,6 +510,7 @@ df_auto_sales  = st.session_state.df_auto_sales
 df_india_macro = st.session_state.df_india_macro
 df_mtf         = st.session_state.df_mtf
 df_nifty_ret   = st.session_state.df_nifty_ret
+df_iex         = st.session_state.df_iex
 
 # ── CLEAN df_main ──
 numeric_cols_main = [
@@ -554,6 +557,7 @@ VIEWS = [
     "Multiasset Chart (One View)",
     "Net MTF Outstanding",
     "Nifty 50 Fwd & Bwd Returns",
+    "IEX Volumes",
 ]
 
 col1, col2 = st.columns([6, 1])
@@ -882,6 +886,32 @@ if view == "Global Interest Rates":
                          title=f"{country} Interest Rate", key=f"rates_{country}")
     else:
         st.info("No data available.")
+
+
+# =================================================
+# IEX VOLUMES
+# =================================================
+if view == "IEX Volumes":
+
+    st.markdown("#### IEX Volumes")
+
+    iex = df_iex.copy()
+    if iex.empty or "DATE" not in iex.columns:
+        st.info("No data available.")
+    else:
+        iex["DATE"] = pd.to_datetime(iex["DATE"].astype(str).str.strip(), format="%b %Y", errors="coerce")
+        iex = iex.dropna(subset=["DATE"])
+        iex_cols = [c for c in iex.columns if c != "DATE"]
+        for c in iex_cols:
+            iex[c] = pd.to_numeric(iex[c].astype(str).str.replace(",", "", regex=False).str.strip(), errors="coerce")
+
+        metric = st.radio("Metric", iex_cols, horizontal=True,
+                          key="iex_radio", label_visibility="collapsed")
+        df_ = iex[["DATE", metric]].dropna()
+        start, end, freq = date_filter_widget(df_["DATE"], "iex")
+        df_ = df_[(df_["DATE"] >= start) & (df_["DATE"] <= end)]
+        df_ = apply_tf(df_, "DATE", freq)
+        plot_single_line(df_, "DATE", metric, title=metric, key="iex_chart")
 
 
 # =================================================
