@@ -899,7 +899,13 @@ if view == "IEX Volumes":
     if iex.empty or "DATE" not in iex.columns:
         st.info("No data available.")
     else:
-        iex["DATE"] = pd.to_datetime(iex["DATE"].astype(str).str.strip(), format="%b %Y", errors="coerce")
+        _d = iex["DATE"].astype(str).str.strip()
+        _p = pd.to_datetime(_d, format="%d-%b-%y", errors="coerce")
+        for _fmt in ("%d-%b-%Y", "%b %Y"):
+            _m = _p.isna()
+            if _m.any():
+                _p[_m] = pd.to_datetime(_d[_m], format=_fmt, errors="coerce")
+        iex["DATE"] = _p
         iex = iex.dropna(subset=["DATE"])
         iex_cols = [c for c in iex.columns if c != "DATE"]
         for c in iex_cols:
