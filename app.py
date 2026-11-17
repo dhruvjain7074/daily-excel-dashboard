@@ -1551,8 +1551,8 @@ if view == "Nifty 50 Fwd & Bwd Returns":
     ret = df_nifty_ret.copy()
     ret["Date"] = pd.to_datetime(ret["Date"], format="%d-%b-%Y", errors="coerce")
 
-    pct_cols = ["Bkw 1 YR", "Bkw 2 YR", "Bkw 3 YR", "Bkw 5 YR",
-                "Fwd 1yr", "Fwd 2yr", "Fwd 3yr", "Fwd 5yr"]
+    pct_cols = ["Bkw 1 YR", "Bkw 2 YR", "Bkw 3 YR", "Bkw 4 YR", "Bkw 5 YR",
+                "Fwd 1yr", "Fwd 2yr", "Fwd 3yr", "Fwd 4yr", "Fwd 5yr"]
     for col in pct_cols:
         if col in ret.columns:
             ret[col] = pd.to_numeric(
@@ -1594,11 +1594,11 @@ if view == "Nifty 50 Fwd & Bwd Returns":
 
     # ── Sort state via session ──
     SORT_COLS = {
-        0: "Bkw 5 YR", 1: "Bkw 3 YR", 2: "Bkw 2 YR", 3: "Bkw 1 YR",
-        4: "Date", 5: "Fwd 1yr", 6: "Fwd 2yr", 7: "Fwd 3yr", 8: "Fwd 5yr"
+        0: "Bkw 5 YR", 1: "Bkw 4 YR", 2: "Bkw 3 YR", 3: "Bkw 2 YR", 4: "Bkw 1 YR",
+        5: "Date", 6: "Fwd 1yr", 7: "Fwd 2yr", 8: "Fwd 3yr", 9: "Fwd 4yr", 10: "Fwd 5yr"
     }
-    if "matrix_sort_col" not in st.session_state:
-        st.session_state.matrix_sort_col = 4
+    if "matrix_sort_col" not in st.session_state or st.session_state.matrix_sort_col > 10:
+        st.session_state.matrix_sort_col = 5
         st.session_state.matrix_sort_asc = False
 
     sort_col_name = SORT_COLS[st.session_state.matrix_sort_col]
@@ -1636,14 +1636,14 @@ if view == "Nifty 50 Fwd & Bwd Returns":
     rows_html = ""
     for _, row in ret_f.iterrows():
         rows_html += "<tr>"
-        for col in ["Bkw 5 YR", "Bkw 3 YR", "Bkw 2 YR", "Bkw 1 YR"]:
+        for col in ["Bkw 5 YR", "Bkw 4 YR", "Bkw 3 YR", "Bkw 2 YR", "Bkw 1 YR"]:
             v = row.get(col, float("nan"))
             rows_html += f'<td class="{cell_class(v)}">{fmt_val(v)}</td>'
         date_str = row["Date"].strftime("%b %Y") if pd.notna(row["Date"]) else ""
         price_v = row.get("Price", float("nan"))
         price_str = f"{price_v:,.0f}" if pd.notna(price_v) else ""
         rows_html += f'<td class="center">{date_str}<br><b>{price_str}</b></td>'
-        for col in ["Fwd 1yr", "Fwd 2yr", "Fwd 3yr", "Fwd 5yr"]:
+        for col in ["Fwd 1yr", "Fwd 2yr", "Fwd 3yr", "Fwd 4yr", "Fwd 5yr"]:
             v = row.get(col, float("nan"))
             rows_html += f'<td class="{cell_class(v)}">{fmt_val(v)}</td>'
         rows_html += "</tr>"
@@ -1654,22 +1654,22 @@ if view == "Nifty 50 Fwd & Bwd Returns":
 
     thead = (
         "<tr>" +
-        sort_th(0,"Bkw 5Y") + sort_th(1,"Bkw 3Y") +
-        sort_th(2,"Bkw 2Y") + sort_th(3,"Bkw 1Y") +
-        sort_th(4,"Date/Price") +
-        sort_th(5,"Fwd 1Y") + sort_th(6,"Fwd 2Y") +
-        sort_th(7,"Fwd 3Y") + sort_th(8,"Fwd 5Y") +
+        sort_th(0,"Bkw 5Y") + sort_th(1,"Bkw 4Y") + sort_th(2,"Bkw 3Y") +
+        sort_th(3,"Bkw 2Y") + sort_th(4,"Bkw 1Y") +
+        sort_th(5,"Date/Price") +
+        sort_th(6,"Fwd 1Y") + sort_th(7,"Fwd 2Y") + sort_th(8,"Fwd 3Y") +
+        sort_th(9,"Fwd 4Y") + sort_th(10,"Fwd 5Y") +
         "</tr>"
     )
 
     st.markdown(f"""
     <style>
-      .matrix-wrap{{overflow-x:auto;margin-top:0;}}
+      .matrix-wrap{{margin-top:0;}}
       .matrix-tbl{{border-collapse:collapse;width:100%;font-family:'DM Mono',monospace;font-size:12px;}}
       .matrix-tbl th{{background:#f2f2f0;border:1px solid #e8e8e5;padding:7px 10px;
                       text-align:center;font-size:11px;font-weight:600;
                       text-transform:uppercase;letter-spacing:.05em;color:#6b6b64;
-                      white-space:nowrap;}}
+                      white-space:nowrap;position:sticky;top:3.75rem;z-index:5;}}
       .matrix-tbl th:hover{{background:#e8e8e5;color:#1a1a18;}}
       .matrix-tbl td{{border:1px solid #e8e8e5;padding:5px 10px;text-align:center;}}
       .matrix-tbl .green{{background:#d1fae5;color:#065f46;}}
@@ -1689,8 +1689,8 @@ if view == "Nifty 50 Fwd & Bwd Returns":
     # Streamlit sort buttons hidden below — triggered by JS postMessage via st.query_params workaround
     # Use visible but compact button row that mirrors header clicks
     st.markdown("<div style='margin-top:6px;font-size:0.72rem;color:#a0a09a;text-transform:uppercase;letter-spacing:.06em'>Sort by column:</div>", unsafe_allow_html=True)
-    col_labels = ["Bkw 5Y","Bkw 3Y","Bkw 2Y","Bkw 1Y","Date","Fwd 1Y","Fwd 2Y","Fwd 3Y","Fwd 5Y"]
-    sort_btns = st.columns(9)
+    col_labels = ["Bkw 5Y","Bkw 4Y","Bkw 3Y","Bkw 2Y","Bkw 1Y","Date","Fwd 1Y","Fwd 2Y","Fwd 3Y","Fwd 4Y","Fwd 5Y"]
+    sort_btns = st.columns(11)
     for i, (label, scol) in enumerate(zip(col_labels, sort_btns)):
         with scol:
             active = st.session_state.matrix_sort_col == i
