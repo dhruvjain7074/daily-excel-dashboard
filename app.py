@@ -1669,7 +1669,7 @@ if view == "Nifty 50 Fwd & Bwd Returns":
       .matrix-tbl th{{background:#f2f2f0;border:1px solid #e8e8e5;padding:7px 10px;
                       text-align:center;font-size:11px;font-weight:600;
                       text-transform:uppercase;letter-spacing:.05em;color:#6b6b64;
-                      white-space:nowrap;position:sticky;top:3.75rem;z-index:5;}}
+                      white-space:nowrap;position:sticky;top:0;z-index:5;}}
       .matrix-tbl th:hover{{background:#e8e8e5;color:#1a1a18;}}
       .matrix-tbl td{{border:1px solid #e8e8e5;padding:5px 10px;text-align:center;}}
       .matrix-tbl .green{{background:#d1fae5;color:#065f46;}}
