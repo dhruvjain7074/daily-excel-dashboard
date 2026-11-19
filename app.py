@@ -1558,7 +1558,13 @@ if view == "Index Fwd & Bwd Returns":
                          key="ret_index", label_visibility="collapsed")
     ret_key = {"Nifty 50": "n50", "Sensex": "sensex", "NSE 500": "n500"}[ret_index]
     ret = {"Nifty 50": df_nifty_ret, "Sensex": df_sensex_ret, "NSE 500": df_nifty500_ret}[ret_index].copy()
-    ret["Date"] = pd.to_datetime(ret["Date"], format="%d-%b-%Y", errors="coerce")
+    _rd = ret["Date"].astype(str).str.strip()
+    _rp = pd.to_datetime(_rd, format="%d-%b-%Y", errors="coerce")
+    for _rf in ("%d-%m-%Y", "%d/%m/%Y", "%d-%b-%y"):
+        _rm = _rp.isna()
+        if _rm.any():
+            _rp[_rm] = pd.to_datetime(_rd[_rm], format=_rf, errors="coerce")
+    ret["Date"] = _rp
 
     pct_cols = ["Bkw 1 YR", "Bkw 2 YR", "Bkw 3 YR", "Bkw 4 YR", "Bkw 5 YR",
                 "Fwd 1yr", "Fwd 2yr", "Fwd 3yr", "Fwd 4yr", "Fwd 5yr"]
