@@ -477,8 +477,10 @@ def load_data():
     df_mtf         = read_worksheet("mtf outstanding")
     df_nifty_ret   = read_worksheet("Nifty_50 Fwd&Bwd Returns")
     df_iex         = read_worksheet("IEX Volumes")
+    df_sensex_ret  = read_worksheet("Sensex Fwd&Bwd Returns")
+    df_nifty500_ret= read_worksheet("Nifty_500 Fwd&Bwd Returns")
 
-    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales, df_india_macro, df_mtf, df_nifty_ret, df_iex
+    return df_main, df_rbi, df_index_oi, df_index_val, df_tariff, df_global_rates, df_auto_sales, df_india_macro, df_mtf, df_nifty_ret, df_iex, df_sensex_ret, df_nifty500_ret
 
 
 # Load all data once per session — stored in session_state so switching
@@ -497,6 +499,8 @@ if "data_loaded" not in st.session_state:
             st.session_state.df_mtf,
             st.session_state.df_nifty_ret,
             st.session_state.df_iex,
+            st.session_state.df_sensex_ret,
+            st.session_state.df_nifty500_ret,
         ) = load_data()
         st.session_state.data_loaded = True
 
@@ -511,6 +515,8 @@ df_india_macro = st.session_state.df_india_macro
 df_mtf         = st.session_state.df_mtf
 df_nifty_ret   = st.session_state.df_nifty_ret
 df_iex         = st.session_state.df_iex
+df_sensex_ret  = st.session_state.df_sensex_ret
+df_nifty500_ret= st.session_state.df_nifty500_ret
 
 # ── CLEAN df_main ──
 numeric_cols_main = [
@@ -556,7 +562,7 @@ VIEWS = [
     "Magazine Cover",
     "Multiasset Chart (One View)",
     "Net MTF Outstanding",
-    "Nifty 50 Fwd & Bwd Returns",
+    "Index Fwd & Bwd Returns",
     "IEX Volumes",
 ]
 
@@ -1544,11 +1550,14 @@ if view == "Multiasset Chart (One View)":
 # =================================================
 # NIFTY 50 FWD & BWD RETURNS
 # =================================================
-if view == "Nifty 50 Fwd & Bwd Returns":
+if view == "Index Fwd & Bwd Returns":
 
-    st.markdown("#### Nifty 50 Forward & Backward Returns")
+    st.markdown("#### Index Forward & Backward Returns")
 
-    ret = df_nifty_ret.copy()
+    ret_index = st.radio("Index", ["Nifty 50", "Sensex", "NSE 500"], horizontal=True,
+                         key="ret_index", label_visibility="collapsed")
+    ret_key = {"Nifty 50": "n50", "Sensex": "sensex", "NSE 500": "n500"}[ret_index]
+    ret = {"Nifty 50": df_nifty_ret, "Sensex": df_sensex_ret, "NSE 500": df_nifty500_ret}[ret_index].copy()
     ret["Date"] = pd.to_datetime(ret["Date"], format="%d-%b-%Y", errors="coerce")
 
     pct_cols = ["Bkw 1 YR", "Bkw 2 YR", "Bkw 3 YR", "Bkw 4 YR", "Bkw 5 YR",
@@ -1577,9 +1586,9 @@ if view == "Nifty 50 Fwd & Bwd Returns":
 
     fc1, fc2 = st.columns([1, 2])
     with fc1:
-        month_filter = st.selectbox("Month", MONTHS, key="ret_month", label_visibility="visible")
+        month_filter = st.selectbox("Month", MONTHS, key=f"ret_month_{ret_key}", label_visibility="visible")
     with fc2:
-        fy_filter = st.multiselect("Financial Year (leave empty = all)", all_fys, default=[], key="ret_fy")
+        fy_filter = st.multiselect("Financial Year (leave empty = all)", all_fys, default=[], key=f"ret_fy_{ret_key}")
 
     # Apply filters
     ret_f = ret.copy()
